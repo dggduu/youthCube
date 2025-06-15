@@ -85,6 +85,25 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    splits {
+        abi {
+            enable true                      // 开启 ABI 拆分
+            reset()                          // 重置默认 ABI 配置
+            include "armeabi-v7a", "arm64-v8a" // 指定要生成的 ABI
+            universalApk true                // 生成一个 universal APK，包含所有 ABI
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+            if (abi != null) {
+                def baseVersionCode = rootProject.ext.abiCodes.get(abi) ?: 0
+                output.versionCodeOverride = baseVersionCode * 1000000 + variant.versionCode
+            }
+        }
+    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -108,7 +127,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
