@@ -1,10 +1,11 @@
-name: React Native iOS Build (Release)
+name: Build iOS (Release)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-ios-release:
+  build-ios:
+    name: Build iOS Release
     runs-on: macos-latest
 
     steps:
@@ -28,13 +29,13 @@ jobs:
             --dev false \
             --entry-file index.js \
             --bundle-output ios/mainjsbundle/main.jsbundle \
-            --assets-dest ios
+            --assets-dest ios/
 
       - name: Install CocoaPods
         run: |
           cd ios && pod install --repo-update
 
-      - name: Build iOS Release IPA/App
+      - name: Build iOS App (Release)
         run: |
           cd ios && xcodebuild \
             -workspace your-project-name.xcworkspace \
@@ -44,12 +45,12 @@ jobs:
             clean build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_ENTITLEMENTS="" \
-            CODE_SIGN certificateless=true
+            CODE_SIGN_STYLE="Manual" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGN_ENTITLEMENTS=""
 
-      - name: Archive and Upload IPA or App file
+      - name: Archive the app
         run: |
-          cd ios && mkdir -p build/Release-iphoneos/
           cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/your-project-name.app
 
       - name: Upload iOS App as artifact
