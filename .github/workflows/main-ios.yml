@@ -1,0 +1,59 @@
+name: React Native iOS Build (Release)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios-release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install npm dependencies
+        run: |
+          npm install
+
+      - name: Generate JS Bundle for iOS
+        run: |
+          mkdir -p ios/mainjsbundle
+          npx react-native bundle \
+            --platform ios \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output ios/mainjsbundle/main.jsbundle \
+            --assets-dest ios
+
+      - name: Install CocoaPods
+        run: |
+          cd ios && pod install --repo-update
+
+      - name: Build iOS Release IPA/App
+        run: |
+          cd ios && xcodebuild \
+            -workspace your-project-name.xcworkspace \
+            -scheme your-project-name \
+            -sdk iphoneos \
+            -configuration Release \
+            clean build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            CODE_SIGN certificateless=true
+
+      - name: Archive and Upload IPA or App file
+        run: |
+          cd ios && mkdir -p build/Release-iphoneos/
+          cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/your-project-name.app
+
+      - name: Upload iOS App as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ios-release
+          path: ios/build/Release-iphoneos/app-release.zip
