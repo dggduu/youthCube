@@ -38,7 +38,7 @@ jobs:
       - name: Build iOS App (Release)
         run: |
           cd ios && xcodebuild \
-            -workspace your-project-name.xcworkspace \
+            -workspace youthcube.xcworkspace \
             -scheme your-project-name \
             -sdk iphoneos \
             -configuration Release \
@@ -51,7 +51,7 @@ jobs:
 
       - name: Archive the app
         run: |
-          cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/your-project-name.app
+          cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/youthcube.app
 
       - name: Upload iOS App as artifact
         uses: actions/upload-artifact@v4
