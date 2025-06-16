@@ -3,7 +3,6 @@
 ## ToDo List
 ### 核心组件
 - [ ] 导航设计
-- [ ] db 封装
 - [ ] OSS 封装(minio)(后期可能用ali oss)
   
 - [ ] 社区平台
@@ -40,5 +39,9 @@
 - [ ] 手表端数据相关（可能不会做）
 - [ ] 集成mapbox||高德（rn-geolocation）
 - [ ] 基于webview的h5小游戏
-- [ ] 网页后端
+- [ ] 网页后端(nodejs + express)
 - [ ] 家长端
+### back-end
+  
+- [ ] 邮件推送服务
+- [ ] db 封装

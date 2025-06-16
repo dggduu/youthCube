@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
+import { store } from './src/store/store';
+import AuthNavigator from './src/navigators/AuthNavigator'; // 新增的导航器
 
-import { LoginPage } from "./src/components";
+const RootApp = () => {
+  return (
+    <NavigationContainer>
+      <AuthNavigator />
+    </NavigationContainer>
+  );
+};
+
 const App = () => {
-  return <LoginPage />;
+  return (
+    <Provider store={store}>
+      <RootApp />
+    </Provider>
+  );
 };
 
 export default App;
