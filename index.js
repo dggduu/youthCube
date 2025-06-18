@@ -1,18 +1,16 @@
-/**
- * @format
- */
-
 import { AppRegistry } from 'react-native';
 import App from './src/App';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
+import {Provider as AntdProvider} from '@ant-design/react-native';
 import { name as appName } from './app.json';
 import store from "./src/store/index";
 
-console.log(store);
 const Root = () => (
-  <Provider store={store}>
-    <App />
-  </Provider>
+  <ReduxProvider store={store}>
+    <AntdProvider>
+      <App />
+    </AntdProvider>
+  </ReduxProvider>
 );
 
 AppRegistry.registerComponent(appName, () => Root);
