@@ -39,7 +39,7 @@ jobs:
         run: |
           cd ios && xcodebuild \
             -workspace youthcube.xcworkspace \
-            -scheme your-project-name \
+            -scheme youthcube \
             -sdk iphoneos \
             -configuration Release \
             clean build \
