@@ -5,6 +5,8 @@ import MainTabNavigator from './navigation/MainTabNavigator';
 import { useSelector } from 'react-redux';
 import { DEV } from '@env';
 
+import '../global.css'
+
 const App = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (

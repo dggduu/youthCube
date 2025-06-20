@@ -5,6 +5,7 @@ import {Provider as AntdProvider} from '@ant-design/react-native';
 import { name as appName } from './app.json';
 import store from "./src/store/index";
 
+
 const Root = () => (
   <ReduxProvider store={store}>
     <AntdProvider>

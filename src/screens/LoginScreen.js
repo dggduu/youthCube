@@ -49,7 +49,7 @@ const LoginPage = ({ navigation }) => {
       >
         <ScrollView contentContainerStyle={styles.container}>
           <Image
-            source={require("../assets/logo/ava.png")}
+            source={require("@assets/logo/ava.png")}
             style={styles.logo}
           />
           <Text style={styles.title}>欢迎回来</Text>
