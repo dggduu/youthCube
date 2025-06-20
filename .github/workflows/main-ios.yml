@@ -30,22 +30,26 @@ jobs:
             --entry-file index.js \
             --bundle-output ios/mainjsbundle/main.jsbundle \
             --assets-dest ios/
-
+      
       - name: Install CocoaPods
+        working-directory: ios
         run: |
-          cd ios && pod install --repo-update
-
+          pod install --repo-update
+      
       - name: Get Scheme Name
         id: get_scheme_name
+        working-directory: ios
         run: |
-          scheme=$(xcodebuild -list -workspace youthcube.xcworkspace | grep "Schemes" -A 1 | tail -n 1 | xargs)
+          workspace=$(ls *.xcworkspace | head -n 1)
+          scheme=$(xcodebuild -list -workspace "$workspace" | grep "Schemes" -A 1 | tail -n 1 | xargs)
           echo "::set-output name=scheme::$scheme"
-
+      
       - name: Build iOS App (Release)
+        working-directory: ios
         run: |
-          cd ios && xcodebuild \
-            -workspace youthcube.xcworkspace \
-            -scheme ${{ steps.get_scheme_name.outputs.scheme }} \
+          xcodebuild \
+            -workspace "$workspace" \
+            -scheme "${{ steps.get_scheme_name.outputs.scheme }}" \
             -sdk iphoneos \
             -configuration Release \
             clean build \
