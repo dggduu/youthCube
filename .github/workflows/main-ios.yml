@@ -35,11 +35,17 @@ jobs:
         run: |
           cd ios && pod install --repo-update
 
+      - name: Get Scheme Name
+        id: get_scheme_name
+        run: |
+          scheme=$(xcodebuild -list -workspace youthcube.xcworkspace | grep "Schemes" -A 1 | tail -n 1 | xargs)
+          echo "::set-output name=scheme::$scheme"
+
       - name: Build iOS App (Release)
         run: |
           cd ios && xcodebuild \
             -workspace youthcube.xcworkspace \
-            -scheme youthcube \
+            -scheme ${{ steps.get_scheme_name.outputs.scheme }} \
             -sdk iphoneos \
             -configuration Release \
             clean build \
@@ -48,13 +54,3 @@ jobs:
             CODE_SIGN_STYLE="Manual" \
             PROVISIONING_PROFILE_SPECIFIER="" \
             CODE_SIGN_ENTITLEMENTS=""
-
-      - name: Archive the app
-        run: |
-          cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/youthcube.app
-
-      - name: Upload iOS App as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-ios-release
-          path: ios/build/Release-iphoneos/app-release.zip
