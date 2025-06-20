@@ -1,4 +1,4 @@
-name: Build iOS (Release)
+name: Build iOS(Release)
 
 on:
   workflow_dispatch:
@@ -12,15 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install npm dependencies
-        run: |
-          npm install
-
       - name: Generate JS Bundle for iOS
         run: |
           mkdir -p ios/mainjsbundle
@@ -30,31 +21,50 @@ jobs:
             --entry-file index.js \
             --bundle-output ios/mainjsbundle/main.jsbundle \
             --assets-dest ios/
-      
+
       - name: Install CocoaPods
         working-directory: ios
         run: |
           pod install --repo-update
-      
-      - name: Get Scheme Name
-        id: get_scheme_name
+
+      - name: Get Scheme and Workspace
+        id: get_scheme_and_workspace
         working-directory: ios
         run: |
-          workspace=$(ls *.xcworkspace | head -n 1)
-          scheme=$(xcodebuild -list -workspace "$workspace" | grep "Schemes" -A 1 | tail -n 1 | xargs)
+          workspace=$(ls -d *.xcworkspace | head -n 1)
+          if [ ! -f "$workspace/contents.xcworkspacedata" ]; then
+            echo "Error: Missing contents.xcworkspacedata"
+            exit 1
+          fi
+          scheme=$(xcodebuild -list -workspace "$workspace" | awk '/Schemes:/,+1 {if(NR==after) print} {after=NR+1}' | xargs)
+          if [ -z "$scheme" ]; then
+            echo "Error: No scheme found"
+            exit 1
+          fi
           echo "::set-output name=scheme::$scheme"
-      
+          echo "::set-output name=workspace::$workspace"
+
       - name: Build iOS App (Release)
         working-directory: ios
         run: |
           xcodebuild \
-            -workspace "$workspace" \
-            -scheme "${{ steps.get_scheme_name.outputs.scheme }}" \
+            -workspace "${{ steps.get_scheme_and_workspace.outputs.workspace }}" \
+            -scheme "${{ steps.get_scheme_and_workspace.outputs.scheme }}" \
             -sdk iphoneos \
             -configuration Release \
             clean build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_STYLE="Manual" \
+            CODE_SIGN_STYLE=Manual \
             PROVISIONING_PROFILE_SPECIFIER="" \
             CODE_SIGN_ENTITLEMENTS=""
+
+      - name: Archive App
+        run: |
+          cd ios && zip -r build/Release-iphoneos/app-release.zip build/Release-iphoneos/*.app
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ios-release
+          path: ios/build/Release-iphoneos/app-release.zip
