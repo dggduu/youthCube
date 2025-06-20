@@ -3,15 +3,17 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   FlatList,
+  useColorScheme
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const PreferenceBubbleSelector = ({ options, onSubmit }) => {
   const [selected, setSelected] = useState([]);
   const maxSelection = 5;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme == "dark";
 
   const toggleSelection = (item) => {
     if (selected.includes(item)) {
@@ -30,45 +32,78 @@ const PreferenceBubbleSelector = ({ options, onSubmit }) => {
 
     return (
       <TouchableOpacity
-        style={styles.bubbleContainer}
+        className={`flex-1 m-1 py-4 rounded-xl items-center justify-center ${
+          isSelected ? 'bg-green-400' : 'bg-gray-300'
+        }`}
         onPress={() => toggleSelection(item)}
         activeOpacity={0.7}
       >
-        <LinearGradient
-          colors={
-            isSelected
-              ? ['#4A90E2', '#5B6CFF']
-              : ['#e0e0e0', '#f5f5f5']
-          }
-          style={styles.bubble}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+        <Text
+          className={`text-sm font-medium ${
+            isSelected ? 'text-white' : 'text-gray-800'
+          }`}
         >
-          <Text style={[styles.bubbleText, isSelected && styles.selectedText]}>
-            {item}
-          </Text>
-        </LinearGradient>
+          {item}
+        </Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView
+      className={`flex-1 ${isDark ? 'bg-black' : 'bg-white'} px-4`}
+    >
       <FlatList
         data={options}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        numColumns={3}
-        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => {
+          const isSelected = selected.includes(item);
+          return (
+            <TouchableOpacity
+              className={`
+                flex-1 m-2 py-4 rounded-xl items-center justify-center
+                ${
+                  isSelected
+                    ? 'bg-green-500'
+                    : isDark
+                    ? 'bg-gray-700'
+                    : 'bg-gray-200'
+                }
+              `}
+              onPress={() => toggleSelection(item)}
+            >
+              <Text
+                className={`
+                  text-base font-medium
+                  ${
+                    isSelected
+                      ? 'text-white'
+                      : isDark
+                      ? 'text-gray-300'
+                      : 'text-gray-800'
+                  }
+                `}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
+        numColumns={2}
+        contentContainerClassName="py-2"
+        columnWrapperClassName="justify-between space-x-4"
       />
 
       <TouchableOpacity
-        style={styles.submitButton}
+        className={`
+          mt-6 py-4 rounded-lg items-center justify-center
+          ${isDark ? 'bg-blue-600' : 'bg-blue-500'}
+        `}
         onPress={() => onSubmit(selected)}
       >
-        <Text style={styles.submitText}>提交</Text>
+        <Text className="text-white text-lg font-medium">提交</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

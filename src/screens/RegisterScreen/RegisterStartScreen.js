@@ -1,19 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 const RegisterStartScreen = ({ navigation }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const RoleButton = ({ title, imageSource, onPress }) => (
+  const RoleButton = ({ title, iconName, onPress }) => (
     <TouchableOpacity onPress={onPress} className="items-center mb-14">
       <View className="items-center">
-        <Image
-          source={imageSource}
-          className="w-28 h-28 self-center"
-          resizeMode="contain"
-        />
+          <MaterialIcon
+            name={iconName}
+            size={80}
+            color={isDark ? '#ffffff' : '#888'}
+            style={{ marginRight: 10 }}
+          />
         <Text className={`text-center font-normal text-lg mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {title}
         </Text>
@@ -33,7 +35,7 @@ const RegisterStartScreen = ({ navigation }) => {
         <View className="items-center">
           <RoleButton
             title="我是学生"
-            imageSource={require('../../assets/registerScreen/stu.png')}
+            iconName={"psychology"}
             onPress={() =>
               navigation.navigate('registerFlow', {
                 screen: 'inputProfile',
@@ -44,7 +46,7 @@ const RegisterStartScreen = ({ navigation }) => {
 
           <RoleButton
             title="我是家长"
-            imageSource={require('../../assets/registerScreen/family.png')}
+            iconName={"family-restroom"}
             onPress={() =>
               navigation.navigate('registerFlow', {
                 screen: 'inputProfile',
@@ -55,7 +57,7 @@ const RegisterStartScreen = ({ navigation }) => {
 
           <RoleButton
             title="我是导师"
-            imageSource={require('../../assets/registerScreen/teacher.png')}
+            iconName={"school"}
             onPress={() =>
               navigation.navigate('registerFlow', {
                 screen: 'inputProfile',

@@ -98,7 +98,7 @@ export default function InputProfile({ route }) {
   const [formError, setFormError] = useState('');
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
-
+  const DEV = __DEV__;
   useEffect(() => {
     if (useType === 'student') {
       setGrade('');
@@ -140,6 +140,7 @@ export default function InputProfile({ route }) {
 
   // 发送验证码
   const handleSendCode = async () => {
+    console.log("DEV:",DEV);
     if (countdown > 0) return;
 
     let hasError = false;
@@ -157,7 +158,6 @@ export default function InputProfile({ route }) {
     if (hasError) return;
 
     console.log('发送验证码至:', email);
-
     try {
       const result = await sendVerificationCode(email);
       if (result.success) {
@@ -173,6 +173,17 @@ export default function InputProfile({ route }) {
 
   // 提交表单
   const onSubmit = async () => {
+    //开发模式下直接跳过验证
+    if (DEV === true) {
+      console.log("DEV skip:",DEV);
+      if (useType === 'student') {
+        navigation.navigate('choseLove');
+      } else {
+        navigation.navigate('boundStu');
+      }
+      return ;
+    }
+
     let hasError = false;
 
     if (!name.trim() || !grade || !email.trim() || !code.trim() || !password.trim() || !gender.trim()) {
@@ -213,7 +224,7 @@ export default function InputProfile({ route }) {
 
     const result = await registerUser(formData);
     if (result.success) {
-      if (useType === 'stu') {
+      if (useType === 'student') {
         navigation.navigate('choseLove');
       } else {
         navigation.navigate('boundStu');
@@ -225,7 +236,7 @@ export default function InputProfile({ route }) {
 
     return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior='padding'
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}
     >
       <ScrollView
@@ -240,7 +251,10 @@ export default function InputProfile({ route }) {
           >
             填写个人信息
           </Text>
-          {formError ? <Text className="text-red-500 pl-1 font-normal text-lg self-center">{formError}</Text> : null}
+          {formError ?
+            <Text className="text-red-500 pl-1 font-normal text-lg self-center">
+              {formError}
+            </Text> : null}
           {/* 昵称 */}
           <InputBox
             label="昵称"
@@ -268,7 +282,7 @@ export default function InputProfile({ route }) {
                 selectedValue={gender}
                 onValueChange={(value) => setGender(value)}
                 style={{
-                  color: isDarkMode ? 'white' : 'black',
+                  color: isDarkMode ? 'white' : 'gray',
                   backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
                 }}
                 dropdownIconColor={isDarkMode ? 'white' : 'black'}
@@ -324,8 +338,9 @@ export default function InputProfile({ route }) {
                   selectedValue={grade}
                   onValueChange={(value) => setGrade(value)}
                   style={{
-                    color: isDarkMode ? 'white' : 'black',
+                    color: isDarkMode ? 'white' : 'gray',
                     backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                    height:60,
                   }}
                   dropdownIconColor={isDarkMode ? 'white' : 'black'}
                   mode="dropdown"
@@ -358,10 +373,11 @@ export default function InputProfile({ route }) {
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-600">
+            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-400">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}
+                style={{height:55}}
                 onChangeText={setCode}
                 className={`p-5 flex-1 pr-3 ${
                   isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-black'
@@ -370,7 +386,8 @@ export default function InputProfile({ route }) {
               <TouchableOpacity
                 onPress={handleSendCode}
                 disabled={countdown > 0}
-                className={`px-3 py-5 ${
+                style={{height:55}}
+                className={`px-3 justify-center ${
                   countdown > 0 ? 'bg-gray-300 dark:bg-gray-700' : 'bg-blue-500'
                 }`}
               >
@@ -409,9 +426,9 @@ export default function InputProfile({ route }) {
           {/* 下一步 */}
           <TouchableOpacity
             onPress={onSubmit}
-            disabled={!password || !isValidPassword(password).valid}
+            disabled={(!password || !isValidPassword(password).valid) && !DEV}
             className={`py-3 rounded-lg items-center justify-center mt-5 ${
-              password && isValidPassword(password).valid
+              (password && isValidPassword(password).valid) || DEV
                 ? 'bg-blue-500'
                 : 'bg-gray-400'
             }`}

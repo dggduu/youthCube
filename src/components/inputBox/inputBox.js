@@ -28,7 +28,7 @@ const InputBox = ({
         </Text>
       )}
       <View
-        className={`flex-row items-center rounded-md px-3 py-2 ${
+        className={`flex-row items-center rounded-md px-3 ${
           isDark ? 'bg-gray-800' : 'bg-white'
         } ${isFocused ? (isDark ? 'border-blue-400' : 'border-blue-500') : isDark ? 'border-gray-600' : 'border-gray-300'
         } border`}
@@ -45,6 +45,7 @@ const InputBox = ({
           className={`flex-1 text-base ${
             isDark ? 'text-gray-200' : 'text-gray-800'
           }`}
+          style={{height:55}}
           placeholder={placeholder}
           placeholderTextColor={isDark ? '#666' : '#999'}
           value={value}
