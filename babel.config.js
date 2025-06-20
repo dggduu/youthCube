@@ -20,6 +20,7 @@ module.exports = {
           '@screens': './src/screens',
           '@store': './src/store',
           '@navigation': './src/navigation',
+          '@env': "./src/constant",
         },
       },
     ],

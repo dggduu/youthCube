@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  StyleSheet,
   Text,
   TouchableOpacity,
   TextInput,
@@ -11,7 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  useColorScheme,
 } from 'react-native';
+import InputBox from '../components/inputBox/index';
 import { Button, WhiteSpace } from '@ant-design/react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch } from 'react-redux';
@@ -25,6 +26,8 @@ const LoginPage = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -42,111 +45,74 @@ const LoginPage = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+          contentContainerClassName="px-8 justify-center flex-grow pt-16 pb-14"
+        >
           <Image
-            source={require("@assets/logo/ava.png")}
-            style={styles.logo}
+            source={require('../assets/logo/ava.png')}
+            className="w-28 h-28 self-center mb-10"
+            resizeMode="contain"
           />
-          <Text style={styles.title}>欢迎回来</Text>
 
-          <View style={styles.inputContainer}>
-            <View style={styles.iconContainer}>
-              <Icon name="email" size={24} color="#888" />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="邮箱地址"
+          <Text
+            className={`text-3xl font-bold text-center mb-10 ${
+              isDark ? 'text-white' : 'text-gray-800'
+            }`}
+          >
+            欢迎回来
+          </Text>
+
+          <View className="mb-4">
+            <InputBox
+              label="邮箱地址"
+              placeholder="请输入邮箱"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              leftIconName="mail"
+              isDarkMode={isDark}
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <View style={styles.iconContainer}>
-              <Icon name="lock" size={24} color="#888" />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="密码"
+          <View className="mb-4">
+            <InputBox
+              label="密码"
+              placeholder="请输入密码"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              leftIconName="lock"
+              isDarkMode={isDark}
             />
           </View>
 
-          <WhiteSpace size="lg" />
-          <Button type="primary" onPress={handleLogin} style={styles.loginBtn}>
+          <Button
+            type="primary"
+            onPress={handleLogin}
+            className="mt-4 py-3 rounded-lg"
+          >
             登录
           </Button>
 
-          <TouchableOpacity onPress={() => navigation.navigate('RegisterStart')}>
-            <Text style={styles.link}>没有账号？去注册</Text>
+          <WhiteSpace size="lg" />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('RegisterStart')}
+            className="items-center mt-6"
+          >
+            <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
+              没有账号？去注册
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  logo: {
-    height: 100,
-    width: 100,
-    marginTop: 100,
-    marginBottom:50,
-    alignSelf: 'center',
-  },
-  container: {
-    flexGrow: 1,
-    paddingHorizontal: 30,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    paddingBottom: 60,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-    paddingBottom: 8,
-    marginBottom: 20,
-  },
-  iconContainer: {
-    width: 30,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 10,
-  },
-  loginBtn: {
-    marginTop: 10,
-  },
-  link: {
-    marginTop: 20,
-    textAlign: 'center',
-    color: '#4A90E2',
-  },
-});
 
 export default LoginPage;
