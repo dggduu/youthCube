@@ -1,4 +1,4 @@
-name: [test]:Check iOS Scheme
+name: Check iOS Scheme (Dry Run)
 
 on:
   workflow_dispatch:
