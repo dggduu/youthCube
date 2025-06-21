@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import InputBox from '../../components/inputBox/inputBox';
 import { Picker } from '@react-native-picker/picker';
 import { WhiteSpace } from '@ant-design/react-native';
-
+import BackIcon from "../../components/backIcon/backIcon";
 import{ registerUser,sendVerificationCode } from "../RegisterScreen/utils/registerUtils";
 
 // 学年选项
@@ -243,10 +243,11 @@ export default function InputProfile({ route }) {
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="px-4 pt-6 mt-16 mb-20">
+      <BackIcon isDark={false}/>
+        <View className="px-4 pt-6 mt-8 mb-20">
           <Text
             className={`text-2xl font-bold text-center mb-6 ${
-              isDarkMode ? 'text-white' : 'text-gray-800'
+              isDarkMode ? 'text-gray-300' : 'text-gray-800'
             }`}
           >
             填写个人信息
@@ -373,21 +374,21 @@ export default function InputProfile({ route }) {
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-400">
+            <View className="flex-row items-center border rounded-lg border-gray-300">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}
-                style={{height:55}}
+                style={{height:50}}
                 onChangeText={setCode}
-                className={`p-5 flex-1 pr-3 ${
+                className={`flex-1 pl-5 ${
                   isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-black'
                 }`}
               />
               <TouchableOpacity
                 onPress={handleSendCode}
                 disabled={countdown > 0}
-                style={{height:55}}
-                className={`px-3 justify-center ${
+                style={{height:50}}
+                className={`px-3 justify-center rounded-lg ${
                   countdown > 0 ? 'bg-gray-300 dark:bg-gray-700' : 'bg-blue-500'
                 }`}
               >
@@ -435,7 +436,9 @@ export default function InputProfile({ route }) {
           >
             <Text className="text-white font-semibold text-base">下一步</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={()=>{
+            navigation.navigate('helpSolvor');
+          }}>
             <View>
               <Text className= {`mt-6 self-center font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-300'}`}>有问题？联系工作人员</Text>
             </View>

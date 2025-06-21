@@ -1,11 +1,14 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Text, View} from 'react-native';
+import MainChat from "../../components/aiChat/mainChat";
+
+import { SafeAreaProvider} from 'react-native-safe-area-context';
 
 const chatScreen = () => {
   return (
-    <View>
-      <Text>chatScreen</Text>
-    </View>
+    <SafeAreaProvider>
+      <MainChat/>
+    </SafeAreaProvider>
   );
 };
 

@@ -4,14 +4,16 @@ import { Provider as ReduxProvider } from 'react-redux';
 import {Provider as AntdProvider} from '@ant-design/react-native';
 import { name as appName } from './app.json';
 import store from "./src/store/index";
-
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Root = () => (
-  <ReduxProvider store={store}>
-    <AntdProvider>
-      <App />
-    </AntdProvider>
-  </ReduxProvider>
+  <SafeAreaProvider>
+    <ReduxProvider store={store}>
+      <AntdProvider>
+        <App />
+      </AntdProvider>
+    </ReduxProvider>
+  </SafeAreaProvider>
 );
 
 AppRegistry.registerComponent(appName, () => Root);

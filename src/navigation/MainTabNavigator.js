@@ -35,11 +35,13 @@ const MainTabNavigator = () => {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: isDark ? '#a855f7' : 'purple',
-        tabBarInactiveTintColor: isDark ? '#9ca3af' : 'gray',
+        tabBarActiveTintColor: isDark ? '#b453d2' : 'purple',
+        tabBarInactiveTintColor: isDark ? '#8691a4' : '#626e80',
         tabBarStyle: {
-          backgroundColor: isDark ? '#1f2937' : '#ffffff',
+          backgroundColor: isDark ? '#1d2024' : '#e7e8ee',
           borderTopColor: isDark ? '#374151' : '#e5e7eb',
+          paddingBottom:15,
+          height:60,
         },
       })}
     >
