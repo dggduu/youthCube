@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import chatScreen from '../screens/MainTabScreen/chatScreen';
 import ideaMarketScreen from '../screens/MainTabScreen/ideaMarketScreen';
 import learningHomeScreen from '../screens/MainTabScreen/learningHomeScreen';
-import profileScreen from '../screens/MainTabScreen/profileScreen';
+import ProfileScreen from '../screens/MainTabScreen/profileScreen';
 import { colorScheme } from 'nativewind';
 
 
@@ -38,7 +38,7 @@ const MainTabNavigator = () => {
         tabBarActiveTintColor: isDark ? '#b453d2' : 'purple',
         tabBarInactiveTintColor: isDark ? '#8691a4' : '#626e80',
         tabBarStyle: {
-          backgroundColor: isDark ? '#1d2024' : '#e7e8ee',
+          backgroundColor: isDark ? '#1d2024' : '##fafafa',
           borderTopColor: isDark ? '#374151' : '#e5e7eb',
           paddingBottom:15,
           height:60,
@@ -48,7 +48,7 @@ const MainTabNavigator = () => {
       <Tab.Screen name="聪宝" component={chatScreen} />
       <Tab.Screen name="想法市场" component={ideaMarketScreen} />
       <Tab.Screen name="学习中心" component={learningHomeScreen} />
-      <Tab.Screen name="我的" component={profileScreen} />
+      <Tab.Screen name="我的" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

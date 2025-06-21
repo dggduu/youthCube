@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import InputBox from '../components/inputBox/index';
 import { Button, WhiteSpace } from '@ant-design/react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch } from 'react-redux';
 
 const loginAction = (email) => ({

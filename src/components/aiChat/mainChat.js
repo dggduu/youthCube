@@ -12,11 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { BASE_URL } from "../../constant/url";
+import { AI_CHAT_BASE_URL } from "../../constant/url";
 
 const CHAT_HISTORY_KEY = '@chat_history_';
 const TOPIC_HISTORY_KEY = '@topic_list';
-const MAX_TOPICS = 5;
+const MAX_TOPICS = 2;
 
 const MainChat = () => {
   const [messages, setMessages] = useState([]);
@@ -24,6 +24,7 @@ const MainChat = () => {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false); // 控制AI回复期间是否禁用输入
 
   const loadTopics = async () => {
     try {
@@ -41,7 +42,7 @@ const MainChat = () => {
             createdAt: new Date(),
             user: {
               _id: 2,
-              name: 'ChatGPT',
+              name: '聪宝',
               avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
             },
           },
@@ -68,7 +69,7 @@ const MainChat = () => {
             createdAt: new Date(),
             user: {
               _id: 2,
-              name: 'ChatGPT',
+              name: '聪宝',
               avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
             },
           },
@@ -91,25 +92,26 @@ const MainChat = () => {
     loadTopics();
   }, []);
 
-useEffect(() => {
-    console.log("当前话题列表:", topics);
-    console.log("当前选择的话题:", selectedTopic);
-    console.log("当前消息列表:", messages);
-  }, [topics, selectedTopic, messages]);
-
   const onSend = useCallback(
     async (newMessages = []) => {
+      if (isChatLoading) return; // 防止重复发送
+
       const updatedMessages = GiftedChat.append(messages, newMessages);
       setMessages(updatedMessages);
       await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessages));
 
-      fetchChatGPTResponse(newMessages[0].text);
+      setIsChatLoading(true);
+      try {
+        await fetchChatGPTResponse(newMessages[0].text);
+      } finally {
+        setIsChatLoading(false);
+      }
     },
-    [messages, selectedTopic]
+    [messages, selectedTopic, isChatLoading]
   );
 
   const fetchChatGPTResponse = async (inputText) => {
-    const url = 'http://10.69.57.141:1234/v1/chat/completions';
+    const url = `${AI_CHAT_BASE_URL}/v1/chat/completions`;
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -121,10 +123,7 @@ useEffect(() => {
     };
 
     try {
-      const response = await axios.post(url, data, {
-        headers,
-      });
-
+      const response = await axios.post(url, data, { headers });
       const assistantResponse = response.data.choices[0]?.message?.content || '抱歉，我没有理解你的问题。';
 
       const assistantMessage = {
@@ -133,16 +132,13 @@ useEffect(() => {
         createdAt: new Date(),
         user: {
           _id: 2,
-          name: 'ChatGPT',
+          name: '聪宝',
           avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
         },
       };
 
-      // 更新消息列表
       const updatedMessages = GiftedChat.append(messages, [assistantMessage]);
       setMessages(updatedMessages);
-
-      // 保存到 AsyncStorage
       await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessages));
     } catch (error) {
       console.error('请求失败:', error);
@@ -152,7 +148,7 @@ useEffect(() => {
         createdAt: new Date(),
         user: {
           _id: 2,
-          name: 'ChatGPT',
+          name: '聪宝',
           avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
         },
       };
@@ -162,7 +158,6 @@ useEffect(() => {
     }
   };
 
-  // 新建话题
   const createNewTopic = async () => {
     const name = newTopicName.trim();
     if (!name) {
@@ -175,30 +170,61 @@ useEffect(() => {
       return;
     }
 
+    const welcomeMessage = {
+      _id: 1,
+      text: '你好！我是聪宝，有什么可以帮你的吗？',
+      createdAt: new Date(),
+      user: {
+        _id: 2,
+        name: '聪宝',
+        avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+      },
+    };
+
     const updatedTopics = [name, ...topics.filter((t) => t !== name)].slice(0, MAX_TOPICS);
     setTopics(updatedTopics);
     setSelectedTopic(name);
     setIsModalVisible(false);
 
+    // 保存新的话题和初始欢迎消息
     await AsyncStorage.setItem(TOPIC_HISTORY_KEY, JSON.stringify(updatedTopics));
-    await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${name}`, JSON.stringify([])); // 空记录
-    setMessages([]);
+    await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${name}`, JSON.stringify([welcomeMessage]));
+
+    // 更新当前聊天界面的消息列表
+    setMessages([welcomeMessage]);
     setNewTopicName('');
+  };
+
+  const deleteCurrentTopic = async () => {
+    if (topics.length <= 1) {
+      alert('至少保留一个话题');
+      return;
+    }
+
+    const updatedTopics = topics.filter(topic => topic !== selectedTopic);
+    const newSelectedTopic = updatedTopics[0];
+
+    setTopics(updatedTopics);
+    setSelectedTopic(newSelectedTopic);
+
+    await AsyncStorage.removeItem(`${CHAT_HISTORY_KEY}${selectedTopic}`);
+    await AsyncStorage.setItem(TOPIC_HISTORY_KEY, JSON.stringify(updatedTopics));
+    await loadChatHistory(newSelectedTopic);
   };
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }}>
-      <View className="flex-1 bg-white dark:bg-black">
+      <View className="flex-1 bg-white dark:bg-gray-800">
         {/* 顶部操作栏 */}
-        <View className="p-3 bg-gray-100 flex-row items-center justify-between">
+        <View className="p-4 bg-white flex-row items-center justify-between dark:bg-gray-900 rounded-lg ">
           {/* 话题选择器 */}
-          <View className="flex-1 mr-2">
-            <Text className="text-sm text-gray-700 mb-1">选择话题:</Text>
-            <View className="border border-gray-300 rounded overflow-hidden bg-white">
+          <View className="flex-1 mr-2 ">
+            <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
+            <View className="border border-gray-300 rounded overflow-hidden bg-gray-300">
               <Picker
                 selectedValue={selectedTopic}
                 onValueChange={(value) => setSelectedTopic(value)}
-                style={{ height: 40 }}
+                style={{ height: 55 }}
                 dropdownIconColor="#000"
               >
                 {topics.map((topic) => (
@@ -211,9 +237,17 @@ useEffect(() => {
           {/* 新建话题按钮 */}
           <TouchableOpacity
             onPress={() => setIsModalVisible(true)}
-            className="bg-green-500 px-4 py-2 rounded self-end"
+            className="bg-green-500 dark:bg-green-600 px-4 py-2 mt-6 rounded self-center"
           >
             <Text className="text-white font-bold">新建话题</Text>
+          </TouchableOpacity>
+
+          {/* 删除话题按钮 */}
+          <TouchableOpacity
+            onPress={deleteCurrentTopic}
+            className="bg-red-500 dark:bg-red-600 px-4 py-2 mt-6 rounded self-center ml-2"
+          >
+            <Text className="text-white font-bold">删除话题</Text>
           </TouchableOpacity>
         </View>
 
@@ -226,18 +260,19 @@ useEffect(() => {
           }}
           placeholder="输入消息..."
           renderUsernameOnMessage
+          isKeyboardInternallyDisabled={isChatLoading} // 禁止输入
         />
 
         {/* 新建话题模态框 */}
         <Modal visible={isModalVisible} animationType="slide" transparent>
           <View className="flex-1 justify-center bg-black/50 p-4">
-            <View className="bg-white p-5 rounded-lg mx-4">
+            <View className="bg-white dark:bg-gray-800 p-5 rounded-lg mx-4">
               <Text className="text-lg font-semibold mb-3">输入新话题名称：</Text>
               <TextInput
                 value={newTopicName}
                 onChangeText={setNewTopicName}
                 className="border border-gray-300 p-3 rounded mb-4"
-                placeholder="例如：旅行攻略"
+                placeholder="输入新话题名称"
               />
               <View className="flex-row justify-end space-x-3">
                 <TouchableOpacity
