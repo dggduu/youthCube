@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState,useEffect } from 'react';
 import { View,useColorScheme } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -7,14 +7,21 @@ import chatScreen from '../screens/MainTabScreen/chatScreen';
 import ideaMarketScreen from '../screens/MainTabScreen/ideaMarketScreen';
 import learningHomeScreen from '../screens/MainTabScreen/learningHomeScreen';
 import ProfileScreen from '../screens/MainTabScreen/profileScreen';
-import { colorScheme } from 'nativewind';
 
 
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
+  const [isDark, setIsDark] = useState(false);
   const colorScheme = useColorScheme();
-  const isDark = colorScheme == "dark";
+
+  useEffect(() => {
+    if (colorScheme === 'dark') {
+      setIsDark(true);
+    } else {
+      setIsDark(false);
+    }
+  }, [colorScheme]);
 
   return (
     <Tab.Navigator
@@ -38,10 +45,11 @@ const MainTabNavigator = () => {
         tabBarActiveTintColor: isDark ? '#b453d2' : 'purple',
         tabBarInactiveTintColor: isDark ? '#8691a4' : '#626e80',
         tabBarStyle: {
-          backgroundColor: isDark ? '#1d2024' : '##fafafa',
+          backgroundColor: isDark ? '#1d2024' : '#fafafa',
           borderTopColor: isDark ? '#374151' : '#e5e7eb',
-          paddingBottom:15,
-          height:60,
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 60,
         },
       })}
     >

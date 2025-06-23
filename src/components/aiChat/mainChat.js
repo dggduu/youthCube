@@ -5,14 +5,26 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Image,
+  useColorScheme,
+  Linking,
+  Button,
+  Pressable,
+  Platform,
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import RNFS from 'react-native-fs';
 
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Send, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AI_CHAT_BASE_URL } from "../../constant/url";
+import { Shadow } from "react-native-shadow-2";
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { pick, types, isCancel } from '@react-native-documents/picker';
 
 const CHAT_HISTORY_KEY = '@chat_history_';
 const TOPIC_HISTORY_KEY = '@topic_list';
@@ -24,7 +36,14 @@ const MainChat = () => {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isChatLoading, setIsChatLoading] = useState(false); // 控制AI回复期间是否禁用输入
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const colorScheme = useColorScheme();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [inputText, setInputText] = useState('');
+  const isDarkMode = colorScheme === "dark";
+
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
+  const [currentImageUri, setCurrentImageUri] = useState('');
 
   const loadTopics = async () => {
     try {
@@ -94,31 +113,90 @@ const MainChat = () => {
 
   const onSend = useCallback(
     async (newMessages = []) => {
-      if (isChatLoading) return; // 防止重复发送
+      const text = inputText.trim();
+      let imageData = null;
 
-      const updatedMessages = GiftedChat.append(messages, newMessages);
-      setMessages(updatedMessages);
-      await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessages));
+      setInputText('');
 
-      setIsChatLoading(true);
-      try {
-        await fetchChatGPTResponse(newMessages[0].text);
-      } finally {
-        setIsChatLoading(false);
+      if (selectedFile) {
+        if (selectedFile.type === 'image') {
+          try {
+            const filePath = Platform.OS === 'ios' ? selectedFile.uri.replace('file://', '') : selectedFile.uri;
+            const base64Image = await RNFS.readFile(filePath, 'base64');
+            imageData = `data:${selectedFile.mimeType || 'image/jpeg'};base64,${base64Image}`;
+          } catch (error) {
+            alert('无法读取图片，请重试。');
+            setSelectedFile(null);
+            return;
+          }
+        }
+      }
+
+      if (text !== '' || selectedFile) {
+        const combinedMessage = {
+          _id: Math.random().toString(36).substring(7),
+          createdAt: new Date(),
+          user: { _id: 1 },
+          text: text || '',
+        };
+
+        if (selectedFile) {
+          if (selectedFile.type === 'image') {
+            combinedMessage.image = selectedFile.uri;
+          } else if (selectedFile.type === 'document') {
+            combinedMessage.file = {
+              uri: selectedFile.uri,
+              name: selectedFile.name,
+              type: selectedFile.type,
+            };
+          }
+        }
+
+        const updatedMessagesWithUser = GiftedChat.append(messages, [combinedMessage]);
+        setMessages(updatedMessagesWithUser);
+        await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessagesWithUser));
+
+        setIsChatLoading(true);
+        try {
+          if (text || imageData) {
+            await fetchChatGPTResponse(text, imageData, updatedMessagesWithUser);
+          } else {
+            setIsChatLoading(false);
+          }
+        } finally {
+          setSelectedFile(null);
+        }
       }
     },
-    [messages, selectedTopic, isChatLoading]
+    [inputText, selectedFile, messages, selectedTopic]
   );
 
-  const fetchChatGPTResponse = async (inputText) => {
-    const url = `${AI_CHAT_BASE_URL}/v1/chat/completions`;
+  const fetchChatGPTResponse = async (inputText, imageData, currentChatMessages) => {
+    const url = `http://10.69.57.141:1234/v1/chat/completions`;
     const headers = {
       'Content-Type': 'application/json',
     };
 
+    let messagesForApi = [];
+
+    if (imageData) {
+      messagesForApi.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: inputText || '描述这张图片' },
+          { type: 'image_url', image_url: { url: imageData } }
+        ]
+      });
+    } else if (inputText) {
+      messagesForApi.push({ role: 'user', content: inputText });
+    } else {
+      setIsChatLoading(false);
+      return;
+    }
+
     const data = {
-      model: 'qwen3-8b',
-      messages: [{ role: 'user', content: inputText }],
+      model: 'qwen2-vl-2b-instruct', 
+      messages: messagesForApi,
       stream: false,
     };
 
@@ -137,14 +215,14 @@ const MainChat = () => {
         },
       };
 
-      const updatedMessages = GiftedChat.append(messages, [assistantMessage]);
+      const updatedMessages = GiftedChat.append(currentChatMessages, [assistantMessage]);
       setMessages(updatedMessages);
       await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessages));
     } catch (error) {
-      console.error('请求失败:', error);
+      console.error('请求失败:', error.response ? error.response.data : error.message);
       const errorMessage = {
         _id: Math.random().toString(36).substring(7),
-        text: '请求失败，请检查网络或稍后再试。',
+        text: `请求失败: ${error.response?.data?.error?.message || error.message || '未知错误'}`,
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -152,9 +230,11 @@ const MainChat = () => {
           avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
         },
       };
-      const updatedMessages = GiftedChat.append(messages, [errorMessage]);
-      setMessages(updatedMessages);
-      await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessages));
+      const updatedMessagesWithError = GiftedChat.append(currentChatMessages, [errorMessage]);
+      setMessages(updatedMessagesWithError);
+      await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${selectedTopic}`, JSON.stringify(updatedMessagesWithError));
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -181,16 +261,14 @@ const MainChat = () => {
       },
     };
 
-    const updatedTopics = [name, ...topics.filter((t) => t !== name)].slice(0, MAX_TOPICS);
+    const updatedTopics = [name, ...topics].slice(0, MAX_TOPICS);
     setTopics(updatedTopics);
     setSelectedTopic(name);
     setIsModalVisible(false);
 
-    // 保存新的话题和初始欢迎消息
     await AsyncStorage.setItem(TOPIC_HISTORY_KEY, JSON.stringify(updatedTopics));
     await AsyncStorage.setItem(`${CHAT_HISTORY_KEY}${name}`, JSON.stringify([welcomeMessage]));
 
-    // 更新当前聊天界面的消息列表
     setMessages([welcomeMessage]);
     setNewTopicName('');
   };
@@ -212,84 +290,304 @@ const MainChat = () => {
     await loadChatHistory(newSelectedTopic);
   };
 
+  const pickFile = async () => {
+    setSelectedFile(null);
+    try {
+      const [pickResult] = await pick({
+        type: [
+          types.pdf,
+          types.docx,
+          types.doc,
+        ],
+        mode: 'open',
+        allowMultiSelection: false,
+      });
+
+      if (pickResult) {
+        console.log("selected file:", pickResult);
+        setSelectedFile({ ...pickResult, type: 'document' });
+      } else {
+        console.log('用户取消了文件选择');
+      }
+    } catch (err) {
+      if (isCancel(err)) {
+        console.log('用户取消了文件选择');
+      } else {
+        console.error('文件选择失败:', err);
+      }
+    }
+  };
+
+  const handleImagePick = async () => {
+    setSelectedFile(null);
+    const options = {
+      mediaType: 'photo',
+      quality: 0.7,
+      includeBase64: false,
+    };
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('用户取消了图片选择');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorCode);
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        console.log("图片已选择:", asset);
+        setSelectedFile({ type: 'image', uri: asset.uri, mimeType: asset.type });
+      }
+    });
+  };
+
+  const renderMessageImage = (props) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          setCurrentImageUri(props.currentMessage.image);
+          setIsImageViewerVisible(true);
+        }}
+      >
+        <Image
+          source={{ uri: props.currentMessage.image }}
+          className="w-48 h-48 rounded-lg my-1"
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+    );
+  };
+
+  const renderMessage = (props) => {
+    const { currentMessage } = props;
+
+    return (
+      <View>
+        {currentMessage.file && (
+          <View className="px-3 py-4 bg-gray-200 dark:bg-gray-800 rounded-lg self-start my-1 max-w-xs">
+            <TouchableOpacity onPress={() => Linking.openURL(currentMessage.file.uri)}>
+              <Text className="text-blue-600">{currentMessage.file.name}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {currentMessage.text && <Bubble
+          {...props}
+          wrapperStyle={{
+            left: { // AI消息气泡样式
+              backgroundColor: isDarkMode ? '#2f312a':'#e8e9de',
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              borderBottomRightRadius: 10,
+              borderBottomLeftRadius: 10,
+              paddingLeft:5,
+              paddingRight:5,
+              paddingTop:5,
+              marginBottom:10,
+            },
+            right: { // 发送者消息气泡样式
+              backgroundColor: isDarkMode ? '#8a9579':'#477572',
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              borderBottomLeftRadius: 10,
+              borderBottomRightRadius: 10,
+              paddingLeft:5,
+              paddingRight:5,
+              paddingTop:5,
+              marginBottom:10,
+            },
+          }}
+          textStyle={{
+            left: { // AI文本样式
+              color: isDarkMode? '#fff':'#000',
+            },
+            right: { // 发送者文本样式
+              color: isDarkMode? '#fff': '#4c662b',
+            },
+          }}
+        />}
+      </View>
+    );
+  };
+
+  const renderSend = props => {
+    return (
+      <Send {...props}>
+        <View className="mr-2 ml-2 mb-2 p-2 bg-blue-500 rounded-full self-center justify-center">
+          <MaterialIcon name={"send"} size={16} color={isDarkMode ? '#eee' : '#fff'} />
+        </View>
+      </Send>
+    );
+  };
+
+
+  const renderActions = () => {
+    return (
+      <View className="flex-row items-center mr-2 justify-center self-center ml-3">
+        <TouchableOpacity onPress={handleImagePick} className='mr-2' disabled={!!selectedFile}>
+          <MaterialIcon name={"photo"} size={25} color={selectedFile ? '#aaa' : (isDarkMode ? '#eee' : '#000')} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={pickFile} disabled={!!selectedFile}>
+          <MaterialIcon name={"attachment"} size={25} color={selectedFile ? '#aaa' : (isDarkMode ? '#eee' : '#000')} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }}>
       <View className="flex-1 bg-white dark:bg-gray-800">
-        {/* 顶部操作栏 */}
-        <View className="p-4 bg-white flex-row items-center justify-between dark:bg-gray-900 rounded-lg ">
-          {/* 话题选择器 */}
-          <View className="flex-1 mr-2 ">
-            <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
-            <View className="border border-gray-300 rounded overflow-hidden bg-gray-300">
-              <Picker
-                selectedValue={selectedTopic}
-                onValueChange={(value) => setSelectedTopic(value)}
-                style={{ height: 55 }}
-                dropdownIconColor="#000"
-              >
-                {topics.map((topic) => (
-                  <Picker.Item key={topic} label={topic} value={topic} />
-                ))}
-              </Picker>
+        <Shadow distance={10}>
+          <View className="p-2 bg-white flex-row items-center justify-between dark:bg-gray-700/35 shadow rounded-lg w-full ">
+            <View className="flex-1 mr-2 ">
+              <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
+              <View className="border border-gray-300 rounded bg-white dark:bg-gray-700l">
+                <Picker
+                  selectedValue={selectedTopic}
+                  onValueChange={(value) => setSelectedTopic(value)}
+                  style={{
+                    height: 55,
+                    width: '100%',
+                    color: 'black',
+                  }}
+                  dropdownIconColor={isDarkMode ? '#eee' : '#000'}
+                >
+                  {topics.map((topic) => (
+                    <Picker.Item key={topic} label={topic} value={topic} />
+                  ))}
+                </Picker>
+              </View>
             </View>
+
+            <TouchableOpacity
+              onPress={() => setIsModalVisible(true)}
+              className="bg-green-500 dark:bg-green-600 p-3 mt-6 rounded-full self-center ml-1"
+            >
+              <MaterialIcon name={"add"} size={15} color={isDarkMode ? '#eee' : '#000'} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={deleteCurrentTopic}
+              className="bg-red-500 dark:bg-red-700 p-3 mt-6 rounded-full self-center ml-3"
+            >
+              <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#000'} />
+            </TouchableOpacity>
           </View>
+        </Shadow>
 
-          {/* 新建话题按钮 */}
-          <TouchableOpacity
-            onPress={() => setIsModalVisible(true)}
-            className="bg-green-500 dark:bg-green-600 px-4 py-2 mt-6 rounded self-center"
-          >
-            <Text className="text-white font-bold">新建话题</Text>
-          </TouchableOpacity>
-
-          {/* 删除话题按钮 */}
-          <TouchableOpacity
-            onPress={deleteCurrentTopic}
-            className="bg-red-500 dark:bg-red-600 px-4 py-2 mt-6 rounded self-center ml-2"
-          >
-            <Text className="text-white font-bold">删除话题</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 聊天界面 */}
         <GiftedChat
           messages={messages}
-          onSend={(newMessages) => onSend(newMessages)}
-          user={{
-            _id: 1,
-          }}
+          onSend={onSend}
+          user={{ _id: 1 }}
           placeholder="输入消息..."
           renderUsernameOnMessage
-          isKeyboardInternallyDisabled={isChatLoading} // 禁止输入
+          isKeyboardInternallyDisabled={isChatLoading}
+          renderBubble={renderMessage}
+          renderMessageImage={renderMessageImage}
+          renderActions={renderActions}
+          renderSend={renderSend}
+          renderInputToolbar={props => (
+            <InputToolbar
+              {...props}
+              containerStyle={{
+                backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
+                paddingTop: 4,
+                marginTop: 10,
+                paddingBottom: 2,
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                {props.children}
+              </View>
+            </InputToolbar>
+          )}
+          textInputStyle={{
+            color: isDarkMode ? '#fff' : '#000',
+            fontSize: 16,
+            padding: 10,
+            maxHeight: 100,
+            minHeight: 40,
+            flex: 1,
+            backgroundColor: isDarkMode ? '#2d2d2d' : '#fff',
+            borderRadius: 20,
+            paddingHorizontal: 15,
+          }}
+          text={inputText}
+          onInputTextChanged={setInputText}
+          placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
         />
 
-        {/* 新建话题模态框 */}
-        <Modal visible={isModalVisible} animationType="slide" transparent>
+        {selectedFile && (
+          <View style={{
+            flexDirection: 'row',
+            padding: 10,
+            alignItems: 'center',
+            backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
+            borderTopWidth: 1,
+            borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
+          }}>
+            {selectedFile.type === "image" ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentImageUri(selectedFile.uri);
+                  setIsImageViewerVisible(true);
+                }}
+              >
+                <Image
+                  source={{ uri: selectedFile.uri }}
+                  style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                />
+              </TouchableOpacity>
+            ) : (
+              <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#f0f0f0', borderRadius: 8 }}>
+                <Text numberOfLines={1} style={{ width: 100, height:100, color: isDarkMode ? '#eee' : '#000' }}>{selectedFile.name || '文件'}</Text>
+              </View>
+            )}
+            <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginLeft: 5, position: 'absolute', top: 5, left: 85 }} className='bg-gray-300 dark:bg-gray-600 rounded-full p-1'>
+              <MaterialIcon name="close" size={20} color={isDarkMode ? '#aaa' : '#888'} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <Modal visible={isModalVisible} animationType="fade" transparent hardwareAccelerated={true}>
           <View className="flex-1 justify-center bg-black/50 p-4">
             <View className="bg-white dark:bg-gray-800 p-5 rounded-lg mx-4">
-              <Text className="text-lg font-semibold mb-3">输入新话题名称：</Text>
+              <Text className="text-lg font-semibold mb-3 text-black dark:text-gray-300">输入新话题名称：</Text>
               <TextInput
                 value={newTopicName}
                 onChangeText={setNewTopicName}
-                className="border border-gray-300 p-3 rounded mb-4"
+                className="border border-gray-300 p-3 rounded mb-4 text-black dark:text-gray-300"
                 placeholder="输入新话题名称"
+                placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
               />
               <View className="flex-row justify-end space-x-3">
                 <TouchableOpacity
                   onPress={() => setIsModalVisible(false)}
-                  className="px-4 py-2 rounded bg-gray-200"
+                  className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-300"
                 >
                   <Text>取消</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={createNewTopic}
-                  className="px-4 py-2 rounded bg-green-500"
+                  className="px-4 py-2 ml-4 rounded bg-green-500 dark:bg-green-600"
                 >
-                  <Text className="text-white font-bold">创建</Text>
+                  <Text className="text-white dark:text-gray-100">创建</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
+        </Modal>
+
+        <Modal visible={isImageViewerVisible} transparent={true} onRequestClose={() => setIsImageViewerVisible(false)}>
+          <TouchableOpacity onPress={() => setIsImageViewerVisible(false)} style={{position:'absolute', top:15, left:10, zIndex:1}} className='bg-gray-300 dark:bg-gray-600 p-2 rounded-full z-0'>
+            <MaterialIcon name={"close"} size={30} style={{
+              color: isDarkMode ? '#eee' : '#000',
+            }}/>
+          </TouchableOpacity>
+          <ImageViewer
+            imageUrls={[{ url: currentImageUri }]}
+            enableSwipeDown
+            onCancel={() => setIsImageViewerVisible(false)}
+            renderIndicator={() => null}
+            backgroundColor="rgba(0,0,0,0.8)"
+          />
         </Modal>
       </View>
     </KeyboardAwareScrollView>
