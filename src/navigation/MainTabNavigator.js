@@ -3,11 +3,11 @@ import { View,useColorScheme } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import chatScreen from '../screens/MainTabScreen/chatScreen';
-import ideaMarketScreen from '../screens/MainTabScreen/ideaMarketScreen';
-import learningHomeScreen from '../screens/MainTabScreen/learningHomeScreen';
-import ProfileScreen from '../screens/MainTabScreen/profileScreen';
-
+import ChatScreen from '@screens/MainTabScreen/chatScreen';
+import IdeaMarketScreen from '@screens/MainTabScreen/ideaMarketScreen';
+import LearningHomeScreen from '@screens/MainTabScreen/learningHomeScreen';
+import ProfileScreen from '@screens/MainTabScreen/profileScreen';
+import ProfileNavigtor from "../navigation/profileNavigator/ProfileNavigtor";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,10 +53,10 @@ const MainTabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="聪宝" component={chatScreen} />
-      <Tab.Screen name="想法市场" component={ideaMarketScreen} />
-      <Tab.Screen name="学习中心" component={learningHomeScreen} />
-      <Tab.Screen name="我的" component={ProfileScreen} />
+      <Tab.Screen name="聪宝" component={ChatScreen} />
+      <Tab.Screen name="想法市场" component={IdeaMarketScreen} />
+      <Tab.Screen name="学习中心" component={LearningHomeScreen} />
+      <Tab.Screen name="我的" component={ProfileNavigtor} />
     </Tab.Navigator>
   );
 };

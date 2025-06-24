@@ -1,10 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function IeaMarketScreen() {
+const PracticeScreen = () => {
   return (
     <View>
-      <Text>ideaMarketScreen</Text>
+      <Text>PracticeScreen</Text>
     </View>
   )
 }
+
+export default PracticeScreen

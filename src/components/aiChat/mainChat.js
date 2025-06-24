@@ -467,6 +467,7 @@ const MainChat = () => {
                     height: 55,
                     width: '100%',
                     color: isDarkMode ? '#eee' : '#000',
+                    borderRadius:10,
                   }}
                   dropdownIconColor={isDarkMode ? '#eee' : '#000'}
                 >

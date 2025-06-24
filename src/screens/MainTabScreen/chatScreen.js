@@ -4,7 +4,7 @@ import MainChat from "../../components/aiChat/mainChat";
 
 import { SafeAreaProvider} from 'react-native-safe-area-context';
 
-const chatScreen = () => {
+const ChatScreen = () => {
   return (
     <SafeAreaProvider>
       <MainChat/>
@@ -12,4 +12,4 @@ const chatScreen = () => {
   );
 };
 
-export default chatScreen;
+export default ChatScreen;
