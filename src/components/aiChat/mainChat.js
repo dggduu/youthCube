@@ -20,14 +20,18 @@ import { GiftedChat, Send, Bubble, InputToolbar } from 'react-native-gifted-chat
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { BASE_INFO } from "../../constant/base";
 import { Shadow } from "react-native-shadow-2";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { pick, types, isCancel } from '@react-native-documents/picker';
 import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from "../tip/ToastHooks";
+
+import SquareGridBackground from "../misc/SquareGridBackground";
+import PatternSVG from "../../assets/background/pattern.svg";
+
 const CHAT_HISTORY_KEY = '@chat_history_';
 const TOPIC_HISTORY_KEY = '@topic_list';
 const MAX_TOPICS = 2;
@@ -133,15 +137,15 @@ const MainChat = () => {
             setSelectedFile(null); // 使用后删除照片
             return;
           }
-        } if (selectedFile.type == 'docment') {
+        } else if (selectedFile.type == 'document') {
           try {
             const filePath = Platform.OS == 'ios' ? selectedFile.url.replace('file://', '') : selectedFile.url;
             const base64Image = await RNFS.readFile(filePath, 'base64');
             setSelectedFile(null); // 未开发
-          }catch {
+          } catch {
             console.log("[onSend]函数: 无法加载document，请重重试！");
             setSelectedFile(null);
-            return ;
+            return;
           }
         }
       }
@@ -209,7 +213,7 @@ const MainChat = () => {
     }
 
     const data = {
-      model: BASE_INFO.chat.model, 
+      model: BASE_INFO.chat.model,
       messages: messagesForApi,
       stream: false,
     };
@@ -343,7 +347,7 @@ const MainChat = () => {
     setSelectedFile(null);
     const options = {
       mediaType: 'photo',
-      quality: 0.7,
+      quality: 0.9,
       includeBase64: false,
     };
     launchImageLibrary(options, (response) => {
@@ -392,34 +396,34 @@ const MainChat = () => {
           {...props}
           wrapperStyle={{
             left: { // AI消息气泡样式
-              backgroundColor: isDarkMode ? '#2f312a':'#e8e9de',
+              backgroundColor: isDarkMode ? '#2f312a' : '#e8e9de',
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
               borderBottomRightRadius: 10,
               borderBottomLeftRadius: 10,
-              paddingLeft:5,
-              paddingRight:5,
-              paddingTop:5,
-              marginBottom:10,
+              paddingLeft: 5,
+              paddingRight: 5,
+              paddingTop: 5,
+              marginBottom: 10,
             },
             right: { // 发送者消息气泡样式
-              backgroundColor: isDarkMode ? '#8a9579':'#477572',
+              backgroundColor: isDarkMode ? '#8a9579' : '#477572',
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
               borderBottomLeftRadius: 10,
               borderBottomRightRadius: 10,
-              paddingLeft:5,
-              paddingRight:5,
-              paddingTop:5,
-              marginBottom:10,
+              paddingLeft: 5,
+              paddingRight: 5,
+              paddingTop: 5,
+              marginBottom: 10,
             },
           }}
           textStyle={{
             left: { // AI文本样式
-              color: isDarkMode? '#fff':'#000',
+              color: isDarkMode ? '#fff' : '#000',
             },
             right: { // 发送者文本样式
-              color: isDarkMode? '#fff': '#fff',
+              color: isDarkMode ? '#fff' : '#fff',
             },
           }}
         />}
@@ -452,53 +456,67 @@ const MainChat = () => {
     );
   };
 
+  const renderInputToolbar = props => {
+    return (
+      <InputToolbar
+        {...props}
+        containerStyle={{
+          backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+          paddingTop: 4,
+          paddingBottom: 2,
+        }}
+      />
+    );
+  };
+
+
   return (
-    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }} className='h-full'>
-      <View className="flex-1 h-full" style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
-        <Shadow distance={10}>
-          <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
-            <View className="flex-1 mr-2 ">
-              <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
-              <View className="border border-gray-300 rounded l" style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
-                <Picker
-                  selectedValue={selectedTopic}
-                  onValueChange={(value) => setSelectedTopic(value)}
-                  style={{
-                    height: 55,
-                    width: '100%',
-                    color: isDarkMode ? '#eee' : '#000',
-                    borderRadius:10,
-                  }}
-                  dropdownIconColor={isDarkMode ? '#eee' : '#000'}
-                >
-                  {topics.map((topic) => (
-                    <Picker.Item key={topic} label={topic} value={topic} />
-                  ))}
-                </Picker>
-              </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? "#2f312a" : "#f9faef" }}>
+      <Shadow distance={10}>
+        <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{ backgroundColor: isDarkMode ? "#2f312a" : "#f9faef", }}>
+          <View className="flex-1 mr-2 ">
+            <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
+            <View className="border border-gray-300 rounded l" style={{ backgroundColor: isDarkMode ? "#2f312a" : "#f9faef", }}>
+              <Picker
+                selectedValue={selectedTopic}
+                onValueChange={(value) => setSelectedTopic(value)}
+                style={{
+                  height: 55,
+                  width: '100%',
+                  color: isDarkMode ? '#eee' : '#000',
+                  borderRadius: 10,
+                }}
+                dropdownIconColor={isDarkMode ? '#eee' : '#000'}
+              >
+                {topics.map((topic) => (
+                  <Picker.Item key={topic} label={topic} value={topic} />
+                ))}
+              </Picker>
             </View>
-
-            <TouchableOpacity
-              onPress={() => setIsModalVisible(true)}
-              className="bg-[#667157] dark:bg-[#354e16] p-3 mt-6 rounded-full self-center ml-1"
-            >
-              <MaterialIcon name={"add"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={deleteCurrentTopic}
-              className="bg-[#8f4c38] dark:bg-[#7d3030] p-3 mt-6 rounded-full self-center ml-3"
-            >
-              <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
-            </TouchableOpacity>
           </View>
-        </Shadow>
-          <LinearGradient
-            colors={isDarkMode ? ['#353f29', '#002b29'] : ['#f0f9eb', '#c9e5b5']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={{ flex: 1 }}
+
+          <TouchableOpacity
+            onPress={() => setIsModalVisible(true)}
+            className="bg-[#667157] dark:bg-[#354e16] p-3 mt-6 rounded-full self-center ml-1"
           >
+            <MaterialIcon name={"add"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={deleteCurrentTopic}
+            className="bg-[#8f4c38] dark:bg-[#7d3030] p-3 mt-6 rounded-full self-center ml-3"
+          >
+            <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
+          </TouchableOpacity>
+        </View>
+      </Shadow>
+
+      {isDarkMode ? (
+        <View style={{ flex: 1 }}>
+          <SquareGridBackground
+            pattern={PatternSVG}
+            size={70}
+          />
           <GiftedChat
             messages={messages}
             onSend={onSend}
@@ -510,20 +528,9 @@ const MainChat = () => {
             renderMessageImage={renderMessageImage}
             renderActions={renderActions}
             renderSend={renderSend}
-            renderInputToolbar={props => (
-              <InputToolbar
-                {...props}
-                containerStyle={{
-                  backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
-                  paddingTop: 4,
-                  paddingBottom: 2,
-                }}
-              >
-                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                  {props.children}
-                </View>
-              </InputToolbar>
-            )}
+            bottomOffset={Platform.OS === 'ios' ? 34 : 0}
+            keyboardShouldPersistTaps="handled"
+            renderInputToolbar={renderInputToolbar}
             textInputStyle={{
               color: isDarkMode ? '#fff' : '#000',
               fontSize: 16,
@@ -536,93 +543,163 @@ const MainChat = () => {
               paddingHorizontal: 15,
             }}
             text={inputText}
+            renderChatFooter={() => (
+              selectedFile ? (
+                <View style={{
+                  flexDirection: 'row',
+                  padding: 10,
+                  alignItems: 'center',
+                  backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
+                  borderTopWidth: 1,
+                  borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
+                }}>
+                  {selectedFile.type === "image" ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setCurrentImageUri(selectedFile.uri);
+                        setIsImageViewerVisible(true);
+                      }}
+                    >
+                      <Image
+                        source={{ uri: selectedFile.uri }}
+                        style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#ddd', borderRadius: 16, width: 100, height: 100, overflow: 'hidden' }}>
+                      <Text style={{ color: isDarkMode ? '#eee' : '#000' }}>{selectedFile.name || '文件'}</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginLeft: 5, position: 'absolute', top: 5, left: 85 }} className='bg-gray-300 dark:bg-gray-600 rounded-full p-1'>
+                    <MaterialIcon name="close" size={20} color={isDarkMode ? '#aaa' : '#888'} />
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            )}
+            onInputTextChanged={setInputText}
+            placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
+          />
+        </View>
+      ) : (
+        <LinearGradient
+          colors={['#f0f9eb', '#c9e5b5']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{ flex: 1 }}
+        >
+          <GiftedChat
+            messages={messages}
+            onSend={onSend}
+            user={{ _id: 1 }}
+            placeholder="输入消息..."
+            renderUsernameOnMessage
+            isKeyboardInternallyDisabled={isChatLoading}
+            renderBubble={renderMessage}
+            renderMessageImage={renderMessageImage}
+            renderActions={renderActions}
+            renderSend={renderSend}
+            bottomOffset={Platform.OS === 'ios' ? 34 : 0}
+            keyboardShouldPersistTaps="handled"
+            renderInputToolbar={renderInputToolbar}
+            textInputStyle={{
+              color: isDarkMode ? '#fff' : '#000',
+              fontSize: 16,
+              padding: 10,
+              maxHeight: 100,
+              minHeight: 40,
+              flex: 1,
+              backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+              borderRadius: 20,
+              paddingHorizontal: 15,
+            }}
+            text={inputText}
+            renderChatFooter={() => (
+              selectedFile ? (
+                <View style={{
+                  flexDirection: 'row',
+                  padding: 10,
+                  alignItems: 'center',
+                  backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
+                  borderTopWidth: 1,
+                  borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
+                }}>
+                  {selectedFile.type === "image" ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setCurrentImageUri(selectedFile.uri);
+                        setIsImageViewerVisible(true);
+                      }}
+                    >
+                      <Image
+                        source={{ uri: selectedFile.uri }}
+                        style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#ddd', borderRadius: 16, width: 100, height: 100, overflow: 'hidden' }}>
+                      <Text style={{ color: isDarkMode ? '#eee' : '#000' }}>{selectedFile.name || '文件'}</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginLeft: 5, position: 'absolute', top: 5, left: 85 }} className='bg-gray-300 dark:bg-gray-600 rounded-full p-1'>
+                    <MaterialIcon name="close" size={20} color={isDarkMode ? '#aaa' : '#888'} />
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            )}
             onInputTextChanged={setInputText}
             placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
           />
         </LinearGradient>
+      )}
 
-        
 
-        {selectedFile && (
-          <View style={{
-            flexDirection: 'row',
-            padding: 10,
-            alignItems: 'center',
-            backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
-            borderTopWidth: 1,
-            borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
-          }}>
-            {selectedFile.type === "image" ? (
+      <Modal visible={isModalVisible} animationType="fade" transparent hardwareAccelerated={true}>
+        <View className="flex-1 justify-center bg-black/50 p-4">
+          <View className="bg-white dark:bg-gray-800 p-5 rounded-lg mx-4">
+            <Text className="text-lg font-semibold mb-3 text-black dark:text-gray-300">输入新话题名称：</Text>
+            <TextInput
+              value={newTopicName}
+              onChangeText={setNewTopicName}
+              className="border border-gray-300 p-3 rounded mb-4 text-black dark:text-gray-300"
+              placeholder="输入新话题名称"
+              style={{
+                height: 55,
+              }}
+              placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
+            />
+            <View className="flex-row justify-end space-x-3">
               <TouchableOpacity
-                onPress={() => {
-                  setCurrentImageUri(selectedFile.uri);
-                  setIsImageViewerVisible(true);
-                }}
+                onPress={() => setIsModalVisible(false)}
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-300"
               >
-                <Image
-                  source={{ uri: selectedFile.uri }}
-                  style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
-                />
+                <Text>取消</Text>
               </TouchableOpacity>
-            ) : (
-              <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#ddd', borderRadius: 16, width: 100, height: 100, overflow: 'hidden' }}>
-                <Text style={{color: isDarkMode ? '#eee' : '#000' }} >{selectedFile.name || '文件'}</Text>
-              </View>
-            )}
-            <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginLeft: 5, position: 'absolute', top: 5, left: 85 }} className='bg-gray-300 dark:bg-gray-600 rounded-full p-1'>
-              <MaterialIcon name="close" size={20} color={isDarkMode ? '#aaa' : '#888'} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <Modal visible={isModalVisible} animationType="fade" transparent hardwareAccelerated={true}>
-          <View className="flex-1 justify-center bg-black/50 p-4">
-            <View className="bg-white dark:bg-gray-800 p-5 rounded-lg mx-4">
-              <Text className="text-lg font-semibold mb-3 text-black dark:text-gray-300">输入新话题名称：</Text>
-              <TextInput
-                value={newTopicName}
-                onChangeText={setNewTopicName}
-                className="border border-gray-300 p-3 rounded mb-4 text-black dark:text-gray-300"
-                placeholder="输入新话题名称"
-                style={{
-                  height:55,
-                }}
-                placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
-              />
-              <View className="flex-row justify-end space-x-3">
-                <TouchableOpacity
-                  onPress={() => setIsModalVisible(false)}
-                  className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-300"
-                >
-                  <Text>取消</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={createNewTopic}
-                  className="px-4 py-2 ml-4 rounded bg-green-500 dark:bg-green-600"
-                >
-                  <Text className="text-white dark:text-gray-100">创建</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={createNewTopic}
+                className="px-4 py-2 ml-4 rounded bg-green-500 dark:bg-green-600"
+              >
+                <Text className="text-white dark:text-gray-100">创建</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        <Modal visible={isImageViewerVisible} transparent={true} onRequestClose={() => setIsImageViewerVisible(false)}>
-          <TouchableOpacity onPress={() => setIsImageViewerVisible(false)} style={{position:'absolute', top:15, left:10, zIndex:1}} className='bg-gray-300 dark:bg-gray-600 p-2 rounded-full z-0'>
-            <MaterialIcon name={"close"} size={30} style={{
-              color: isDarkMode ? '#eee' : '#000',
-            }}/>
-          </TouchableOpacity>
-          <ImageViewer
-            imageUrls={[{ url: currentImageUri }]}
-            enableSwipeDown
-            onCancel={() => setIsImageViewerVisible(false)}
-            renderIndicator={() => null}
-            backgroundColor="rgba(0,0,0,0.8)"
-          />
-        </Modal>
-      </View>
-    </KeyboardAwareScrollView>
+      <Modal visible={isImageViewerVisible} transparent={true} onRequestClose={() => setIsImageViewerVisible(false)}>
+        <TouchableOpacity onPress={() => setIsImageViewerVisible(false)} style={{ position: 'absolute', top: 15, left: 10, zIndex: 1 }} className='bg-gray-300 dark:bg-gray-600 p-2 rounded-full z-0'>
+          <MaterialIcon name={"close"} size={30} style={{
+            color: isDarkMode ? '#eee' : '#000',
+          }} />
+        </TouchableOpacity>
+        <ImageViewer
+          imageUrls={[{ url: currentImageUri }]}
+          enableSwipeDown
+          onCancel={() => setIsImageViewerVisible(false)}
+          renderIndicator={() => null}
+          backgroundColor="rgba(0,0,0,0.8)"
+        />
+      </Modal>
+    </SafeAreaView>
   );
 };
 
