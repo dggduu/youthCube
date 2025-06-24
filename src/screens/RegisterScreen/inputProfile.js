@@ -20,6 +20,8 @@ import { WhiteSpace } from '@ant-design/react-native';
 import BackIcon from "../../components/backIcon/backIcon";
 import{ registerUser,sendVerificationCode } from "../RegisterScreen/utils/registerUtils";
 
+import { useToast } from "../../components/tip/ToastHooks";
+
 // 学年选项
 const GRADES = [
   { label: '幼儿园', value: 'child' },
@@ -99,6 +101,7 @@ export default function InputProfile({ route }) {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const DEV = __DEV__;
+  const { showToast } = useToast;
   useEffect(() => {
     if (useType === 'student') {
       setGrade('');
@@ -161,13 +164,13 @@ export default function InputProfile({ route }) {
     try {
       const result = await sendVerificationCode(email);
       if (result.success) {
-        alert('验证码已发送');
+        showToast('验证码已发送', 'success');
         setCountdown(60); // 启动倒计时
       } else {
-        alert(result.error);
+        showToast(result.error, 'error');
       }
     } catch (error) {
-      alert('网络错误，请稍后再试');
+      showToast('网络错误', 'error');
     }
   };
 

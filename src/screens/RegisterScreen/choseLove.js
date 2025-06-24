@@ -3,16 +3,16 @@ import {
   View,
   Text,
   SafeAreaView,
-  Alert,
   useColorScheme
 } from 'react-native';
 
 import PreferenceBubbleSelector from '../../components/peferenceBubbleSelector/preferenceBubbleSelector';
-
+import { useToast } from "../../components/tip/ToastHooks";
 export default function ChoseLove({ navigation }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme == "dark";
   const [selectedPreferences, setSelectedPreferences] = useState([]);
+  const { showToast } = useToast;
   const preferenceOptions = [
     '运动',
     '音乐',
@@ -30,13 +30,12 @@ export default function ChoseLove({ navigation }) {
 
   const handleSubmit = (selected) => {
     if (selected.length === 0) {
-      Alert.alert('提示', '请至少选择一个兴趣爱好');
+      showToast('请至少选择一个兴趣爱好', 'error');
       return;
     }
 
     setSelectedPreferences(selected);
-    Alert.alert('提交成功', `你选择了：${selected.join(', ')}`);
-
+    showToast(`提交成功！\n你选择了：${selected.join(', ')}`, 'success');
     navigation.navigate('MainTabNavigator');
   };
 

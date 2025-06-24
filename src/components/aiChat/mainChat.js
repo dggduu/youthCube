@@ -21,11 +21,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { AI_CHAT_BASE_URL } from "../../constant/url";
+import { BASE_INFO } from "../../constant/base";
 import { Shadow } from "react-native-shadow-2";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { pick, types, isCancel } from '@react-native-documents/picker';
+import LinearGradient from 'react-native-linear-gradient';
 
+import { useToast } from "../tip/ToastHooks";
 const CHAT_HISTORY_KEY = '@chat_history_';
 const TOPIC_HISTORY_KEY = '@topic_list';
 const MAX_TOPICS = 2;
@@ -44,7 +46,7 @@ const MainChat = () => {
 
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [currentImageUri, setCurrentImageUri] = useState('');
-
+  const { showToast } = useToast();
   const loadTopics = async () => {
     try {
       const topicList = await AsyncStorage.getItem(TOPIC_HISTORY_KEY);
@@ -72,6 +74,7 @@ const MainChat = () => {
       setSelectedTopic(parsedTopics[0]);
     } catch (e) {
       console.error('加载话题失败:', e);
+      showToast('加载话题失败，请重试。', 'error');
     }
   };
 
@@ -124,10 +127,21 @@ const MainChat = () => {
             const filePath = Platform.OS === 'ios' ? selectedFile.uri.replace('file://', '') : selectedFile.uri;
             const base64Image = await RNFS.readFile(filePath, 'base64');
             imageData = `data:${selectedFile.mimeType || 'image/jpeg'};base64,${base64Image}`;
-          } catch (error) {
-            alert('无法读取图片，请重试。');
             setSelectedFile(null);
+          } catch (error) {
+            showToast('无法读取图片，请重试。', 'error');
+            setSelectedFile(null); // 使用后删除照片
             return;
+          }
+        } if (selectedFile.type == 'docment') {
+          try {
+            const filePath = Platform.OS == 'ios' ? selectedFile.url.replace('file://', '') : selectedFile.url;
+            const base64Image = await RNFS.readFile(filePath, 'base64');
+            setSelectedFile(null); // 未开发
+          }catch {
+            console.log("[onSend]函数: 无法加载document，请重重试！");
+            setSelectedFile(null);
+            return ;
           }
         }
       }
@@ -172,7 +186,7 @@ const MainChat = () => {
   );
 
   const fetchChatGPTResponse = async (inputText, imageData, currentChatMessages) => {
-    const url = `http://10.69.57.141:1234/v1/chat/completions`;
+    const url = BASE_INFO.chat.url + '/v1/chat/completions';
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -195,7 +209,7 @@ const MainChat = () => {
     }
 
     const data = {
-      model: 'qwen2-vl-2b-instruct', 
+      model: BASE_INFO.chat.model, 
       messages: messagesForApi,
       stream: false,
     };
@@ -241,12 +255,19 @@ const MainChat = () => {
   const createNewTopic = async () => {
     const name = newTopicName.trim();
     if (!name) {
-      alert('请输入话题名称');
+      showToast('请输入话题名称', 'error');
+      return;
+    }
+
+    if (topics.length >= MAX_TOPICS) {
+      showToast(`最多只能创建 ${MAX_TOPICS} 个话题，请删除旧话题后再创建新的。`, 'error');
+      setIsModalVisible(false);
+      setNewTopicName('');
       return;
     }
 
     if (topics.includes(name)) {
-      alert('该话题已存在');
+      showToast('该话题已存在', 'error');
       return;
     }
 
@@ -275,7 +296,7 @@ const MainChat = () => {
 
   const deleteCurrentTopic = async () => {
     if (topics.length <= 1) {
-      alert('至少保留一个话题');
+      showToast('至少保留一个话题', 'error');
       return;
     }
 
@@ -398,7 +419,7 @@ const MainChat = () => {
               color: isDarkMode? '#fff':'#000',
             },
             right: { // 发送者文本样式
-              color: isDarkMode? '#fff': '#4c662b',
+              color: isDarkMode? '#fff': '#fff',
             },
           }}
         />}
@@ -432,20 +453,20 @@ const MainChat = () => {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }}>
-      <View className="flex-1 bg-white dark:bg-gray-800">
+    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }} className='h-full'>
+      <View className="flex-1 h-full" style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
         <Shadow distance={10}>
-          <View className="p-2 bg-white flex-row items-center justify-between dark:bg-gray-700/35 shadow rounded-lg w-full ">
+          <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
             <View className="flex-1 mr-2 ">
               <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
-              <View className="border border-gray-300 rounded bg-white dark:bg-gray-700l">
+              <View className="border border-gray-300 rounded l" style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
                 <Picker
                   selectedValue={selectedTopic}
                   onValueChange={(value) => setSelectedTopic(value)}
                   style={{
                     height: 55,
                     width: '100%',
-                    color: 'black',
+                    color: isDarkMode ? '#eee' : '#000',
                   }}
                   dropdownIconColor={isDarkMode ? '#eee' : '#000'}
                 >
@@ -471,48 +492,55 @@ const MainChat = () => {
             </TouchableOpacity>
           </View>
         </Shadow>
+          <LinearGradient
+            colors={isDarkMode ? ['#12140e', '#12140e'] : ['#f0f9eb', '#c9e5b5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={{ flex: 1 }}
+          >
+          <GiftedChat
+            messages={messages}
+            onSend={onSend}
+            user={{ _id: 1 }}
+            placeholder="输入消息..."
+            renderUsernameOnMessage
+            isKeyboardInternallyDisabled={isChatLoading}
+            renderBubble={renderMessage}
+            renderMessageImage={renderMessageImage}
+            renderActions={renderActions}
+            renderSend={renderSend}
+            renderInputToolbar={props => (
+              <InputToolbar
+                {...props}
+                containerStyle={{
+                  backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+                  paddingTop: 4,
+                  paddingBottom: 2,
+                }}
+              >
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                  {props.children}
+                </View>
+              </InputToolbar>
+            )}
+            textInputStyle={{
+              color: isDarkMode ? '#fff' : '#000',
+              fontSize: 16,
+              padding: 10,
+              maxHeight: 100,
+              minHeight: 40,
+              flex: 1,
+              backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+              borderRadius: 20,
+              paddingHorizontal: 15,
+            }}
+            text={inputText}
+            onInputTextChanged={setInputText}
+            placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
+          />
+        </LinearGradient>
 
-        <GiftedChat
-          messages={messages}
-          onSend={onSend}
-          user={{ _id: 1 }}
-          placeholder="输入消息..."
-          renderUsernameOnMessage
-          isKeyboardInternallyDisabled={isChatLoading}
-          renderBubble={renderMessage}
-          renderMessageImage={renderMessageImage}
-          renderActions={renderActions}
-          renderSend={renderSend}
-          renderInputToolbar={props => (
-            <InputToolbar
-              {...props}
-              containerStyle={{
-                backgroundColor: isDarkMode ? '#1e1e1e' : '#f9f9f9',
-                paddingTop: 4,
-                marginTop: 10,
-                paddingBottom: 2,
-              }}
-            >
-              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                {props.children}
-              </View>
-            </InputToolbar>
-          )}
-          textInputStyle={{
-            color: isDarkMode ? '#fff' : '#000',
-            fontSize: 16,
-            padding: 10,
-            maxHeight: 100,
-            minHeight: 40,
-            flex: 1,
-            backgroundColor: isDarkMode ? '#2d2d2d' : '#fff',
-            borderRadius: 20,
-            paddingHorizontal: 15,
-          }}
-          text={inputText}
-          onInputTextChanged={setInputText}
-          placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
-        />
+        
 
         {selectedFile && (
           <View style={{
@@ -536,8 +564,8 @@ const MainChat = () => {
                 />
               </TouchableOpacity>
             ) : (
-              <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#f0f0f0', borderRadius: 8 }}>
-                <Text numberOfLines={1} style={{ width: 100, height:100, color: isDarkMode ? '#eee' : '#000' }}>{selectedFile.name || '文件'}</Text>
+              <View style={{ padding: 10, backgroundColor: isDarkMode ? '#333' : '#ddd', borderRadius: 16, width: 100, height: 100, overflow: 'hidden' }}>
+                <Text style={{color: isDarkMode ? '#eee' : '#000' }} >{selectedFile.name || '文件'}</Text>
               </View>
             )}
             <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginLeft: 5, position: 'absolute', top: 5, left: 85 }} className='bg-gray-300 dark:bg-gray-600 rounded-full p-1'>
@@ -555,6 +583,9 @@ const MainChat = () => {
                 onChangeText={setNewTopicName}
                 className="border border-gray-300 p-3 rounded mb-4 text-black dark:text-gray-300"
                 placeholder="输入新话题名称"
+                style={{
+                  height:55,
+                }}
                 placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
               />
               <View className="flex-row justify-end space-x-3">

@@ -3,13 +3,12 @@ import { View, Text, Image, TouchableOpacity, useColorScheme } from 'react-nativ
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
-// 引入 FlatGrid
 import { FlatGrid } from 'react-native-super-grid';
 
 export default function ProfileScreen() {
   const isDark = useColorScheme() === 'dark';
 
-  // 🔹 我的学习 - 8 个子项，4 列 × 2 行
+  //我的学习 - 8 个子项，4 列 × 2 行
   const learningItems = [
     { icon: 'access-time', label: '练习记录' },
     { icon: 'group', label: '我的班级' },
@@ -21,7 +20,7 @@ export default function ProfileScreen() {
     { icon: 'publish', label: '我的投稿' },
   ];
 
-  // 🔹 我的运动 - 4 个子项，2 列 × 2 行
+  //我的运动 - 4 个子项，2 列 × 2 行
   const sportsItems = [
     { icon: 'directions-run', label: '开始运动', description: '开始今天的运动' },
     { icon: 'fitness-center', label: '运动记录', description: '查看运动记录' },
@@ -29,7 +28,7 @@ export default function ProfileScreen() {
     { icon: 'emoji-events', label: '运动竞赛', description: '和好友一起PK' },
   ];
 
-  // 🔹 其他选项
+  //其他选项
   const otherItems = [
     { icon: 'shopping-cart', label: '我的订单' },
     { icon: 'favorite', label: '推荐给好友' },

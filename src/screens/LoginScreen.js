@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,13 +15,15 @@ import {
 import InputBox from '../components/inputBox/index';
 import { Button, WhiteSpace } from '@ant-design/react-native';
 import { useDispatch } from 'react-redux';
-
+import { BASE_INFO } from "../constant/base";
+import { useToast } from "../components/tip/ToastHooks";
 const loginAction = (email) => ({
   type: 'LOGIN',
   payload: email,
 });
 
 const LoginPage = ({ navigation }) => {
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
@@ -30,18 +32,19 @@ const LoginPage = ({ navigation }) => {
 
   const handleLogin = () => {
     if (!email || !password) {
-      Alert.alert('提示', '请输入邮箱和密码');
+      showToast('发送失败，请重试。', 'error');
       return;
     }
 
     dispatch(loginAction(email));
-    Alert.alert('登录成功', `邮箱: ${email}`, [
-      {
-        text: '确定',
-        onPress: () => navigation.navigate('MainTabNavigator'),
-      },
-    ]);
+    showToast(`登录成功！\n邮箱: ${email}`, 'success');
   };
+  useEffect(() => {
+      if (BASE_INFO.magic.isSkipLoginPage) {
+        dispatch(loginAction("Skipped user"));
+        showToast(`跳过登录成功!`, 'success');
+      }
+    }, []);
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>

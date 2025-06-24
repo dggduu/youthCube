@@ -5,13 +5,17 @@ import {Provider as AntdProvider} from '@ant-design/react-native';
 import { name as appName } from './app.json';
 import store from "./src/store/index";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ToastProvider } from "./src/components/tip/ToastHooks";
 
 const Root = () => (
   <SafeAreaProvider>
     <ReduxProvider store={store}>
-      <AntdProvider>
-        <App />
-      </AntdProvider>
+      <ToastProvider>
+        <AntdProvider>
+          <App />
+        </AntdProvider>
+      </ToastProvider>
+
     </ReduxProvider>
   </SafeAreaProvider>
 );
