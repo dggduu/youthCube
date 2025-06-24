@@ -454,12 +454,12 @@ const MainChat = () => {
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }} className='h-full'>
-      <View className="flex-1 h-full" style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
+      <View className="flex-1 h-full" style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
         <Shadow distance={10}>
-          <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
+          <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
             <View className="flex-1 mr-2 ">
               <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
-              <View className="border border-gray-300 rounded l" style={{backgroundColor: isDarkMode ? "#12140e" : "#f9faef",}}>
+              <View className="border border-gray-300 rounded l" style={{backgroundColor: isDarkMode ? "#2f312a" : "#f9faef",}}>
                 <Picker
                   selectedValue={selectedTopic}
                   onValueChange={(value) => setSelectedTopic(value)}
@@ -480,21 +480,21 @@ const MainChat = () => {
 
             <TouchableOpacity
               onPress={() => setIsModalVisible(true)}
-              className="bg-green-500 dark:bg-green-600 p-3 mt-6 rounded-full self-center ml-1"
+              className="bg-[#667157] dark:bg-[#354e16] p-3 mt-6 rounded-full self-center ml-1"
             >
-              <MaterialIcon name={"add"} size={15} color={isDarkMode ? '#eee' : '#000'} />
+              <MaterialIcon name={"add"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={deleteCurrentTopic}
-              className="bg-red-500 dark:bg-red-700 p-3 mt-6 rounded-full self-center ml-3"
+              className="bg-[#8f4c38] dark:bg-[#7d3030] p-3 mt-6 rounded-full self-center ml-3"
             >
-              <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#000'} />
+              <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
             </TouchableOpacity>
           </View>
         </Shadow>
           <LinearGradient
-            colors={isDarkMode ? ['#12140e', '#12140e'] : ['#f0f9eb', '#c9e5b5']}
+            colors={isDarkMode ? ['#353f29', '#002b29'] : ['#f0f9eb', '#c9e5b5']}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={{ flex: 1 }}

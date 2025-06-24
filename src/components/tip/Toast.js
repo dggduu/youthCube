@@ -14,13 +14,13 @@ import { useColorScheme } from 'nativewind';
 const TOAST_TYPES = {
   success: {
     icon: 'check-circle',
-    colorLight: 'bg-green-500',
-    colorDark: 'bg-green-700',
+    colorLight: 'bg-[#4c662b]',
+    colorDark: 'bg-[#4c662b]',
   },
   error: {
     icon: 'error',
-    colorLight: 'bg-red-500',
-    colorDark: 'bg-red-700',
+    colorLight: 'bg-[#98000a]',
+    colorDark: 'bg-[#98000a]',
   },
   warning: {
     icon: 'warning',

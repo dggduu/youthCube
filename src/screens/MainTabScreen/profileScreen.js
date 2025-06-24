@@ -1,10 +1,14 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image,ScrollView } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FlatGrid } from 'react-native-super-grid';
+import { useColorScheme } from 'nativewind';
 
-export default function ProfileScreen({ isDark = false, navigation }) {
+export default function ProfileScreen({ navigation }) {
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark'; 
+
   const learningItems = [
     { icon: 'access-time', label: '练习记录', screen: 'LearningNavigtor', params: { screen: 'Pratice' } },
     { icon: 'group', label: '我的班级', screen: 'LearningNavigtor', params: { screen: 'ClassInfo' } },
@@ -32,163 +36,79 @@ export default function ProfileScreen({ isDark = false, navigation }) {
 
   return (
     <SafeAreaProvider>
-      <View style={[styles.container, isDark && styles.darkContainer]}>
-        {/* 头部信息 */}
-        <View style={styles.headerRow}>
-          <View style={styles.userRow}>
-            <Image source={{ uri: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png' }} style={styles.avatar} />
-            <View style={styles.userInfo}>
-              <Text style={styles.username}>写死了</Text>
-              <Text style={styles.userSubtext}>小学一年级</Text>
+      <ScrollView className="flex-1 bg-white dark:bg-black p-5">
+        <View >
+          {/* 头部信息 */}
+          <View className="flex-row justify-between items-center mb-6 ml-2 mt-5">
+            <View className="flex-row items-center">
+              <Image source={{ uri: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png' }} className="w-14 h-14 rounded-full" />
+              <View className="ml-5">
+                <Text className="text-lg font-bold text-neutral-900 dark:text-gray-300">测试用户</Text>
+                <Text className="text-sm text-neutral-500 dark:text-gray-300">小学一年级</Text>
+              </View>
+            </View>
+            <View className="flex-row">
+              <TouchableOpacity className="mr-4" onPress={() => navigation.navigate('TopBar', { screen: 'Message' })}>
+                <MaterialIcon name="people" size={24} color={isDark ? '#A9A9A9' : '#888'} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('TopBar', { screen: 'Setting' })}>
+                <MaterialIcon name="settings" size={24} color={isDark ? '#A9A9A9' : '#888'} />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity style={{ marginRight: 16 }} onPress={() => navigation.navigate('TopBar', { screen: 'Message' })}>
-              <MaterialIcon name="people" size={24} color={isDark ? '#A9A9A9' : '#888'} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('TopBar', { screen: 'Setting' })}>
-              <MaterialIcon name="settings" size={24} color={isDark ? '#A9A9A9' : '#888'} />
-            </TouchableOpacity>
+
+          {/* 我的学习 */}
+          <View className="bg-[#c5ecce] dark:bg-[#2c4e38] p-4 rounded-3xl mb-4">
+            <Text className="text-lg font-bold mb-3 ml-2 text-neutral-800 dark:text-neutral-300">我的学习</Text>
+            <FlatGrid
+              itemDimension={80}
+              data={learningItems}
+              spacing={10}
+              renderItem={({ item }) => (
+                <TouchableOpacity className="items-center" onPress={() => navigation.navigate(item.screen, item.params)}>
+                  <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#666'} />
+                  <Text className="text-xs text-center text-neutral-800 dark:text-neutral-300 mt-1">{item.label}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+
+          {/* 我的运动 */}
+          <View className="bg-blue-gray-100 dark:bg-[#4e472a] bg-[#eee2bc] p-4 rounded-3xl mb-4">
+            <Text className="text-lg font-bold mb-3 ml-2 text-neutral-700 dark:text-neutral-300">我的运动</Text>
+            <FlatGrid
+              itemDimension={130}
+              data={sportsItems}
+              spacing={10}
+              fixedItemsPerRow={2}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  className="flex-row items-center p-3"
+                  onPress={() => navigation.navigate(item.screen, item.params)}
+                >
+                  <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#888'} />
+                  <View>
+                    <Text className="text-base font-bold ml-2 text-neutral-800 dark:text-neutral-300">{item.label}</Text>
+                    <Text className="text-sm ml-2 text-neutral-800 dark:text-neutral-300">{item.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+
+          {/* 其他选项 */}
+          <View className="bg-blue-gray-100 dark:bg-gray-800 bg-gray-100 p-4 rounded-3xl">
+            <View className="gap-3">
+              {otherItems.map((item, idx) => (
+                <TouchableOpacity key={idx} className="flex-row items-center pt-4 pb-4 ml-2" onPress={() => navigation.navigate(item.screen, item.params)}>
+                  <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#888'} />
+                  <Text className="text-base ml-5 text-neutral-800 dark:text-neutral-300">{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
-
-        {/* 我的学习 */}
-        <View style={{ backgroundColor: isDark ? '#5D407C80' : '#EDE7F6', padding: 16, borderRadius: 12, marginBottom: 16 }}>
-          <Text style={[styles.sectionTitle, { color: isDark ? '#ccc' : '#333' }]}>我的学习</Text>
-          <FlatGrid
-            itemDimension={80}
-            data={learningItems}
-            spacing={10}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate(item.screen, item.params)}>
-                <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#888'} />
-                <Text style={[styles.iconText, { color: isDark ? '#ccc' : '#666' }]}>{item.label}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        {/* 我的运动 */}
-        <View style={{ backgroundColor: isDark ? '#2E2E4B80' : '#ECEFF1', padding: 16, borderRadius: 12, marginBottom: 16 }}>
-          <Text style={[styles.sectionTitle, { color: isDark ? '#ccc' : '#333' }]}>我的运动</Text>
-          <FlatGrid
-            itemDimension={130}
-            data={sportsItems}
-            spacing={10}
-            fixedItemsPerRow={2}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.sportsButton, { backgroundColor: isDark ? '#2E2E4B' : '#f0f0f0' }]}
-                onPress={() => navigation.navigate(item.screen, item.params)}
-              >
-                <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#888'} />
-                <View>
-                  <Text style={[styles.sportsText, { color: isDark ? '#ccc' : '#333' }]}>{item.label}</Text>
-                  <Text style={[styles.sportsDesc, { color: isDark ? '#aaa' : '#666' }]}>{item.description}</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        {/* 其他选项 */}
-        <View style={{ backgroundColor: isDark ? '#2E2E4B80' : '#ECEFF1', padding: 16, borderRadius: 12 }}>
-          <View style={{ gap: 12 }}>
-            {otherItems.map((item, idx) => (
-              <TouchableOpacity key={idx} style={styles.otherItem} onPress={() => navigation.navigate(item.screen, item.params)}>
-                <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#888'} />
-                <Text style={[styles.otherLabel, { color: isDark ? '#ccc' : '#333' }]}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
+      </ScrollView>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  darkContainer: {
-    backgroundColor: 'black',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-    marginLeft: 8,
-    marginTop: 20,
-  },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-  },
-  userInfo: {
-    marginLeft: 20,
-  },
-  username: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  userSubtext: {
-    fontSize: 14,
-    color: '#999',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    marginLeft: 8,
-    color: '#333',
-  },
-  gridItem: {
-    alignItems: 'center',
-  },
-  iconText: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 4,
-  },
-  sportsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
-  },
-  sportsText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#333',
-  },
-  sportsDesc: {
-    fontSize: 12,
-    marginLeft: 10,
-    color: '#666',
-  },
-  otherItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 16,
-    paddingBottom: 16,
-    marginLeft: 8,
-  },
-  otherLabel: {
-    fontSize: 16,
-    marginLeft: 20,
-    color: '#333',
-  },
-});
