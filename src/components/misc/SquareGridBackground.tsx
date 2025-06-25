@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Svg, { Rect, Pattern } from 'react-native-svg';
 
 type SquareGridBackgroundProps = {
-  pattern?: React.FC<any>; 
+  pattern?: React.FC<any>;
   color?: string;
   size?: number;
 };
@@ -13,11 +13,17 @@ const SquareGridBackground: React.FC<SquareGridBackgroundProps> = ({
   color = '#000',
   size = 70,
 }) => {
+  const { width, height } = useWindowDimensions(); // 自动适配屏幕变化
+
   if (!PatternComponent) return null;
 
   return (
     <View style={styles.background}>
-      <Svg height="100%" width="100%" style={StyleSheet.absoluteFillObject}>
+      <Svg
+        height={height} 
+        width={width}
+        style={StyleSheet.absoluteFillObject}
+      >
         <Pattern
           id="grid"
           width={size}

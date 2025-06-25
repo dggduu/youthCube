@@ -22,6 +22,8 @@ import{ registerUser,sendVerificationCode } from "../RegisterScreen/utils/regist
 
 import { useToast } from "../../components/tip/ToastHooks";
 
+import {BASE_INFO} from "../../constant/base"; // 引入全局常量
+
 // 学年选项
 const GRADES = [
   { label: '幼儿园', value: 'child' },
@@ -100,7 +102,7 @@ export default function InputProfile({ route }) {
   const [formError, setFormError] = useState('');
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
-  const DEV = __DEV__;
+  const DEV = BASE_INFO.magic.isSkipRegisterVerify;
   const { showToast } = useToast;
   useEffect(() => {
     if (useType === 'student') {
@@ -377,11 +379,11 @@ export default function InputProfile({ route }) {
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg border-gray-300">
+            <View className="flex-row items-center border rounded-lg border-gray-600">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}
-                style={{height:50}}
+                style={{height:55}}
                 onChangeText={setCode}
                 className={`flex-1 pl-5 ${
                   isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-black'
@@ -390,7 +392,7 @@ export default function InputProfile({ route }) {
               <TouchableOpacity
                 onPress={handleSendCode}
                 disabled={countdown > 0}
-                style={{height:50}}
+                style={{height:55}}
                 className={`px-3 justify-center rounded-lg ${
                   countdown > 0 ? 'bg-gray-300 dark:bg-gray-700' : 'bg-blue-500'
                 }`}

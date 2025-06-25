@@ -1,5 +1,5 @@
 import React, { useContext, useState,useEffect } from 'react';
-import { View,useColorScheme } from 'react-native';
+import { View, useColorScheme, Keyboard } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -14,6 +14,7 @@ const Tab = createBottomTabNavigator();
 const MainTabNavigator = () => {
   const [isDark, setIsDark] = useState(false);
   const colorScheme = useColorScheme();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false); // 修复 gifted-chat 内部的 KeyBoardAvoid 造成的显示bug
 
   useEffect(() => {
     if (colorScheme === 'dark') {
@@ -22,6 +23,26 @@ const MainTabNavigator = () => {
       setIsDark(false);
     }
   }, [colorScheme]);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setIsKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setIsKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   return (
     <Tab.Navigator
@@ -49,7 +70,7 @@ const MainTabNavigator = () => {
           borderTopColor: isDark ? '#374151' : '#e5e7eb',
           elevation: 0,
           shadowOpacity: 0,
-          height: 60,
+          height: isKeyboardVisible ? 0 : 60,
         },
       })}
     >

@@ -4,6 +4,7 @@ export const BASE_INFO={
         model: 'qwen2-vl-2b-instruct',
     },
     magic:{
-        isSkipLoginPage: false,
+        isSkipLoginPage: true,
+        isSkipRegisterVerify: true,
     }
 };

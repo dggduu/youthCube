@@ -12,7 +12,7 @@ export default function ChoseLove({ navigation }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme == "dark";
   const [selectedPreferences, setSelectedPreferences] = useState([]);
-  const { showToast } = useToast;
+  const { showToast } = useToast();
   const preferenceOptions = [
     '运动',
     '音乐',
