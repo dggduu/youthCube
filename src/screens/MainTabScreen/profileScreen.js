@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, FlatList } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FlatGrid } from 'react-native-super-grid';
 import { useColorScheme } from 'nativewind';
+import { useSelector } from 'react-redux';
+
+import CrownIcon from "../../assets/registerScreen/crown.svg";
+import { GRADES } from "../../constant/index";
 
 export default function ProfileScreen({ navigation }) {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
-
+  const { userData, isAuthReady, isAuthenticated } = useSelector((state) => state.auth);
+  const GRADES_MAP = GRADES.reduce((acc, current) => {
+      acc[current.value] = current.label;
+      return acc;
+  }, {});
+  function getLabelByValueFromMap(value) {
+    return GRADES_MAP[value];
+}
   const learningItems = [
     { icon: 'access-time', label: '练习记录', screen: 'LearningNavigtor', params: { screen: 'Pratice' } },
     { icon: 'group', label: '我的班级', screen: 'LearningNavigtor', params: { screen: 'ClassInfo' } },
@@ -51,8 +62,11 @@ export default function ProfileScreen({ navigation }) {
                 <View className="flex-row items-center">
                   <Image source={{ uri: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png' }} className="w-14 h-14 rounded-full" />
                   <View className="ml-5">
-                    <Text className="text-lg font-bold text-neutral-900 dark:text-gray-300">测试用户</Text>
-                    <Text className="text-sm text-neutral-500 dark:text-gray-300">小学一年级</Text>
+                   <View style={{flexDirection: 'row'}}>
+                    <Text className="text-lg font-semibold text-dark dark:text-gray-200 mr-2">{userData.name}</Text>
+                    <CrownIcon width={18} height={18} fill={userData.is_member ? isDark ? "#B89230": "#DA954B" : isDark ? "#ddd" : "#000"}/>
+                  </View>
+                    <Text className="text-sm text-neutral-500 dark:text-gray-300">{getLabelByValueFromMap(userData.learn_stage)}</Text>
                   </View>
                 </View>
                 <View className="flex-row">

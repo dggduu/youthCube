@@ -14,37 +14,46 @@ import {
 } from 'react-native';
 import InputBox from '../components/inputBox/index';
 import { Button, WhiteSpace } from '@ant-design/react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearAuthError } from "../store/auth/authSlice";
 import { BASE_INFO } from "../constant/base";
 import { useToast } from "../components/tip/ToastHooks";
-const loginAction = (email) => ({
-  type: 'LOGIN',
-  payload: email,
-});
-
+import { 
+  getAccessTokenByLogin,
+  setItemToAsyncStorage,
+  getItemFromAsyncStorage
+ } from "../utils/index";
 const LoginPage = ({ navigation }) => {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  
+  const dispatch = useDispatch();
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
-  const handleLogin = () => {
+  useEffect(() => {
+      if (!loading && error) {
+          showToast("登录失败","error");
+          dispatch(clearAuthError());
+      }
+  }, [loading, error, dispatch]);
+
+ useEffect(() => {
+        if (isAuthenticated || BASE_INFO.magic.isSkipLoginPage) {
+            setEmail('');
+            setPassword('');
+        }
+    }, [isAuthenticated, navigation]);
+
+  const handleLogin = async () => {
     if (!email || !password) {
       showToast('发送失败，请重试。', 'error');
       return;
     }
-
-    dispatch(loginAction(email));
-    showToast(`登录成功！\n邮箱: ${email}`, 'success');
+    dispatch(loginUser({ email, pswd: password }));
   };
-  useEffect(() => {
-      if (BASE_INFO.magic.isSkipLoginPage) {
-        dispatch(loginAction("Skipped user"));
-        showToast(`跳过登录成功!`, 'success');
-      }
-    }, []);
 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>

@@ -34,7 +34,7 @@ const TOAST_TYPES = {
   },
 };
 
-const DURATION = 800; // 显示时长
+const DURATION = 1000; // 显示时长
 const ANIMATION_DURATION = 200; // 淡入淡出动画时长
 
 const Toast = ({ message, type = 'info', onHide }) => {

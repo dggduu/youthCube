@@ -15,35 +15,12 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import InputBox from '../../components/inputBox/inputBox';
-import { Picker } from '@react-native-picker/picker';
-import { WhiteSpace } from '@ant-design/react-native';
+import { Picker } from '@react-native-picker/picker';;
 import BackIcon from "../../components/backIcon/backIcon";
 import{ registerUser,sendVerificationCode } from "../RegisterScreen/utils/registerUtils";
-
+import { GRADES } from "../../constant/index";
 import { useToast } from "../../components/tip/ToastHooks";
-
 import {BASE_INFO} from "../../constant/base"; // 引入全局常量
-
-// 学年选项
-const GRADES = [
-  { label: '幼儿园', value: 'child' },
-  { label: '小学一年级', value: 'primary_1' },
-  { label: '小学二年级', value: 'primary_2' },
-  { label: '小学三年级', value: 'primary_3' },
-  { label: '小学四年级', value: 'primary_4' },
-  { label: '小学五年级', value: 'primary_5' },
-  { label: '小学六年级', value: 'primary_6' },
-  { label: '初中一年级', value: 'junior_1' },
-  { label: '初中二年级', value: 'junior_2' },
-  { label: '初中三年级', value: 'junior_3' },
-  { label: '高中一年级', value: 'senior_1' },
-  { label: '高中二年级', value: 'senior_2' },
-  { label: '高中三年级', value: 'senior_3' },
-  { label: '本科', value: 'undergraduate' },
-  { label: '硕士', value: 'master' },
-  { label: '博士', value: 'phd' },
-  { label: '成年人', value: 'mature' },
-];
 
 // 密码验证逻辑
 const isValidPassword = (password) => {
@@ -145,21 +122,22 @@ export default function InputProfile({ route }) {
 
   // 发送验证码
   const handleSendCode = async () => {
-    console.log("DEV:",DEV);
     if (countdown > 0) return;
 
     let hasError = false;
 
     if (!email.trim()) {
       setEmailError('请输入邮箱');
+      showToast('网络错误', 'warnning');
       hasError = true;
     } else if (!isValidEmail(email)) {
       setEmailError('邮箱格式不正确');
+      showToast('网络错误', 'error');
       hasError = true;
     } else {
       setEmailError('');
     }
-
+    showToast('网络错误', 'successful');
     if (hasError) return;
 
     console.log('发送验证码至:', email);

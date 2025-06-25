@@ -1,26 +1,53 @@
-import React, {useState, useEffect} from 'react';
+// App.js
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { useSelector, useDispatch, Provider } from 'react-redux';
+import store from './store/auth/authStore';
+import { loadAuthData } from './store/auth/authSlice';
+
 import AuthStack from './navigation/AuthStack';
 import MainTabNavigator from './navigation/MainTabNavigator';
-import { useSelector } from 'react-redux';
-import { DEV } from '@env';
-import SplashScreen from "./screens/SplashScreen";
+import { ActivityIndicator, View, Text } from 'react-native';
+import { useToast } from "./components/tip/ToastHooks";
+import '../global.css' 
+import { BASE_INFO } from "./constant/base";
 
+const RootAppContent = () => {
+    const dispatch = useDispatch();
+    // 从 Redux中获取认证相关的状态
+    const { isAuthenticated, isAuthReady } = useSelector((state) => state.auth);
+    const {showToast} = useToast();
+    useEffect(() => {
+        dispatch(loadAuthData());
+    }, [dispatch]);
+    
+    useEffect(() => {
+      if(isAuthenticated) {
+        showToast("登录成功!","success");
+      }
+    }, [isAuthenticated, isAuthReady]);
 
-import '../global.css'
+    if (!isAuthReady) {
+        return (
+            <View className='flex-1 justify-center items-center bg-white dark:bg-gray-600'>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text className='text-black dark:text-gray-300 mt-5'>正在加载数据中...</Text>
+            </View>
+        );
+    }
 
-const App = () => {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const [isSplashFinished, setIsSplashFinished] = useState(false);
-
-  if (!isSplashFinished) {
-    return <SplashScreen onFinish={() => setIsSplashFinished(true)} />;
-  }
-  return (
-    <NavigationContainer>
-      {isAuthenticated ? <MainTabNavigator /> : <AuthStack />}
-    </NavigationContainer>
-  );
+    return (
+        <NavigationContainer>
+            {isAuthenticated ? <MainTabNavigator /> : <AuthStack />}
+        </NavigationContainer>
+    );
 };
 
+const App = () => {
+    return (
+        <Provider store={store}>
+            <RootAppContent />
+        </Provider>
+    );
+};
 export default App;
