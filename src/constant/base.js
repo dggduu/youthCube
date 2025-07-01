@@ -13,7 +13,7 @@ export const BASE_INFO={
         ava_url: null,
     },
     magic:{
-        isSkipLoginPage: false,
-        isSkipRegisterVerify: false,
+        isSkipLoginPage: true,
+        isSkipRegisterVerify: true,
     }
 };

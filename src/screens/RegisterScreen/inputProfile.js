@@ -82,11 +82,7 @@ export default function InputProfile({ route }) {
   const DEV = BASE_INFO.magic.isSkipRegisterVerify;
   const { showToast } = useToast;
   useEffect(() => {
-    if (useType === 'student') {
-      setGrade('');
-    } else {
-      setGrade('mature');
-    }
+    setGrade('');
 
     // 再次进入界面时重置变量
     setName('');
@@ -159,11 +155,7 @@ export default function InputProfile({ route }) {
     //开发模式下直接跳过验证
     if (DEV === true) {
       console.log("DEV skip:",DEV);
-      if (useType === 'student') {
-        navigation.navigate('choseLove');
-      } else {
-        navigation.navigate('boundStu');
-      }
+      navigation.navigate('choseLove');
       return ;
     }
 
@@ -207,11 +199,7 @@ export default function InputProfile({ route }) {
 
     const result = await registerUser(formData);
     if (result.success) {
-      if (useType === 'student') {
-        navigation.navigate('choseLove');
-      } else {
-        navigation.navigate('boundStu');
-      }
+      navigation.navigate('choseLove');
     } else {
       setFormError(result.error || '注册失败，请重试');
     }
@@ -303,40 +291,38 @@ export default function InputProfile({ route }) {
             />
           )}
 
-          {useType == 'student' && (
-            <View className="mb-4" key={useType}>
-              <Text
-                className={`mb-3 ml-1 font-normal ${
-                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}
+          <View className="mb-4" key={useType}>
+            <Text
+              className={`mb-3 ml-1 font-normal ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}
+            >
+              学年
+            </Text>
+            <View
+              className={`p-1 rounded-lg border ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
+              }`}
+            >
+              <Picker
+                key={useType}
+                selectedValue={grade}
+                onValueChange={(value) => setGrade(value)}
+                style={{
+                  color: isDarkMode ? 'white' : 'gray',
+                  backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                  height:60,
+                }}
+                dropdownIconColor={isDarkMode ? 'white' : 'black'}
+                mode="dropdown"
               >
-                学年
-              </Text>
-              <View
-                className={`p-1 rounded-lg border ${
-                  isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
-                }`}
-              >
-                <Picker
-                  key={useType}
-                  selectedValue={grade}
-                  onValueChange={(value) => setGrade(value)}
-                  style={{
-                    color: isDarkMode ? 'white' : 'gray',
-                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                    height:60,
-                  }}
-                  dropdownIconColor={isDarkMode ? 'white' : 'black'}
-                  mode="dropdown"
-                >
-                  <Picker.Item label="请选择学年" value="" enabled={false} />
-                  {GRADES.map((item) => (
-                    <Picker.Item key={item.value} label={item.label} value={item.value} />
-                  ))}
-                </Picker>
-              </View>
+                <Picker.Item label="请选择学年" value="" enabled={false} />
+                {GRADES.map((item) => (
+                  <Picker.Item key={item.value} label={item.label} value={item.value} />
+                ))}
+              </Picker>
             </View>
-          )}
+          </View>
 
           {/* 邮箱 */}
           <InputBox

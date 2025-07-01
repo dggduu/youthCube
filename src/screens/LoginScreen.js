@@ -108,7 +108,7 @@ const LoginPage = ({ navigation }) => {
 
           <WhiteSpace size="lg" />
           <TouchableOpacity
-            onPress={() => navigation.navigate('RegisterStart')}
+            onPress={() => navigation.navigate('registerFlow')}
             className="items-center mt-6"
           >
             <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
