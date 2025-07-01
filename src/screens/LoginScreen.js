@@ -18,11 +18,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearAuthError } from "../store/auth/authSlice";
 import { BASE_INFO } from "../constant/base";
 import { useToast } from "../components/tip/ToastHooks";
-import { 
-  getAccessTokenByLogin,
-  setItemToAsyncStorage,
-  getItemFromAsyncStorage
- } from "../utils/index";
 const LoginPage = ({ navigation }) => {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');

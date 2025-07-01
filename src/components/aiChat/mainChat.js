@@ -8,11 +8,10 @@ import {
   Image,
   useColorScheme,
   Linking,
-  Button,
-  Pressable,
   Platform,
+  Pressable,
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import RNFS from 'react-native-fs';
 
@@ -51,6 +50,10 @@ const MainChat = () => {
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [currentImageUri, setCurrentImageUri] = useState('');
   const { showToast } = useToast();
+
+  // State for image source selection modal
+  const [isImagePickerModalVisible, setIsImagePickerModalVisible] = useState(false);
+
   const loadTopics = async () => {
     try {
       const topicList = await AsyncStorage.getItem(TOPIC_HISTORY_KEY);
@@ -343,7 +346,8 @@ const MainChat = () => {
     }
   };
 
-  const handleImagePick = async () => {
+  const selectImageFromGallery = async () => {
+    setIsImagePickerModalVisible(false);
     setSelectedFile(null);
     const options = {
       mediaType: 'photo',
@@ -362,6 +366,29 @@ const MainChat = () => {
       }
     });
   };
+
+  const takePhoto = async () => {
+    setIsImagePickerModalVisible(false);
+    setSelectedFile(null);
+    const options = {
+      mediaType: 'photo',
+      quality: 0.9,
+      includeBase64: false,
+      saveToPhotos: true,
+    };
+    launchCamera(options, (response) => {
+      if (response.didCancel) {
+        console.log('用户取消了拍照');
+      } else if (response.errorCode) {
+        console.log('Camera Error: ', response.errorCode);
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        console.log("照片已拍摄:", asset);
+        setSelectedFile({ type: 'image', uri: asset.uri, mimeType: asset.type });
+      }
+    });
+  };
+
 
   const renderMessageImage = (props) => {
     return (
@@ -445,7 +472,7 @@ const MainChat = () => {
   const renderActions = () => {
     return (
       <View className="flex-row items-center mr-2 justify-center self-center ml-3">
-        <TouchableOpacity onPress={handleImagePick} className='mr-2' disabled={!!selectedFile}>
+        <TouchableOpacity onPress={() => setIsImagePickerModalVisible(true)} className='mr-2' disabled={!!selectedFile}>
           <MaterialIcon name={"photo"} size={25} color={selectedFile ? '#aaa' : (isDarkMode ? '#eee' : '#000')} />
         </TouchableOpacity>
 
@@ -469,11 +496,44 @@ const MainChat = () => {
     );
   };
 
+  const renderImageSourceSelectionModal = () => (
+    <Modal
+      visible={isImagePickerModalVisible}
+      animationType="fade"
+      transparent
+      onRequestClose={() => setIsImagePickerModalVisible(false)}
+    >
+      <View className="flex-1 justify-center bg-black/50 p-4">
+        <View className="bg-white dark:bg-gray-800 p-5 rounded-lg mx-4">
+          <Text className="text-lg font-semibold mb-5 text-black dark:text-gray-300 text-center">选择图片来源</Text>
+          <Pressable
+            onPress={selectImageFromGallery}
+            className="px-4 py-3 rounded bg-blue-500 dark:bg-blue-600 mb-3 items-center"
+          >
+            <Text className="text-white text-base">从相册选择</Text>
+          </Pressable>
+          <Pressable
+            onPress={takePhoto}
+            className="px-4 py-3 rounded bg-green-500 dark:bg-green-600 mb-4 items-center"
+          >
+            <Text className="text-white text-base">拍照</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setIsImagePickerModalVisible(false)}
+            className="px-4 py-3 rounded bg-gray-200 dark:bg-gray-700 items-center"
+          >
+            <Text className="text-black dark:text-gray-300 text-base">取消</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? "#2f312a" : "#f9faef" }}>
       <Shadow distance={10}>
-        <View className="p-2 flex-row items-center justify-between  shadow rounded-lg w-full " style={{ backgroundColor: isDarkMode ? "#2f312a" : "#f9faef", }}>
+        <View className="p-2 flex-row items-center justify-between shadow rounded-lg w-full " style={{ backgroundColor: isDarkMode ? "#2f312a" : "#f9faef", }}>
           <View className="flex-1 mr-2 ">
             <Text className="text-sm text-gray-700 dark:text-white mb-1">选择话题:</Text>
             <View className="border border-gray-300 rounded l" style={{ backgroundColor: isDarkMode ? "#2f312a" : "#f9faef", }}>
@@ -699,6 +759,8 @@ const MainChat = () => {
           backgroundColor="rgba(0,0,0,0.8)"
         />
       </Modal>
+
+      {renderImageSourceSelectionModal()}
     </SafeAreaView>
   );
 };

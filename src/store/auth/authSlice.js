@@ -13,7 +13,7 @@ import { BASE_INFO } from "../../constant/base";
 // Thunks
 // 异步登录操作
 export const loginUser = createAsyncThunk(
-    'auth/login', 
+    'auth/login',
     async ({ email, pswd }, { rejectWithValue }) => {
         try {
             const response = await getAccessTokenByLogin({ email, pswd });

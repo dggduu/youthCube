@@ -1,10 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function BoundStu() {
+const PostDetail = () => {
   return (
     <View>
-      <Text>boundStu</Text>
+      <Text>PostDetail</Text>
     </View>
   )
 }
+
+export default PostDetail
