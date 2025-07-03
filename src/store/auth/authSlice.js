@@ -8,10 +8,37 @@ import {
     removeItemFromAsyncStorage,
     getItemFromAsyncStorage
 } from '../../utils/LocalStorage';
+import axios from 'axios';
 
 import { BASE_INFO } from "../../constant/base";
-import BackIcon from '../../components/backIcon/backIcon';
-// Thunks
+
+export const updateProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async ({ userId, token, userData }, { rejectWithValue, dispatch }) => {
+        try {
+            console.log("Test:",`${BASE_INFO.BASE_URL}api/users/${userId}`,`Bearer ${token}`);
+            const response = await axios.put(`${BASE_INFO.BASE_URL}api/users/${userId}`, userData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const updatedUser = response.data.user;
+                await setItemToAsyncStorage('currentUser', updatedUser);
+                return updatedUser;
+            } else {
+                return rejectWithValue(response.data.message || '更新用户资料失败。');
+            }
+        } catch (error) {
+            console.error('Error updating user profile:', error);
+            const errorMessage = error.response?.data?.message || error.message || '网络或服务器错误。';
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
 export const fetchUserInfo = createAsyncThunk(
     'auth/fetchUserInfo',
     async (userId, { getState, rejectWithValue }) => {
@@ -27,7 +54,6 @@ export const fetchUserInfo = createAsyncThunk(
             
             const userData = await response.json();
             console.log("UserData: ",userData);
-            // 将用户信息存入localStorage
             await setItemToAsyncStorage('user', userData);
             
             return userData;
@@ -37,13 +63,11 @@ export const fetchUserInfo = createAsyncThunk(
     }
 );
 
-// 异步登录操作
 export const loginUser = createAsyncThunk(
     'auth/login',
     async ({ email, pswd }, { rejectWithValue }) => {
         try {
             const response = await getAccessTokenByLogin({ email, pswd });
-            // 登录成功后，将 tokens 和用户数据存储到 AsyncStorage
             await setItemToAsyncStorage('accessToken', response.accessToken);
             await setItemToAsyncStorage('refreshToken', response.refreshToken);
             return response;
@@ -54,11 +78,10 @@ export const loginUser = createAsyncThunk(
     }
 );
 
-// 刷新 token 
 export const refreshAuthToken = createAsyncThunk(
     'auth/refreshAuthToken',
     async (_, { getState, rejectWithValue }) => {
-        const { auth } = getState(); // 从 Redux 获取当前认证状态
+        const { auth } = getState();
         const currentRefreshToken = auth.refreshToken || (await getItemFromAsyncStorage('refreshToken'));
 
         if (!currentRefreshToken) {
@@ -67,12 +90,10 @@ export const refreshAuthToken = createAsyncThunk(
 
         try {
             const newAccessToken = await refreshAccessToken(currentRefreshToken);
-            // 刷新成功后，更新 accessToken
             await setItemToAsyncStorage('accessToken', newAccessToken);
             return newAccessToken;
         } catch (error) {
             const errorMessage = error.message || '刷新令牌失败，请重新登录。';
-            // 如果刷新失败，清除所有认证信息
             await removeItemFromAsyncStorage('accessToken');
             await removeItemFromAsyncStorage('refreshToken');
             await removeItemFromAsyncStorage('user');
@@ -81,12 +102,11 @@ export const refreshAuthToken = createAsyncThunk(
     }
 );
 
-// 加载认证数据（应用启动时）
 export const loadAuthData = createAsyncThunk(
     'auth/loadData',
     async (_, { rejectWithValue }) => {
         try {
-            if (BASE_INFO.magic.isSkipLoginPage) { // 假用户
+            if (BASE_INFO.magic.isSkipLoginPage) {
                 const fakeAccessToken = "the_pursuit_of_happyness";
                 const fakeRefreshToken = "come_on_baby_light_my_fire";
                 await setItemToAsyncStorage('accessToken', fakeAccessToken);
@@ -103,13 +123,11 @@ export const loadAuthData = createAsyncThunk(
             const user = await getItemFromAsyncStorage('user');
 
             if (accessToken && refreshToken && user) {
-                // 返回完整的用户数据对象
                 return { accessToken, refreshToken, user };
             }
             return null;
         } catch (error) {
             console.error('从 AsyncStorage 加载认证数据失败:', error);
-            // 清理可能损坏的存储数据
             await removeItemFromAsyncStorage('accessToken');
             await removeItemFromAsyncStorage('refreshToken');
             await removeItemFromAsyncStorage('user');
@@ -143,7 +161,6 @@ const authSlice = createSlice({
         isAuthReady: false,
     },
     reducers: {
-        // 同步登出 action
         logout: (state) => {
             state.accessToken = null;
             state.refreshToken = null;
@@ -173,7 +190,6 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // loginUser 的生命周期
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -182,7 +198,6 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.accessToken = action.payload.accessToken;
                 state.refreshToken = action.payload.refreshToken;
-                // 将完整的 user 对象保存到 userData
                 state.userData = action.payload.user; 
                 state.isAuthenticated = true;
             })
@@ -192,13 +207,11 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.accessToken = null;
                 state.refreshToken = null;
-                // 登录失败时，清除 userData
                 state.userData = {
                     id: null, email: null, is_member: null, learn_stage: null,
                     sex: null, ava_url: null,
                 };
             })
-            // refreshAuthToken 的生命周期
             .addCase(refreshAuthToken.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -231,6 +244,15 @@ const authSlice = createSlice({
                     state.isAuthenticated = true;
                 }
             })
+            .addCase(loadAuthData.rejected, (state, action) => {
+                state.isAuthReady = true;
+                state.error = action.payload || '加载认证数据失败';
+                state.isAuthenticated = false;
+                state.userData = {
+                    id: null, email: null, is_member: null, learn_stage: null,
+                    sex: null, ava_url: null,
+                };
+            })
             .addCase(fetchUserInfo.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -243,14 +265,18 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload || '获取用户信息失败';
             })
-            .addCase(loadAuthData.rejected, (state, action) => {
-                state.isAuthReady = true;
-                state.error = action.payload || '加载认证数据失败';
-                state.isAuthenticated = false;
-                state.userData = {
-                    id: null, email: null, is_member: null, learn_stage: null,
-                    sex: null, ava_url: null,
-                };
+            .addCase(updateProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.userData = action.payload;
+                state.error = null;
+            })
+            .addCase(updateProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || '更新失败。';
             });
     },
 });

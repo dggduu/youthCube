@@ -68,11 +68,11 @@ const MainSetting = ( {navigation} ) => {
 
       {/* 通用设置部分 */}
       <Text className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-5 mb-2 px-5">通用设置</Text>
-      {/* <SettingItem
-        description="账户与安全"
+      <SettingItem
+        description="账户信息修改"
         iconName="security"
-        onPress={() => Alert.alert("导航", "跳转到账户安全页面")}
-      /> */}
+        onPress={() => navigation.navigate('SettingDetail', { screen: 'UserInfoChange' })}
+      />
       <SettingItem
         description="通知设置"
         iconName="notifications"
