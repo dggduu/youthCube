@@ -14,8 +14,8 @@ export const BASE_INFO={
         ava_url: null,
     },
     magic:{
-        isSkipLoginPage: false,
-        isSkipRegisterVerify: false,
+        isSkipLoginPage: true,
+        isSkipRegisterVerify: true,
     },
     Version: "0.0.1",
 };
