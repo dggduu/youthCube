@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useSelector, useDispatch, Provider } from 'react-redux';
 import store from './store/auth/authStore';
-import { loadAuthData } from './store/auth/authSlice';
+import { loadAuthData, fetchUserInfo } from './store/auth/authSlice';
 
 import AuthStack from './navigation/AuthStack';
 import MainTabNavigator from './navigation/MainTabNavigator';
@@ -15,7 +15,7 @@ import { BASE_INFO } from "./constant/base";
 const RootAppContent = () => {
     const dispatch = useDispatch();
     // 从 Redux中获取认证相关的状态
-    const { isAuthenticated, isAuthReady } = useSelector((state) => state.auth);
+    const { isAuthenticated, isAuthReady, userData } = useSelector((state) => state.auth);
     const {showToast} = useToast();
     useEffect(() => {
         dispatch(loadAuthData());
@@ -23,9 +23,10 @@ const RootAppContent = () => {
     
     useEffect(() => {
       if(isAuthenticated) {
+        dispatch(fetchUserInfo(userData.id));
         showToast("登录成功!","success");
       }
-    }, [isAuthenticated, isAuthReady]);
+    }, [isAuthenticated, isAuthReady, userData?.id]);
 
     if (!isAuthReady) {
         return (

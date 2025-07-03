@@ -10,7 +10,33 @@ import {
 } from '../../utils/LocalStorage';
 
 import { BASE_INFO } from "../../constant/base";
+import BackIcon from '../../components/backIcon/backIcon';
 // Thunks
+export const fetchUserInfo = createAsyncThunk(
+    'auth/fetchUserInfo',
+    async (userId, { getState, rejectWithValue }) => {
+        try {
+            const { auth } = getState();
+            const accessToken = auth.accessToken;
+            
+            const response = await fetch(`${BASE_INFO.BASE_URL}api/users/${userId}`);
+            
+            if (!response.ok) {
+                throw new Error('获取用户信息失败');
+            }
+            
+            const userData = await response.json();
+            console.log("UserData: ",userData);
+            // 将用户信息存入localStorage
+            await setItemToAsyncStorage('user', userData);
+            
+            return userData;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 // 异步登录操作
 export const loginUser = createAsyncThunk(
     'auth/login',
@@ -20,7 +46,6 @@ export const loginUser = createAsyncThunk(
             // 登录成功后，将 tokens 和用户数据存储到 AsyncStorage
             await setItemToAsyncStorage('accessToken', response.accessToken);
             await setItemToAsyncStorage('refreshToken', response.refreshToken);
-            await setItemToAsyncStorage('user', response.user); 
             return response;
         } catch (error) {
             const errorMessage = error.message || '登录失败，请检查网络或凭据。';
@@ -100,11 +125,17 @@ const authSlice = createSlice({
         refreshToken: null,
         userData: {
             id: null,
-            email: null,
-            is_member: null,
+            name: null,
+            birth_date: null,
             learn_stage: null,
+            email: null,
             sex: null,
-            ava_url: null,
+            avatar_key: null,
+            bio: null,
+            team_id: null,
+            is_member: null,
+            posts: [],
+            team: null
         },
         isAuthenticated: false,
         loading: false,
@@ -117,8 +148,18 @@ const authSlice = createSlice({
             state.accessToken = null;
             state.refreshToken = null;
             state.userData = {
-                id: null, email: null, is_member: null, learn_stage: null,
-                sex: null, ava_url: null,
+                id: null,
+                name: null,
+                birth_date: null,
+                learn_stage: null,
+                email: null,
+                sex: null,
+                avatar_key: null,
+                bio: null,
+                team_id: null,
+                is_member: null,
+                posts: [],
+                team: null
             };
             state.isAuthenticated = false;
             state.error = null;
@@ -189,6 +230,18 @@ const authSlice = createSlice({
                     state.userData = action.payload.user; 
                     state.isAuthenticated = true;
                 }
+            })
+            .addCase(fetchUserInfo.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserInfo.fulfilled, (state, action) => {
+                state.loading = false;
+                state.userData = action.payload;
+            })
+            .addCase(fetchUserInfo.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || '获取用户信息失败';
             })
             .addCase(loadAuthData.rejected, (state, action) => {
                 state.isAuthReady = true;

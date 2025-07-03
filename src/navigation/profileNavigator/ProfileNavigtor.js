@@ -6,6 +6,8 @@ import LearningNavigtor from '../profileNavigator/LearningNavigator';
 import MiscNavigator from './MiscNavigator';
 import TopBarNavigator from "./TopBarNavigator";
 import HelperScreen from "../../screens/helperScreen/helpScreen";
+import MainSettingNavigtor from "../../navigation/profileNavigator/MainSettingNavigtor";
+import { calculateNewMassToMatchDuration } from 'react-native-reanimated/lib/typescript/animation/springUtils';
 const Stack = createNativeStackNavigator();
 
 export default function ProfileNavigator() {
@@ -18,6 +20,8 @@ export default function ProfileNavigator() {
       <Stack.Screen name="MiscStack" component={MiscNavigator} />
       <Stack.Screen name="TopBar" component={TopBarNavigator}/>
       <Stack.Screen name="HelpScreen" component={HelperScreen} />
+
+      <Stack.Screen name='SettingDetail' component={MainSettingNavigtor}/>
     </Stack.Navigator>
   );
 }

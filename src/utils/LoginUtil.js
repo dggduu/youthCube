@@ -1,9 +1,9 @@
 import React, { useState, useEffect, use } from 'react';
 import axios from 'axios';
-import ENV from "../constant/url";
+import ENV, { BASE_INFO } from "../constant/base";
 
 const axiosClient = axios.create({
-    baseURL: ENV.BASE_URL,
+    baseURL: BASE_INFO.BASE_URL + 'api',
     timeout: 10000,
     headers: {
         "Content-Type": 'application/json',
@@ -17,6 +17,7 @@ const axiosClient = axios.create({
  */
 export const getAccessTokenByLogin = async (loginData) => {
     try {
+        console.log("test:",BASE_INFO.BASE_URL + 'api');
         const response = await axiosClient.post('/login', loginData);
         return response.data;
     } catch (error) {

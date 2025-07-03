@@ -39,7 +39,6 @@ export default function ProfileScreen({ navigation }) {
   const otherItems = [
     { icon: 'verified-user', label: '用户协议', screen: 'MiscStack', params: { screen: 'QualityCheck' } },
     { icon: 'help', label: '帮助中心', screen: 'HelpScreen'},
-    { icon: 'logout', label: '退出登录', screen: 'AuthStack', params: { screen: 'Login' } },
   ];
 
   return (
@@ -95,7 +94,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </View>
 
-          {/* --- 我的学习模块：垂直列表形式 --- */}
+          {/* --- 我的学习模块 --- */}
           <View
             className={`p-5 rounded-2xl mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
