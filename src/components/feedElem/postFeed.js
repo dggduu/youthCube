@@ -1,74 +1,108 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
-import FeedElem from './FeedElem'; // 确保路径正确
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
+import WaterfallFlow from 'react-native-waterfall-flow';
+import FeedElem from './feedElem';
+import { useNavigation } from '@react-navigation/native';
+import { BASE_INFO } from "../../constant/base";
 
 const PostFeed = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const navigation = useNavigation();
 
-  // 模拟数据加载
+  const loadingRef = useRef(false);
+  const pageRef = useRef(0);
+  const hasMoreRef = useRef(true);
+  const lastRequestTime = useRef(0);
+  const requestInProgress = useRef(false);
+
   const fetchData = useCallback(async (pageNum) => {
-    if (loading || !hasMore && pageNum > 1) return; // 防止重复加载或没有更多数据时继续加载
-    setLoading(true);
-    try {
-      // 模拟网络请求延迟
-      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const newData = Array.from({ length: 10 }, (_, i) => ({
-        id: (pageNum - 1) * 10 + i,
-        imgUrl: `https://picsum.photos/seed/${(pageNum - 1) * 10 + i}/300/200`, // 随机图片
-        title: `Post Title ${(pageNum - 1) * 10 + i + 1}`,
-        subtitle: `This is a short description for post ${(pageNum - 1) * 10 + i + 1}.`,
+    if (requestInProgress.current || loadingRef.current || (!hasMoreRef.current && pageNum > 0)) {
+      return;
+    }
+
+    // 确保请求间隔至少500ms
+    const now = Date.now();
+    const timeSinceLast = now - lastRequestTime.current;
+    if (timeSinceLast < 500) {
+      await new Promise(resolve => setTimeout(resolve, 500 - timeSinceLast));
+    }
+
+    requestInProgress.current = true;
+    loadingRef.current = true;
+    setLoading(true);
+    lastRequestTime.current = Date.now();
+
+    try {
+      console.log(`${BASE_INFO.BASE_URL}api/posts?page=${pageNum}&size=10`);
+      const response = await fetch(`${BASE_INFO.BASE_URL}api/posts?page=${pageNum}&size=10`);
+      const result = await response.json();
+
+      const newData = result.items.map((item, index) => ({
+        id: item.post_id,
+        imgUrl: item.cover_image_url,
+        title: item.title,
+        subtitle: item.content.length > 50 ? item.content.substring(0, 50) + '...' : item.content,
+        height: index % 3 === 0 ? 300 : index % 2 === 0 ? 250 : 200
       }));
 
-      if (newData.length === 0) {
-        setHasMore(false); // 没有更多数据了
+      setTotalPages(result.totalPages);
+      
+      if (pageNum >= result.totalPages - 1) {
+        hasMoreRef.current = false;
+        setHasMore(false);
       } else {
-        setData(prevData => (pageNum === 1 ? newData : [...prevData, ...newData]));
+        setData(prevData => (pageNum === 0 ? newData : [...prevData, ...newData]));
+        pageRef.current = pageNum + 1;
         setPage(pageNum + 1);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      // 可以添加错误处理，例如显示一个错误消息
     } finally {
+      requestInProgress.current = false;
+      loadingRef.current = false;
       setLoading(false);
       setRefreshing(false);
     }
-  }, [loading, hasMore]);
+  }, []);
 
   useEffect(() => {
-    fetchData(1); // 组件首次渲染时加载第一页数据
+    fetchData(0);
   }, [fetchData]);
 
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      fetchData(page);
+  const handleLoadMore = useCallback(() => {
+    if (!loadingRef.current && hasMoreRef.current) {
+      fetchData(pageRef.current);
     }
-  };
+  }, [fetchData]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
-    setPage(1); // 重置页码
-    setHasMore(true); // 重新设置为有更多数据
-    setData([]); // 清空现有数据
-    fetchData(1); // 重新加载第一页
+    pageRef.current = 0;
+    setPage(0);
+    hasMoreRef.current = true;
+    setHasMore(true);
+    setData([]);
+    fetchData(0);
   }, [fetchData]);
 
   const renderFooter = () => {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="small" color="#3b82f6" />
         <Text style={styles.footerText}>加载中...</Text>
       </View>
     );
   };
 
   const renderEmptyComponent = () => {
-    if (loading && data.length === 0) return null; // 首次加载时不显示“无数据”
+    if (loading) return null;
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>暂无内容</Text>
@@ -77,14 +111,16 @@ const PostFeed = () => {
   };
 
   const onFeedElemPress = (item) => {
-    console.log("Post pressed:", item.title);
-    // 这里可以导航到详情页或者执行其他操作
-    alert(`你点击了：${item.title}`);
+    navigation.navigate('PostDetail', { 
+      postId: item.id,
+      title: item.title,
+      coverImage: item.imgUrl
+    });
   };
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <WaterfallFlow
         data={data}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
@@ -95,20 +131,21 @@ const PostFeed = () => {
             onPress={() => onFeedElemPress(item)}
           />
         )}
-        numColumns={2} // 两列布局
-        columnWrapperStyle={styles.row} // 行样式
+        numColumns={2}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5} // 距离底部50%时触发加载
+        onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmptyComponent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={['#009688']} // Android 下拉刷新指示器颜色
-            tintColor={'#009688'} // iOS 下拉刷新指示器颜色
+            colors={['#3b82f6']}
+            tintColor={'#3b82f6'}
           />
         }
+        contentContainerStyle={styles.contentContainer}
+        itemHeight={(item) => item.height}
       />
     </View>
   );
@@ -117,23 +154,22 @@ const PostFeed = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0', // 背景色
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 8,
   },
-  row: {
-    justifyContent: 'space-around', // 项目之间和边缘有相同的间距
+  contentContainer: {
+    paddingBottom: 16,
   },
   footer: {
     paddingVertical: 20,
-    borderTopWidth: 1,
-    borderColor: '#ced0ce',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerText: {
     marginLeft: 10,
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
+    color: '#6b7280',
   },
   emptyContainer: {
     flex: 1,
@@ -142,8 +178,8 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   emptyText: {
-    fontSize: 18,
-    color: '#888',
+    fontSize: 16,
+    color: '#6b7280',
   },
 });
 

@@ -78,6 +78,7 @@
     "react-native-svg": "^15.12.0",
     "react-native-tab-view": "^4.1.1",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-waterfall-flow": "^1.1.5",
     "react-redux": "^9.2.0",
     "zustand": "^5.0.5"
   }

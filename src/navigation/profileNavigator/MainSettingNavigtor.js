@@ -4,6 +4,7 @@ import PartyInfo from "../../screens/MainTabScreen/ProfileScreen/SettingScreen/P
 import VersionInfo from "../../screens/MainTabScreen/ProfileScreen/SettingScreen/VersionInfo";
 import PolicyInfo from "../../screens/MainTabScreen/ProfileScreen/SettingScreen/PolicyInfo";
 import UserInfoChange from "../../screens/MainTabScreen/ProfileScreen/SettingScreen/UserInfoChange";
+import HelpScreen from "../../screens/helperScreen/helpScreen";
 const Stack = createNativeStackNavigator();
 
 export default function MainSettingNavigtor() {
@@ -13,6 +14,7 @@ export default function MainSettingNavigtor() {
             <Stack.Screen name="PartyInfo" component={PartyInfo}/>
             <Stack.Screen name="PolicyInfo" component={PolicyInfo}/>
             <Stack.Screen name="UserInfoChange" component={UserInfoChange}/>
+            <Stack.Screen name="HelpScreen" component={HelpScreen}/>
         </Stack.Navigator>
     );
 }

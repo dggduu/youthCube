@@ -9,7 +9,8 @@ import {
   TextInput,
   useColorScheme,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingViewBase
 } from 'react-native';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -22,7 +23,8 @@ import { GRADES } from "../../../../constant/index";
 import { useToast } from "../../../../components/tip/ToastHooks";
 import { BASE_INFO } from "../../../../constant/base";
 import { updateProfile } from '../../../../store/auth/authSlice';
-
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { SafeAreaView } from 'react-native-safe-area-context';
 const isValidPassword = (password) => {
   if (!password) return { valid: false };
   const hasUpperCase = /[A-Z]/.test(password);
@@ -237,7 +239,6 @@ const UserInfoChange = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}
     >
       <ScrollView
@@ -392,7 +393,7 @@ const UserInfoChange = () => {
           {/* 密码修改区 */}
           <View className="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6">
             <Text className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-800'}`}>
-              修改密码 (可选)
+              修改密码
             </Text>
             <InputBox
               label="新密码"
@@ -435,9 +436,9 @@ const UserInfoChange = () => {
           </TouchableOpacity>
 
           {/* 联系工作人员 */}
-          <TouchableOpacity onPress={() => navigation.navigate('helpSolvor')}>
+          <TouchableOpacity onPress={() => navigation.navigate('HelpScreen')}>
             <View>
-              <Text className={`mt-6 self-center font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+              <Text className={`mt-6 self-center font-semibold ${isDarkMode ? 'text-blue-500' : 'text-blue-400'}`}>
                 有问题？联系工作人员
               </Text>
             </View>
