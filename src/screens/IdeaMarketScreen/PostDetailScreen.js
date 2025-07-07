@@ -355,7 +355,7 @@ const CommentSection = ({ postId, authToken }) => {
       {loading && <LoadingIndicator />}
 
       {!loading && hasMore && (
-        <LoadMoreButton onPress={() => fetchComments(page)} text="Load more comments" />
+        <LoadMoreButton onPress={() => fetchComments(page)} text="加载更多评论" />
       )}
     </View>
   );
@@ -556,7 +556,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
                   {loadingReplies ? (
                     <ActivityIndicator size="small" />
                   ) : (
-                    <Text className="text-gray-700 dark:text-gray-300">Load more replies</Text>
+                    <Text className="text-gray-700 dark:text-gray-300">加载更多评论</Text>
                   )}
                 </TouchableOpacity>
               )}
