@@ -7,11 +7,14 @@ import {
   RefreshControl,
   Image,
   Text,
-  TextInput
+  TextInput,
+  StyleSheet,
+  Modal
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { BASE_INFO } from "../../constant/base";
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { useToast } from "../../components/tip/ToastHooks";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
 
@@ -29,6 +32,7 @@ const PostDetailScreen = () => {
   const [tags, setTags] = useState([]);
   const { showToast } = useToast();
   const [authToken, setAuthToken] = useState(null);
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
   const fetchPost = useCallback(async () => {
     try {
@@ -159,101 +163,167 @@ const PostDetailScreen = () => {
     );
   }
 
-  return (
-    <ScrollView
-      className="flex-1 bg-white dark:bg-gray-900"
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={['#3b82f6']}
-          tintColor={'#3b82f6'}
-        />
-      }
-    >
-      <View className="p-4">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          {post.title}
-        </Text>
-
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="flex-row items-center">
-            <Image
-              source={post.author.avatar_key ? { uri: post.author.avatar_key } : require("../../assets/logo/ava.png")}
-              className="w-10 h-10 rounded-full mr-2"
-            />
-            <Text className="text-base font-medium text-gray-900 dark:text-white">
-              {post.author.name}
-            </Text>
-          </View>
-          <Text className="text-sm text-gray-500 dark:text-gray-400">
-            {new Date(post.created_at).toLocaleDateString()}
-          </Text>
-        </View>
-
-        {post.cover_image_url && (
-          <Image
-            source={{ uri: post.cover_image_url }}
-            className="w-full h-64 rounded-lg mb-4"
-            resizeMode="cover"
-          />
-        )}
-
-        <Text className="text-base text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
-          {post.content}
-        </Text>
-
-        {tags.length > 0 && (
-          <View className="flex-row flex-wrap mb-4">
-            {tags.map(tag => (
-              <TouchableOpacity
-                key={tag.tag_id}
-                className="bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2"
-                onPress={() => navigation.navigate('Tag', { tagId: tag.tag_id })}
-              >
-                <Text className="text-sm text-gray-800 dark:text-gray-200">
-                  #{tag.tag_name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        <View className="flex-row items-center border-t border-b border-gray-200 dark:border-gray-700 py-3 mb-4">
-          <TouchableOpacity
-            className="flex-row items-center mr-6"
-            onPress={toggleLike}
-          >
-            <Icon
-              name={liked ? "favorite" : "favorite-outline"}
-              size={24}
-              color={liked ? "#ef4444" : "#6b7280"}
-            />
-            <Text className="ml-1 text-gray-600 dark:text-gray-300">
-              {likeCount}
-            </Text>
-          </TouchableOpacity>
-
-          <View className="flex-row items-center mr-6">
-            <Icon name="chat-bubble-outline" size={20} color="#6b7280" />
-            <Text className="ml-1 text-gray-600 dark:text-gray-300">
-              {post.comments_count}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center">
-            <Icon name="visibility" size={20} color="#6b7280" />
-            <Text className="ml-1 text-gray-600 dark:text-gray-300">
-              {post.views_count}
-            </Text>
-          </View>
-        </View>
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" />
       </View>
+    );
+  }
 
-      <CommentSection postId={postId} authToken={authToken} />
-    </ScrollView>
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-red-500 text-lg">{error}</Text>
+      </View>
+    );
+  }
+
+  if (!post) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-red-500 text-lg">Post does not exist</Text>
+      </View>
+    );
+  }
+
+  const images = post.cover_image_url ? [{
+    url: post.cover_image_url,
+    props: {
+    }
+  }] : [];
+
+  return (
+    <>
+      <ScrollView
+        className="flex-1 bg-white dark:bg-gray-900"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#3b82f6']}
+            tintColor={'#3b82f6'}
+          />
+        }
+      >
+        <View className="p-4">
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            {post.title}
+          </Text>
+
+          <View className="flex-row justify-between items-center mb-4">
+            <View className="flex-row items-center">
+              <Image
+                source={post.author.avatar_key ? { uri: post.author.avatar_key } : require("../../assets/logo/ava.png")}
+                className="w-10 h-10 rounded-full mr-2"
+              />
+              <Text className="text-base font-medium text-gray-900 dark:text-white">
+                {post.author.name}
+              </Text>
+            </View>
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
+              {new Date(post.created_at).toLocaleDateString()}
+            </Text>
+          </View>
+
+          {post.cover_image_url && (
+            <TouchableOpacity 
+              onPress={() => setImageViewerVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Image
+                source={{ uri: post.cover_image_url }}
+                className="w-full h-64 rounded-lg mb-4"
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          )}
+
+          <Text className="text-base text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
+            {post.content}
+          </Text>
+
+          {tags.length > 0 && (
+            <View className="flex-row flex-wrap mb-4">
+              {tags.map(tag => (
+                <TouchableOpacity
+                  key={tag.tag_id}
+                  className="bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2"
+                  onPress={() => navigation.navigate('Tag', { id: tag.tag_id })}
+                >
+                  <Text className="text-sm text-gray-800 dark:text-gray-200">
+                    #{tag.tag_name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          <View className="flex-row items-center border-t border-b border-gray-200 dark:border-gray-700 py-3 mb-4">
+            <TouchableOpacity
+              className="flex-row items-center mr-6"
+              onPress={toggleLike}
+            >
+              <Icon
+                name={liked ? "favorite" : "favorite-outline"}
+                size={24}
+                color={liked ? "#ef4444" : "#6b7280"}
+              />
+              <Text className="ml-1 text-gray-600 dark:text-gray-300">
+                {likeCount}
+              </Text>
+            </TouchableOpacity>
+
+            <View className="flex-row items-center mr-6">
+              <Icon name="chat-bubble-outline" size={20} color="#6b7280" />
+              <Text className="ml-1 text-gray-600 dark:text-gray-300">
+                {post.comments_count}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center">
+              <Icon name="visibility" size={20} color="#6b7280" />
+              <Text className="ml-1 text-gray-600 dark:text-gray-300">
+                {post.views_count}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <CommentSection postId={postId} authToken={authToken} />
+      </ScrollView>
+
+      <Modal visible={imageViewerVisible} transparent={true}>
+        <ImageViewer
+          imageUrls={images}
+          enableSwipeDown={true}
+          onSwipeDown={() => setImageViewerVisible(false)}
+          onClick={() => setImageViewerVisible(false)}
+          renderHeader={() => (
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setImageViewerVisible(false)}
+            >
+              <Icon name="close" size={30} color="white" />
+            </TouchableOpacity>
+          )}
+        />
+      </Modal>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 15,
+    padding: 5,
+  },
+});
 
 const CommentSection = ({ postId, authToken }) => {
   const [comments, setComments] = useState([]);
