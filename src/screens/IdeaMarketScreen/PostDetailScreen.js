@@ -575,7 +575,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
           <View className="flex-row items-center">
             <TextInput
               className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
-              placeholder={`Reply to ${comment.user?.name || 'this comment'}...`}
+              placeholder={`回复 ${comment.user?.name || '这个评论'}...`}
               placeholderTextColor="#9ca3af"
               value={replyText}
               onChangeText={setReplyText}
