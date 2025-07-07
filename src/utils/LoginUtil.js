@@ -1,7 +1,8 @@
 import React, { useState, useEffect, use } from 'react';
 import axios from 'axios';
 import ENV, { BASE_INFO } from "../constant/base";
-
+import setupAuthInterceptors from "../utils/axios/AuthInterceptors";
+import { getItemFromAsyncStorage } from "../utils/LocalStorage";
 const axiosClient = axios.create({
     baseURL: BASE_INFO.BASE_URL + 'api',
     timeout: 10000,
@@ -9,6 +10,7 @@ const axiosClient = axios.create({
         "Content-Type": 'application/json',
     },
 });
+setupAuthInterceptors(axiosClient);
 
 /**
  * 登录函数，通过邮箱和密码获取访问令牌和刷新令牌
@@ -43,7 +45,7 @@ export const getAccessTokenByLogin = async (loginData) => {
 export const refreshAccessToken = async (refreshToken) => {
     try {
         const response = await axiosClient.post('/refresh_token', { refreshToken });
-        return response.data.accessToken;
+        return response.data;
     } catch (error) {
         if (error.response) {
             console.error('刷新令牌失败:', error.response.data.error || error.response.data.message);
@@ -55,5 +57,27 @@ export const refreshAccessToken = async (refreshToken) => {
             console.error('刷新令牌时发生未知错误:', error.message);
             throw new Error('刷新令牌时发生未知错误');
         }
+    }
+};
+
+export const checkAuthExpire = async () => {
+    try {
+        const accessToken = await getItemFromAsyncStorage('accessToken');
+        if (!accessToken) throw new Error('无可用的密钥');
+
+        const response = await axiosClient.get('/auth/status', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        return response.data;
+    } catch (error) {
+        // 如果是401/403错误，直接抛出
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            throw error;
+        }
+        throw new Error('检查认证状态失败');
     }
 };

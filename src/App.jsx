@@ -20,7 +20,8 @@ const RootAppContent = () => {
     useEffect(() => {
         dispatch(loadAuthData());
     }, [dispatch]);
-    
+
+
     useEffect(() => {
       if(isAuthenticated) {
         dispatch(fetchUserInfo(userData.id));

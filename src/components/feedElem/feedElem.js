@@ -1,25 +1,40 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image } from 'react-native';
 
 const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.container}>
-      <View style={styles.card}>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      className="m-1"
+    >
+      <View className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
+        {/* 图片区域 */}
         {imgUrl ? (
           <Image
             source={{ uri: imgUrl }}
-            style={styles.image}
+            className="w-full aspect-video bg-gray-200 dark:bg-gray-700"
+            resizeMode="cover"
           />
         ) : (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>No Image</Text>
+          <View className="w-full aspect-video bg-gray-200 dark:bg-gray-700 justify-center items-center">
+            <Text className="text-gray-500 dark:text-gray-400 font-bold">No Image</Text>
           </View>
         )}
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>
+
+        {/* 内容区域 */}
+        <View className="p-3">
+          <Text
+            numberOfLines={2}
+            className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-1"
+          >
             {title || '暂无标题'}
           </Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
+          <Text
+            numberOfLines={2}
+            className="text-sm text-gray-600 dark:text-gray-300"
+          >
             {subtitle || '暂无描述'}
           </Text>
         </View>
@@ -27,51 +42,5 @@ const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 12,
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  image: {
-    width: '100%',
-    aspectRatio: 3/4,
-    backgroundColor: '#f3f4f6',
-  },
-  placeholder: {
-    width: '100%',
-    aspectRatio: 3/4,
-    backgroundColor: '#e5e7eb',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#6b7280',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  content: {
-    padding: 12,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-});
 
 export default FeedElem;

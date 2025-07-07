@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
     getAccessTokenByLogin,
-    refreshAccessToken
+    refreshAccessToken,
+    checkAuthExpire
 } from '../../utils/LoginUtil';
 import {
     setItemToAsyncStorage,
@@ -11,6 +12,9 @@ import {
 import axios from 'axios';
 
 import { BASE_INFO } from "../../constant/base";
+import { stopUpload } from 'react-native-fs';
+
+
 
 export const updateProfile = createAsyncThunk(
     'auth/updateProfile',
@@ -89,9 +93,10 @@ export const refreshAuthToken = createAsyncThunk(
         }
 
         try {
-            const newAccessToken = await refreshAccessToken(currentRefreshToken);
-            await setItemToAsyncStorage('accessToken', newAccessToken);
-            return newAccessToken;
+            const response = await refreshAccessToken(currentRefreshToken);
+            await setItemToAsyncStorage('accessToken', response.accessToken );
+            await setItemToAsyncStorage('refreshToken', response.refreshToken );
+            return response.accessToken;
         } catch (error) {
             const errorMessage = error.message || '刷新令牌失败，请重新登录。';
             await removeItemFromAsyncStorage('accessToken');
@@ -104,28 +109,44 @@ export const refreshAuthToken = createAsyncThunk(
 
 export const loadAuthData = createAsyncThunk(
     'auth/loadData',
-    async (_, { rejectWithValue }) => {
-        try {
-            if (BASE_INFO.magic.isSkipLoginPage) {
-                const fakeAccessToken = "the_pursuit_of_happyness";
-                const fakeRefreshToken = "come_on_baby_light_my_fire";
-                await setItemToAsyncStorage('accessToken', fakeAccessToken);
-                await setItemToAsyncStorage('refreshToken', fakeRefreshToken);
-                await setItemToAsyncStorage('user', BASE_INFO.fakeUser);
-                return {
-                    accessToken: fakeAccessToken,
-                    refreshToken: fakeRefreshToken,
-                    user: BASE_INFO.fakeUser,
-                };
-            }
+    async (_, { rejectWithValue, dispatch }) => {
+        try { 
             const accessToken = await getItemFromAsyncStorage('accessToken');
             const refreshToken = await getItemFromAsyncStorage('refreshToken');
             const user = await getItemFromAsyncStorage('user');
-
-            if (accessToken && refreshToken && user) {
-                return { accessToken, refreshToken, user };
+            console.log(accessToken, refreshToken);
+            if (!accessToken || !refreshToken || !user) {
+                return null;
             }
-            return null;
+
+            try {
+                // 检查token是否有效
+                await checkAuthExpire();
+                return { accessToken, refreshToken, user };
+            } catch (error) {
+                // 如果检查失败，尝试刷新token
+                try {
+                    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = 
+                        await refreshAccessToken(refreshToken);
+                    
+                    await setItemToAsyncStorage('accessToken', newAccessToken);
+                    await setItemToAsyncStorage('refreshToken', newRefreshToken);
+                    
+                    return { 
+                        accessToken: newAccessToken, 
+                        refreshToken: newRefreshToken, 
+                        user 
+                    };
+                } catch (refreshError) {
+                    // 刷新也失败，清除所有token
+                    await removeItemFromAsyncStorage('accessToken');
+                    await removeItemFromAsyncStorage('refreshToken');
+                    await removeItemFromAsyncStorage('user');
+                    
+                    // 这里不需要跳转，由拦截器处理
+                    return null;
+                }
+            }
         } catch (error) {
             console.error('从 AsyncStorage 加载认证数据失败:', error);
             await removeItemFromAsyncStorage('accessToken');
@@ -246,12 +267,11 @@ const authSlice = createSlice({
             })
             .addCase(loadAuthData.rejected, (state, action) => {
                 state.isAuthReady = true;
-                state.error = action.payload || '加载认证数据失败';
                 state.isAuthenticated = false;
-                state.userData = {
-                    id: null, email: null, is_member: null, learn_stage: null,
-                    sex: null, ava_url: null,
-                };
+                state.accessToken = null;
+                state.refreshToken = null;
+                state.userData = null;
+                state.error = action.payload;
             })
             .addCase(fetchUserInfo.pending, (state) => {
                 state.loading = true;
