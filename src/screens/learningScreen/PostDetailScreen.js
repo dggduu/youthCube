@@ -29,6 +29,8 @@ const PostDetailScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [collected, setCollected] = useState(false);
+  const [collectCount, setCollectCount] = useState(0);
   const [tags, setTags] = useState([]);
   const { showToast } = useToast();
   const [authToken, setAuthToken] = useState(null);
@@ -79,6 +81,26 @@ const PostDetailScreen = () => {
     }
   }, [postId]);
 
+  const checkCollectStatus = useCallback(async (token) => {
+    try {
+      const response = await fetch(`${BASE_INFO.BASE_URL}api/posts/${postId}/collect/status`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setCollected(result.collected);
+        setCollectCount(result.collectedCount);
+      }
+    } catch (err) {
+      console.error("Failed to check collect status:", err);
+    }
+  }, [postId]);
+
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -89,6 +111,7 @@ const PostDetailScreen = () => {
 
         if (token) {
           await checkLikeStatus(token);
+          await checkCollectStatus(token);
         }
       } catch (err) {
         console.error("Initialization failed:", err);
@@ -99,7 +122,7 @@ const PostDetailScreen = () => {
     };
 
     initialize();
-  }, [fetchPost, checkLikeStatus]);
+  }, [fetchPost, checkLikeStatus, checkCollectStatus]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -107,11 +130,12 @@ const PostDetailScreen = () => {
       await fetchPost();
       if (authToken) {
         await checkLikeStatus(authToken);
+        await checkCollectStatus(authToken);
       }
     } finally {
       setRefreshing(false);
     }
-  }, [fetchPost, authToken, checkLikeStatus]);
+  }, [fetchPost, authToken, checkLikeStatus, checkCollectStatus]);
 
   const toggleLike = useCallback(async () => {
     try {
@@ -139,29 +163,31 @@ const PostDetailScreen = () => {
     }
   }, [liked, postId, authToken, showToast, navigation]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  const toggleCollect = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${BASE_INFO.BASE_URL}api/posts/${postId}/${collected ? 'uncollect' : 'collect'}`,
+        {
+          method: collected ? 'DELETE' : 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-  if (error) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500 text-lg">{error}</Text>
-      </View>
-    );
-  }
-
-  if (!post) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500 text-lg">Post does not exist</Text>
-      </View>
-    );
-  }
+      if (response.ok) {
+        setCollected(!collected);
+        setCollectCount(prev => collected ? prev - 1 : prev + 1);
+        showToast(collected ? "Uncollected successfully" : "Collected successfully", "success");
+      } else {
+        throw new Error(response.statusText);
+      }
+    } catch (err) {
+      showToast("网络遇到问题，请重试", "error");
+      console.error('Error toggling collect:', err);
+    }
+  }, [collected, postId, authToken, showToast]);
 
   if (loading) {
     return (
@@ -227,7 +253,7 @@ const PostDetailScreen = () => {
           </View>
 
           {post.cover_image_url && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setImageViewerVisible(true)}
               activeOpacity={0.8}
             >
@@ -271,6 +297,20 @@ const PostDetailScreen = () => {
               />
               <Text className="ml-1 text-gray-600 dark:text-gray-300">
                 {likeCount}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center mr-6"
+              onPress={toggleCollect}
+            >
+              <Icon
+                name={collected ? "bookmark" : "bookmark-border"}
+                size={24}
+                color={collected ? "#3b82f6" : "#6b7280"}
+              />
+              <Text className="ml-1 text-gray-600 dark:text-gray-300">
+                {collectCount}
               </Text>
             </TouchableOpacity>
 
@@ -343,7 +383,7 @@ const CommentSection = ({ postId, authToken }) => {
       if (!response.ok) throw new Error('Failed to fetch comments');
 
       const data = await response.json();
-      console.log("post_Comment:",data);
+      console.log("post_Comment:", data);
       setComments(prev => pageNum === 0 ? data.items : [...prev, ...data.items]);
       setPage(pageNum + 1);
       setHasMore(data.currentPage < data.totalPages);
