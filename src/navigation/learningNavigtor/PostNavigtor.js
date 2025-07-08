@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PostDetailScreen from "../../screens/learningScreen/PostDetailScreen";
 import learningHomeScreen from "../../screens/MainTabScreen/learningHomeScreen";
 import TagSection from "../../screens/learningScreen/TagSection";
-import { Tag } from "@ant-design/react-native";
+
 const Stack = createNativeStackNavigator();
 
 const PostNavigator = () => {
