@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import PostDetailScreen from "../../screens/IdeaMarketScreen/PostDetailScreen";
-import IdeaMarketScreen from "../../screens/MainTabScreen/ideaMarketScreen";
-import TagSection from "../../screens/IdeaMarketScreen/TagSection";
+import PostDetailScreen from "../../screens/learningScreen/PostDetailScreen";
+import learningHomeScreen from "../../screens/MainTabScreen/learningHomeScreen";
+import TagSection from "../../screens/learningScreen/TagSection";
 import { Tag } from "@ant-design/react-native";
 const Stack = createNativeStackNavigator();
 
@@ -13,7 +13,7 @@ const PostNavigator = () => {
         animation: 'slide_from_right'
       }}
     >
-      <Stack.Screen name="IdeaMarket" component={IdeaMarketScreen} />
+      <Stack.Screen name="IdeaMarket" component={learningHomeScreen} />
       <Stack.Screen 
         name="PostDetail" 
         component={PostDetailScreen}

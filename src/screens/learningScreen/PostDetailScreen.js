@@ -343,6 +343,7 @@ const CommentSection = ({ postId, authToken }) => {
       if (!response.ok) throw new Error('Failed to fetch comments');
 
       const data = await response.json();
+      console.log("post_Comment:",data);
       setComments(prev => pageNum === 0 ? data.items : [...prev, ...data.items]);
       setPage(pageNum + 1);
       setHasMore(data.currentPage < data.totalPages);
@@ -527,7 +528,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
           className="w-8 h-8 rounded-full mr-2"
         />
         <Text className="font-medium text-gray-900 dark:text-white mr-2">
-          {comment.user?.name || 'Anonymous'}
+          {comment.user?.name || '匿名用户'}
         </Text>
         <Text className="text-xs text-gray-500 dark:text-gray-400">
           {new Date(comment.created_at).toLocaleDateString()}
