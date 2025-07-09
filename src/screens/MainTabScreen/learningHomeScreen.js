@@ -21,7 +21,7 @@ export default function LearningHomeScreen() {
           className="flex-1 p-3 bg-white dark:bg-black rounded-lg ml-2 items-center"
           onPress={() => navigation.navigate('Upload')}
         >
-          <Text className="text-base text-white dark:text-gray-300">发布新帖</Text>
+          <Text className="text-base text-black dark:text-gray-300">发布新帖</Text>
         </TouchableOpacity>
       </View>
 

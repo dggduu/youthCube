@@ -10,6 +10,8 @@ import WeeklyReportScreen from '@screens/MainTabScreen/ProfileScreen/LearningScr
 import ChatGroupScreen from '@screens/MainTabScreen/ProfileScreen/LearningScreen/ChatGroupScreen';
 import UploaderScreen from '@screens/MainTabScreen/ProfileScreen/LearningScreen/UploaderScreen';
 
+import CollectNavigator from "../../navigation/learningNavigtor/collectNavigtor";
+
 const Stack = createNativeStackNavigator();
 
 export default function LearningNavigtor() {
@@ -17,7 +19,7 @@ export default function LearningNavigtor() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Pratice" component={PracticeScreen} />
       <Stack.Screen name="ClassInfo" component={ClassInfoScreen} />
-      <Stack.Screen name="Collect" component={CollectScreen} />
+      <Stack.Screen name="Collect" component={CollectNavigator} />
       <Stack.Screen name="CorrectBook" component={CorrectBookScreen} />
       <Stack.Screen name="Note" component={NoteScreen} />
       <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />

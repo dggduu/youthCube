@@ -1,171 +1,326 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  Image, 
+  ActivityIndicator, 
+  FlatList, 
+  SafeAreaView, 
+  TouchableOpacity,
+  RefreshControl 
+} from 'react-native';
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
 import { useToast } from '../../../components/tip/ToastHooks';
-import BackIcon from "../../../components/backIcon/backIcon";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { GRADES } from "../../../constant/user";
-const MessageScreen = ({navigation}) => {
+import { BASE_INFO } from "../../../constant/base";
+import { WhiteSpace } from '@ant-design/react-native';
+
+const MessageScreen = ({ navigation }) => {
+  // 状态管理
   const [currentUser, setCurrentUser] = useState(null);
+  const [teamInfo, setTeamInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const { showToast } = useToast();
 
+  // 加载用户数据和团队信息
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadData = async () => {
       try {
-        const userData = await getItemFromAsyncStorage('user');
-        console.log("Loaded UserData from AsyncStorage:", userData);
-
-        if (userData) {
-          setCurrentUser(userData);
-        } else {
-          setError("本地存储中未找到用户资料。请尝试重新登录。");
-          showToast("用户资料数据缺失。", "error");
+        const [userData, token] = await Promise.all([
+          getItemFromAsyncStorage('user'),
+          getItemFromAsyncStorage('accessToken')
+        ]);
+        
+        if (!userData || !token) {
+          throw new Error('用户未登录');
         }
+
+        setCurrentUser(userData);
+        
+        // 如果用户有团队，则获取团队信息
+        if (userData.team_id) {
+          await fetchTeamInfo(userData.team_id, token);
+        }
+        
+        await fetchPosts(0, token);
       } catch (e) {
-        console.error("从 AsyncStorage 加载用户数据时出错:", e);
-        setError("加载用户资料失败。 " + e.message);
-        showToast("加载资料错误: " + e.message, "error");
+        setError(e.message);
+        showToast(e.message, "error");
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserData();
+    loadData();
   }, []);
 
-  const getLearnStageLabel = (stageValue) => {
-    const grade = GRADES.find(grade => grade.value === stageValue);
-    return grade ? grade.label : '未知';
+  // 获取团队信息
+  const fetchTeamInfo = async (teamId, token) => {
+    try {
+      console.log(teamId);
+      const response = await fetch(
+        BASE_INFO.BASE_URL + `api/teams/${teamId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) throw new Error(`获取团队信息失败: ${response.status}`);
+
+      const result = await response.json();
+      console.log(result);
+      setTeamInfo(result);
+    } catch (error) {
+      console.error("获取团队信息失败:", error);
+      throw error;
+    }
   };
 
+  // 获取文章数据
+  const fetchPosts = async (pageNum, token) => {
+    try {
+      const response = await fetch(
+        BASE_INFO.BASE_URL + `api/myposts?page=${pageNum}&size=10`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) throw new Error(`请求失败: ${response.status}`);
+
+      const result = await response.json();
+
+      setPosts(prev => pageNum === 0 ? result.items : [...prev, ...result.items]);
+      setTotalPages(result.totalPages);
+      setPage(result.currentPage);
+    } catch (error) {
+      console.error("获取文章失败:", error);
+      throw error;
+    }
+  };
+
+  // 下拉刷新
+  const handleRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      const token = await getItemFromAsyncStorage('accessToken');
+      await fetchPosts(0, token);
+      
+      // 刷新团队信息
+      if (currentUser?.team_id) {
+        await fetchTeamInfo(currentUser.team_id, token);
+      }
+    } catch (e) {
+      showToast("刷新失败", "error");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [currentUser]);
+
+  // 加载更多
+  const handleLoadMore = useCallback(async () => {
+    if (page >= totalPages - 1) return;
+    
+    try {
+      const token = await getItemFromAsyncStorage('accessToken');
+      await fetchPosts(page + 1, token);
+    } catch (e) {
+      showToast("加载更多失败", "error");
+    }
+  }, [page, totalPages]);
+
+  // 渲染文章项
+  const renderPostItem = ({ item }) => (
+    <TouchableOpacity 
+      onPress={() => navigation.navigate('PostDetail', {
+        postId: item.post_id,
+        title: item.title,
+        coverImage: item.cover_image_url,
+      })}
+      activeOpacity={0.8}
+    >
+      <View className="flex-row bg-white dark:bg-gray-700 rounded-lg mb-3 p-4 border-b border-gray-200 dark:border-gray-700">
+        <Image
+          source={{ uri: item.cover_image_url }}
+          className="w-20 h-24 rounded-md mr-3"
+          resizeMode="cover"
+        />
+        <View className="flex-1">
+          <Text 
+            className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-1"
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text 
+            className="text-sm text-gray-500 dark:text-gray-400 mb-2"
+            numberOfLines={2}
+          >
+            {item.content}
+          </Text>
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center space-x-2">
+              <Image
+                source={require("../../../assets/logo/ava.png")}
+                className="w-5 h-5 rounded-full mr-1"
+              />
+              <Text className="text-xs text-gray-500 dark:text-gray-400">
+                {item.author.name}
+              </Text>
+            </View>
+            <View className="flex-row space-x-3">
+              <View className="flex-row items-center">
+                <MaterialIcons name="favorite" size={14} color="#ef4444" />
+                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1 mr-2">
+                  {item.likes_count}
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <MaterialIcons name="chat-bubble-outline" size={14} color="#3b82f6" />
+                <Text className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                  {item.comments_count}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // 学习阶段标签转换
+  const getLearnStageLabel = (stageValue) => {
+    return GRADES.find(grade => grade.value === stageValue)?.label || '未知';
+  };
+
+  // 加载状态
   if (loading) {
     return (
-      <View className='flex-1 bg-white dark:bg-gray-800'>
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text className="mt-4 text-gray-700 dark:text-gray-300 text-base">正在加载用户资料...</Text>
-        </View>
+      <View className="flex-1 bg-white dark:bg-gray-900 justify-center items-center">
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text className="mt-3 text-gray-500 dark:text-gray-400">加载中...</Text>
       </View>
     );
   }
 
+  // 错误状态
   if (error) {
     return (
-      <View className='flex-1 bg-white dark:bg-gray-80'>
-        <View className="flex-1 justify-center items-center p-4">
-          <Text className="text-red-600 dark:text-red-400 text-base text-center">错误: {error}</Text>
-        </View>
+      <View className="flex-1 bg-white dark:bg-gray-900 justify-center items-center p-4">
+        <Text className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</Text>
       </View>
     );
   }
-
-  if (!currentUser) {
-    return (
-      <View className='flex-1 bg-white dark:bg-gray-800'>
-        <View className="flex-1 justify-center items-center p-4">
-          <Text className="text-gray-600 dark:text-gray-400 text-lg text-center">无可用用户数据。</Text>
-        </View>
-      </View>
-    );
-  }
-
-  // 渲染单个文章项的辅助函数
-const renderPostItem = ({ item }) => (
-  <TouchableOpacity onPress={()=>{
-    console.log(item);
-    navigation.navigate('PostDetail', {
-      postId: item.post_id,
-      title: item.title,
-      coverImage: item.cover_image_url,
-    });
-  }}>
-    <View className="flex-row bg-gray-50 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden items-center p-3 border border-gray-200 dark:border-gray-600">
-      <Image
-        source={{ uri: item.cover_image_url || require("../../../assets/logo/ava.png") }}
-        className="w-16 h-16 rounded-md mr-3"
-      />
-      <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-1">{item.title}</Text>
-        <View className="flex-row items-center space-x-4">
-          <View className="flex-row items-center">
-            <MaterialIcons name="favorite" size={14} color="#ef4444" />
-            <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1">{item.likes_count}  </Text>
-          </View>
-          <View className="flex-row items-center">
-            <MaterialIcons name="chat-bubble-outline" size={14} color="#3b82f6" />
-            <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1">{item.comments_count}  </Text>
-          </View>
-          <View className="flex-row items-center">
-            <MaterialIcons name="bookmark-border" size={14} color="#10b981" />
-            <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1">{item.collected_count}  </Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
 
   return (
-    <SafeAreaView className='flex-1'>
-      <ScrollView className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
-        {/* 个人资料头部 */}
-        <View className="bg-white dark:bg-gray-800 rounded-xl p-5 items-center mb-4 mt-5 shadow-md">
-          <Image
-            source={ require("../../../assets/logo/ava.png") }
-            className="w-24 h-24 rounded-full mb-3 border-2 border-gray-200 dark:border-gray-600"
+    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#3b82f6']}
+            tintColor="#3b82f6"
           />
-          <Text className="text-2xl font-bold text-gray-800 dark:text-gray-200">{currentUser.name || 'N/A'}</Text>
-          <Text className="text-base text-gray-600 dark:text-gray-400 mb-1">{currentUser.email || 'N/A'}</Text>
-          <Text className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-3">
-            {currentUser.is_member ? '高级会员' : '普通用户'}
-          </Text>
-          <Text className="text-sm text-gray-700 dark:text-gray-300 text-center mx-2 leading-5">
-            {currentUser.bio || '暂无个人简介。'}
-          </Text>
-        </View>
-
-        {/* 用户详情 */}
-        <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-md">
-          <Text className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">详细信息</Text>
-          <Text className="text-base text-gray-700 dark:text-gray-300 mb-2">ID: {currentUser.id}</Text>
-          <Text className="text-base text-gray-700 dark:text-gray-300 mb-2">出生日期: {currentUser.birth_date || 'N/A'}</Text>
-          <Text className="text-base text-gray-700 dark:text-gray-300 mb-2">学习阶段: {getLearnStageLabel(currentUser.learn_stage)}</Text>
-          <Text className="text-base text-gray-700 dark:text-gray-300 mb-2">性别: {currentUser.sex || 'N/A'}</Text>
-        </View>
-
-        {/* 团队信息 */}
-        {currentUser.team && (
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-md">
-            <Text className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">
-              所属团队: {currentUser.team.team_name}
-            </Text>
-            <Text className="text-sm text-gray-700 dark:text-gray-300 leading-5">
-              {currentUser.team.description}
-            </Text>
-          </View>
-        )}
-
-        {/* 用户文章 */}
-        {currentUser.posts && currentUser.posts.length > 0 && (
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-md">
-            <Text className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">
-              我的文章 ({currentUser.posts.length})
-            </Text>
-            <FlatList
-              data={currentUser.posts}
-              renderItem={renderPostItem}
-              keyExtractor={(item) => item.post_id.toString()}
-              scrollEnabled={false}
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 用户资料卡片 */}
+        <View className="bg-white dark:bg-gray-800 rounded-xl mx-4 my-4 p-6 shadow-sm">
+          <View className="items-center mb-4">
+            <Image
+              source={require("../../../assets/logo/ava.png")}
+              className="w-24 h-24 rounded-full border-2 border-blue-200 dark:border-gray-600"
             />
+            <Text className="text-xl font-bold text-gray-800 dark:text-white mt-3">
+              {currentUser.name}
+            </Text>
+            <Text className="text-blue-500 dark:text-blue-400 text-sm mt-1">
+              {currentUser.is_member ? '高级会员' : '普通用户'}
+            </Text>
           </View>
-        )}
-        {currentUser.posts && currentUser.posts.length === 0 && (
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 items-center justify-center mb-4 shadow-md">
-            <Text className="text-base text-gray-600 dark:text-gray-400">暂无文章。</Text>
+
+          <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <View className="flex-row justify-between mb-3">
+              <Text className="text-gray-500 dark:text-gray-400">用户ID</Text>
+              <Text className="text-gray-800 dark:text-gray-200">{currentUser.id}</Text>
+            </View>
+            <View className="flex-row justify-between mb-3">
+              <Text className="text-gray-500 dark:text-gray-400">邮箱</Text>
+              <Text className="text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
+            </View>
+            <View className="flex-row justify-between mb-3">
+              <Text className="text-gray-500 dark:text-gray-400">学习阶段</Text>
+              <Text className="text-gray-800 dark:text-gray-200">
+                {getLearnStageLabel(currentUser.learn_stage)}
+              </Text>
+            </View>
+            {currentUser.bio && (
+              <View className="mt-3">
+                <Text className="text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
+                <Text className="text-gray-800 dark:text-gray-200">{currentUser.bio}</Text>
+              </View>
+            )}
+            {/* 团队信息 */}
+            {currentUser.team_id && (
+              <View className="flex-row justify-between mb-3">
+                <Text className="text-gray-500 dark:text-gray-400">所属团队</Text>
+                <View className="items-end">
+                  <Text className="text-gray-800 dark:text-gray-200">
+                    {teamInfo?.team_name || '加载中...'}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
-        )}
+        </View>
+
+        {/* 文章列表 */}
+        <View className="bg-white dark:bg-gray-800 rounded-xl mx-4 mb-6 p-4 shadow-sm">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-bold text-gray-800 dark:text-white">我的文章</Text>
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
+              共 {totalPages * 10} 篇
+            </Text>
+          </View>
+
+          <FlatList
+            data={posts}
+            renderItem={renderPostItem}
+            keyExtractor={(item, index) => `${item.post_id}_${index}`}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.3}
+            ListEmptyComponent={
+              <View className="py-8 items-center">
+                <MaterialIcons name="article" size={40} color="#9ca3af" />
+                <Text className="text-gray-500 dark:text-gray-400 mt-2">
+                  {refreshing ? '加载中...' : '暂无文章'}
+                </Text>
+              </View>
+            }
+            ListFooterComponent={
+              page < totalPages - 1 && (
+                <View className="py-4">
+                  <ActivityIndicator size="small" color="#3b82f6" />
+                </View>
+              )
+            }
+            scrollEnabled={false}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

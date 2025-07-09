@@ -1,10 +1,13 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-
+import CollectPostFeed from "@components/feedElem/CollectPostFeed";
+import backIcon from "../../../../components/backIcon/backIcon";
+import BackIcon from '../../../../components/backIcon/backIcon';
 const CollectScreen = () => {
   return (
-    <View>
-      <Text>CollectScreen</Text>
+    <View className='flex-1 bg-white dark:bg-gray-900'>
+      <BackIcon/>
+      <CollectPostFeed/>
     </View>
   )
 }

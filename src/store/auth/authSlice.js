@@ -116,9 +116,10 @@ export const loadAuthData = createAsyncThunk(
             const user = await getItemFromAsyncStorage('user');
             console.log(accessToken, refreshToken);
             if (!accessToken || !refreshToken || !user) {
+                console.log("no data,skip");
                 return null;
             }
-
+            console.log('success');
             try {
                 // 检查token是否有效
                 await checkAuthExpire();
