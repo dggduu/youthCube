@@ -59,7 +59,7 @@ const PostFeed = () => {
       lastRequestTime.current = Date.now();
 
       try {
-        const url = `${BASE_INFO.BASE_URL}api/posts?page=${pageNum}&size=10`;
+        const url = `${BASE_INFO.BASE_URL}api/posts?page=${pageNum}&size=15`;
         console.log('Fetching:', url);
         const response = await fetch(url);
         const result = await response.json();

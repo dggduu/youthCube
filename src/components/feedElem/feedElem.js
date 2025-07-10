@@ -11,16 +11,12 @@ const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
     >
       <View className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
         {/* 图片区域 */}
-        {imgUrl ? (
+        {imgUrl && (
           <Image
             source={{ uri: imgUrl }}
             className="w-full aspect-video bg-gray-200 dark:bg-gray-700"
             resizeMode="cover"
           />
-        ) : (
-          <View className="w-full aspect-video bg-gray-200 dark:bg-gray-700 justify-center items-center">
-            <Text className="text-gray-500 dark:text-gray-400 font-bold">No Image</Text>
-          </View>
         )}
 
         {/* 内容区域 */}
