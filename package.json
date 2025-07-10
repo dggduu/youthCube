@@ -69,6 +69,7 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keyboard-controller": "^1.17.4",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-markdown-display": "^7.0.2",
     "react-native-paper": "^5.3.0",
     "react-native-permissions": "^5.4.1",
     "react-native-reanimated": "^3.18.0",

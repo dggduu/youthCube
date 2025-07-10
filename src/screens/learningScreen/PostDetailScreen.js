@@ -9,7 +9,8 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Modal
+  Modal,
+  useColorScheme
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,11 +18,13 @@ import { BASE_INFO } from "../../constant/base";
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { useToast } from "../../components/tip/ToastHooks";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
-
+import Markdown from 'react-native-markdown-display';
 const PostDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { postId } = route.params;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme == "dark";
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -219,6 +222,42 @@ const PostDetailScreen = () => {
     }
   }] : [];
 
+const mdStyle = {
+  body: {
+    fontSize: 12,
+    color: isDark ? '#FFFFFF' : '#000000',
+  },
+  heading1: {
+    fontWeight: 800,
+    padding: 5,
+  },
+  heading2: {
+    fontWeight:700,
+    margin: 5,
+  },
+  heading3: {
+    fontWeight:600,
+    margin: 5,
+  },
+   code: { // 内联代码样式
+      backgroundColor: isDark ? '#333333' : '#F5F5F5',
+      padding: 2,
+      borderRadius: 3,
+      color: isDark ? '#FFFFFF' : '#000000',
+    },
+    codeBlock: { // 代码块样式
+      backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+      padding: 10,
+      borderRadius: 5,
+      overflow: 'hidden',
+      magrin: 10,
+    },
+    fence: { // 特定于 fenced code blocks 的样式
+      backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+      magrin: 10,
+    },
+};
+
   return (
     <>
       <ScrollView
@@ -265,9 +304,12 @@ const PostDetailScreen = () => {
             </TouchableOpacity>
           )}
 
-          <Text className="text-base text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
+          {/* <Text className="text-base text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
             {post.content}
-          </Text>
+          </Text> */}
+          <Markdown style={mdStyle}>
+            {post.content}
+          </Markdown>
 
           {tags.length > 0 && (
             <View className="flex-row flex-wrap mb-4">
@@ -699,5 +741,6 @@ const LoadMoreButton = ({ onPress, loading = false, text }) => (
     )}
   </TouchableOpacity>
 );
+
 
 export default PostDetailScreen;

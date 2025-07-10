@@ -138,7 +138,7 @@ const UploaderScreen = () => {
       formData.append('file', file);
       formData.append('bucketName', 'posts');
 
-      const response = await axios.post(`${BASE_INFO.BASE_URL}api/upload/quick`, formData, {
+      const response = await axios.post(`${BASE_INFO.BASE_URL}upload/quick`, formData, {
         headers: {
           Authorization: `Bearer ${authKey}`,
           'Content-Type': 'multipart/form-data',
@@ -181,7 +181,7 @@ const UploaderScreen = () => {
       let coverImageUrl = null;
       if (coverImage) {
         const objectName = await uploadImage(coverImage);
-        coverImageUrl = `${BASE_INFO.BASE_URL}api/upload/dl/posts/${objectName}`;
+        coverImageUrl = `${BASE_INFO.BASE_URL}dl/posts/${objectName}`;
       }
 
       const response = await axios.post(
@@ -239,7 +239,7 @@ const UploaderScreen = () => {
       try {
         Alert.alert('提示', '图片上传功能需要配置文件保存逻辑，当前只接收数据。');
         const objectName = 'PLACEHOLDER_OBJECT_NAME.jpg';
-        const imageUrl = `${BASE_INFO.BASE_URL}api/upload/dl/posts/${objectName}`;
+        const imageUrl = `${BASE_INFO.BASE_URL}sdl/posts/${objectName}`;
 
         if (webViewRef.current) {
           webViewRef.current.injectJavaScript(`
@@ -455,7 +455,7 @@ const UploaderScreen = () => {
               <TouchableOpacity
                 onPress={createNewTag}
                 disabled={isUploading || !newTagName.trim()}
-                className={`px-4 py-2 rounded-lg ${
+                className={`px-4 py-2 rounded-lg  ${
                   isUploading || !newTagName.trim() ? 'bg-green-400' : 'bg-green-600'
                 }`}
               >
