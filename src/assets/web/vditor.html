@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Markdown 编辑器</title>
+    <link rel="stylesheet" href="./index.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #vditor {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .vditor-toolbar {
+            flex-shrink: 0;
+            border-bottom: 1px solid #eee;
+        }
+        .vditor-editor {
+            flex-grow: 1;
+        }
+        .vditor-toolbar, .vditor-content, .vditor-panel {
+            box-shadow: none !important;
+        }
+        .submit-button-container {
+            width: 100%;
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #eee;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .submit-button {
+            background-color: #007AFF;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .submit-button:active {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="vditor"></div>
+    <div class="submit-button-container">
+        <button class="submit-button" id="submitBtn">完成编辑</button>
+    </div>
+
+    <script src="./index.min.js"></script>
+    <script>
+        let vditorInstance;
+        window.onload = function() {
+            vditorInstance = new Vditor('vditor', {
+                height: 'auto',
+                minHeight: 200,
+                toolbar: [
+                    'emoji', 'headings', 'bold', 'italic', 'strike', 'link', '|',
+                    'list', 'ordered-list', 'check', 'outdent', 'indent', '|',
+                    'quote', 'code', 'inline-code', 'insert-after', 'insert-before', '|',
+                    'table', 'preview'
+                ],
+                toolbarConfig: {
+                    pin: true,
+                },
+                typewriterMode: true,
+                placeholder: '开始输入你的内容...',
+                after: () => {
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_READY' }));
+                    }
+                },
+                mode: 'ir',
+            });
+
+            document.getElementById('submitBtn').addEventListener('click', () => {
+                if (vditorInstance) {
+                    const markdownContent = vditorInstance.getValue();
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'VDITOR_SUBMIT',
+                            content: markdownContent
+                        }));
+                    } else {
+                        console.log("Not in WebView, content:", markdownContent);
+                        alert("Content: " + markdownContent.substring(0, 100) + "...");
+                    }
+                }
+            });
+
+            document.addEventListener('message', (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'SET_INITIAL_CONTENT' && vditorInstance) {
+                        vditorInstance.setValue(message.content || '');
+                    }
+                } catch (e) {
+                    console.error("无法从RN解析字符串:", e);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
