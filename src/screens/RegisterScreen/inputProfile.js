@@ -79,7 +79,6 @@ export default function InputProfile({ route }) {
   const [formError, setFormError] = useState('');
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
-  const DEV = BASE_INFO.magic.isSkipRegisterVerify;
   const { showToast } = useToast;
   useEffect(() => {
     setGrade('');
@@ -133,7 +132,7 @@ export default function InputProfile({ route }) {
     } else {
       setEmailError('');
     }
-    showToast('网络错误', 'successful');
+    
     if (hasError) return;
 
     console.log('发送验证码至:', email);
@@ -152,12 +151,6 @@ export default function InputProfile({ route }) {
 
   // 提交表单
   const onSubmit = async () => {
-    //开发模式下直接跳过验证
-    if (DEV === true) {
-      console.log("DEV skip:",DEV);
-      navigation.navigate('choseLove');
-      return ;
-    }
 
     let hasError = false;
 
@@ -210,11 +203,11 @@ export default function InputProfile({ route }) {
       behavior='padding'
       className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}
     >
+      <BackIcon isDark={false}/>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         keyboardShouldPersistTaps="handled"
       >
-      <BackIcon isDark={false}/>
         <View className="px-4 pt-6 mt-8 mb-20">
           <Text
             className={`text-2xl font-bold text-center mb-6 ${
@@ -396,9 +389,9 @@ export default function InputProfile({ route }) {
           {/* 下一步 */}
           <TouchableOpacity
             onPress={onSubmit}
-            disabled={(!password || !isValidPassword(password).valid) && !DEV}
+            disabled={(!password || !isValidPassword(password).valid)}
             className={`py-3 rounded-lg items-center justify-center mt-5 ${
-              (password && isValidPassword(password).valid) || DEV
+              (password && isValidPassword(password).valid)
                 ? 'bg-blue-500'
                 : 'bg-gray-400'
             }`}

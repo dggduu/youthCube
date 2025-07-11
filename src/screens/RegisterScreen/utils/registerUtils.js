@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { BASE_URL, DEFAULT_AVATAR } from "../../../constant/url";
+import { BASE_INFO } from "../../../constant/base";
 
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BASE_INFO.BASE_URL,
   timeout: 10000, 
   headers: {
     'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ const apiClient = axios.create({
  */
 export const sendVerificationCode = async (email) => {
   try {
-    const response = await apiClient.post('/send-verification-code', {
+    const response = await apiClient.post('/api/send-verification-code', {
       email,
     });
     return { success: true, message: response.data.message };
@@ -41,7 +41,7 @@ export const registerUser = async (userData) => {
   const { name, date, learnStage, email, code, pswd, sex } = userData;
 
   // 使用默认头像
-  const defaultGravasterUrl = DEFAULT_AVATAR
+  const defaultGravasterUrl = ''
   const payload = {
     name,
     date,
@@ -54,9 +54,14 @@ export const registerUser = async (userData) => {
   };
 
   try {
-    const response = await apiClient.post('/register', payload);
+    const response = await apiClient.post('/api/register', payload);
     return { success: true, data: response.data };
   } catch (error) {
+    console.log('注册失败:', JSON.stringify({
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    }, null, 2));
     const errorMessage = error.response?.data?.error 
       || '注册失败，请稍后再试';
     return { success: false, error: errorMessage };

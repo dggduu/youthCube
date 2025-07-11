@@ -1,9 +1,9 @@
 export const BASE_INFO={
     chat:{
-        url: 'http://192.168.0.103:1234',
+        url: 'http://10.0.2.2:1234',
         model: 'qwen2-vl-2b-instruct',
     },
-    BASE_URL: 'http://192.168.0.105:3000/v1/',
+    BASE_URL: 'http://10.0.2.2:3000/v1/',
     fakeUser: {
         id: '8',
         email: 'dev@example.com',
@@ -15,7 +15,7 @@ export const BASE_INFO={
     },
     magic:{
         isSkipLoginPage: false,
-        isSkipRegisterVerify: true,
+        isSkipRegisterVerify: false,
     },
     Version: "0.0.1",
 };
