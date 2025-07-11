@@ -6,7 +6,7 @@ import axios from 'axios';
 import { BASE_INFO } from '../../../../constant/base';
 import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
-
+import BackIcon from "../../../../components/backIcon/backIcon";
 const VDITOR_CACHE_KEY = 'vditor_draft_content';
 
 const UploaderScreen = () => {
@@ -228,6 +228,11 @@ const UploaderScreen = () => {
     );
   };
 
+  const cleanMDContent = () => {
+    setVditorMarkdownContent('');
+    setContentDisplay('');
+    removeItemFromAsyncStorage(VDITOR_CACHE_KEY);
+  };
 
   const onWebViewMessage = useCallback(async (event) => {
     const message = JSON.parse(event.nativeEvent.data);
@@ -287,225 +292,236 @@ const UploaderScreen = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-5 dark:bg-gray-900">
-      <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建新帖子</Text>
+    <View className='flex-1 dark:bg-gray-900'>
+      <BackIcon/>
+      <ScrollView className="flex-1 p-5 0">
+        <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建新帖子</Text>
 
-      {/* Title Input */}
-      <TextInput
-        placeholder="标题 *"
-        placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-        value={title}
-        onChangeText={setTitle}
-        className="border border-gray-300 dark:border-gray-600 p-3 mb-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-      />
-
-      {/* Content Edit Button */}
-      <TouchableOpacity
-        onPress={() => setShowVditorModal(true)}
-        className="border border-gray-300 dark:border-gray-600 p-3 mb-4 rounded-lg bg-white dark:bg-gray-800"
-      >
-        <Text className="text-gray-900 dark:text-white font-semibold">
-          {contentDisplay ? '已编辑内容 (点击编辑)' : '点击编辑内容 *'}
-        </Text>
-        {contentDisplay ? (
-          <Text className="mt-2 text-gray-700 dark:text-gray-300" numberOfLines={5}>
-            {contentDisplay}
-          </Text>
-        ) : null}
-      </TouchableOpacity>
-
-      {/* Cover Image Upload */}
-      <TouchableOpacity
-        onPress={selectCoverImage}
-        className="border border-gray-300 dark:border-gray-600 p-4 mb-4 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
-      >
-        <Text className="text-gray-700 dark:text-gray-300">
-          {coverImage ? '更换封面图片' : '选择封面图片'}
-        </Text>
-      </TouchableOpacity>
-
-      {coverImage && (
-        <Image
-          source={{ uri: coverImage }}
-          className="w-full h-48 mb-4 rounded-lg"
+        {/* Title Input */}
+        <TextInput
+          placeholder="标题 *"
+          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          value={title}
+          onChangeText={setTitle}
+          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-      )}
 
-      {/* Tags Selection */}
-      <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>
+        {/* Content Edit Button */}
         <TouchableOpacity
-          onPress={() => setShowAddTagModal(true)}
-          className="px-3 py-1 bg-green-600 rounded-full"
+          onPress={() => setShowVditorModal(true)}
+          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800"
         >
-          <Text className="text-white text-sm">+ 新建标签</Text>
+          <Text className="text-gray-700 dark:text-gray-300 font-semibold">
+            {contentDisplay ? '已编辑内容 (点击编辑)' : '点击编辑内容 *'}
+          </Text>
+          {contentDisplay ? (
+            <Text className="mt-2 text-gray-700 dark:text-gray-300" numberOfLines={5}>
+              {contentDisplay}
+            </Text>
+          ) : null}
         </TouchableOpacity>
-      </View>
 
-      {/* Tag Search */}
-      <TextInput
-        placeholder="搜索标签..."
-        placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-        value={tagSearch}
-        onChangeText={setTagSearch}
-        className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-      />
+        <TouchableOpacity
+          onPress={()=>cleanMDContent()}
+          className="border border-gray-300 dark:border-gray-600 p-4 mb-5 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
+        >
+          <Text className="text-gray-700 dark:text-gray-300">清空已编辑内容</Text>
+        </TouchableOpacity>
+        
+        {/* Cover Image Upload */}
+        <TouchableOpacity
+          onPress={selectCoverImage}
+          className="border border-gray-300 dark:border-gray-600 p-4 mb-3 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
+        >
+          <Text className="text-gray-700 dark:text-gray-300">
+            {coverImage ? '更换封面图片' : '选择封面图片'}
+          </Text>
+        </TouchableOpacity>
 
-      {isLoadingTags ? (
-        <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
-      ) : (
-        <View className="flex-row flex-wrap mb-4">
-          {filteredTags.map((tag) => (
-            <TouchableOpacity
-              key={tag.tag_id}
-              onPress={() => toggleTag(tag.tag_id)}
-              className={`px-3 py-2 m-1 rounded-full ${
-                selectedTags.includes(tag.tag_id)
-                  ? 'bg-blue-600'
-                  : 'bg-gray-200 dark:bg-gray-600'
-              }`}
-            >
-              <Text
-                className={`${
-                  selectedTags.includes(tag.tag_id)
-                    ? 'text-white'
-                    : 'text-gray-800 dark:text-gray-200'
-                }`}
-              >
-                {tag.tag_name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        {coverImage && (
+          <Image
+            source={{ uri: coverImage }}
+            className="w-full h-48 mb-5 rounded-lg"
+          />
+        )}
+
+        {/* Tags Selection */}
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>
+          <TouchableOpacity
+            onPress={() => setShowAddTagModal(true)}
+            className="px-3 py-1 bg-green-600 rounded-full"
+          >
+            <Text className="text-white text-sm">+ 新建标签</Text>
+          </TouchableOpacity>
         </View>
-      )}
 
-      {/* Selected Tags */}
-      {selectedTags.length > 0 && (
-        <View className="mb-4">
-          <Text className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">已选标签:</Text>
-          <View className="flex-row flex-wrap">
-            {selectedTags.map((tagId) => {
-              const tag = availableTags.find((t) => t.tag_id === tagId);
-              return tag ? (
-                <TouchableOpacity
-                  key={tag.tag_id}
-                  onPress={() => toggleTag(tag.tag_id)}
-                  className="px-3 py-2 m-1 rounded-full bg-blue-600"
-                >
-                  <Text className="text-white">
-                    {tag.tag_name} ×
-                  </Text>
-                </TouchableOpacity>
-              ) : null;
-            })}
-          </View>
-        </View>
-      )}
+        {/* Tag Search */}
+        <TextInput
+          placeholder="搜索标签..."
+          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          value={tagSearch}
+          onChangeText={setTagSearch}
+          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+        />
 
-      {/* Upload Progress */}
-      {isUploading && (
-        <View className="items-center mb-4">
+        {isLoadingTags ? (
           <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
-          {uploadProgress > 0 && (
-            <Text className="mt-1 text-gray-600 dark:text-gray-400">上传中: {uploadProgress}%</Text>
-          )}
-        </View>
-      )}
-
-      {/* Submit Button */}
-      <TouchableOpacity
-        onPress={createPost}
-        disabled={isUploading || (Date.now() - lastSubmitTimeRef.current < 5000)}
-        className={`p-4 rounded-lg items-center ${
-          isUploading || (Date.now() - lastSubmitTimeRef.current < 5000) ? 'bg-gray-400' : 'bg-blue-600'
-        }`}
-      >
-        <Text className="text-white font-bold">
-          {isUploading ? '正在创建...' : '创建帖子'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Add Tag Modal */}
-      <Modal
-        visible={showAddTagModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowAddTagModal(false)}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50 p-5">
-          <View className="w-full bg-white dark:bg-gray-800 p-5 rounded-lg">
-            <Text className="text-xl font-bold mb-4 text-gray-900 dark:text-white">新建标签</Text>
-
-            <TextInput
-              placeholder="标签名称"
-              placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-              value={newTagName}
-              onChangeText={setNewTagName}
-              className="border border-gray-300 dark:border-gray-600 p-3 mb-4 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-
-            <View className="flex-row justify-end space-x-3">
+        ) : (
+          <View className="flex-row flex-wrap mb-4">
+            {filteredTags.map((tag) => (
               <TouchableOpacity
-                onPress={() => setShowAddTagModal(false)}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg"
-              >
-                <Text className="text-gray-800 dark:text-gray-200">取消</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={createNewTag}
-                disabled={isUploading || !newTagName.trim()}
-                className={`px-4 py-2 rounded-lg  ${
-                  isUploading || !newTagName.trim() ? 'bg-green-400' : 'bg-green-600'
+                key={tag.tag_id}
+                onPress={() => toggleTag(tag.tag_id)}
+                className={`px-3 py-2 m-1 rounded-full ${
+                  selectedTags.includes(tag.tag_id)
+                    ? 'bg-blue-600'
+                    : 'bg-gray-200 dark:bg-gray-600'
                 }`}
               >
-                <Text className="text-white">创建</Text>
+                <Text
+                  className={`${
+                    selectedTags.includes(tag.tag_id)
+                      ? 'text-white'
+                      : 'text-gray-800 dark:text-gray-200'
+                  }`}
+                >
+                  {tag.tag_name}
+                </Text>
               </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Selected Tags */}
+        {selectedTags.length > 0 && (
+          <View className="mb-4">
+            <Text className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">已选标签:</Text>
+            <View className="flex-row flex-wrap">
+              {selectedTags.map((tagId) => {
+                const tag = availableTags.find((t) => t.tag_id === tagId);
+                return tag ? (
+                  <TouchableOpacity
+                    key={tag.tag_id}
+                    onPress={() => toggleTag(tag.tag_id)}
+                    className="px-3 py-2 m-1 rounded-full bg-blue-600"
+                  >
+                    <Text className="text-white">
+                      {tag.tag_name} ×
+                    </Text>
+                  </TouchableOpacity>
+                ) : null;
+              })}
             </View>
           </View>
-        </View>
-      </Modal>
+        )}
 
-      {/* Vditor Modal */}
-      <Modal
-        visible={showVditorModal}
-        animationType="slide"
-        onRequestClose={() => setShowVditorModal(false)}
-      >
-        <View style={{ flex: 1 }}>
-          <WebView
-            ref={webViewRef}
-            source={
-              Platform.OS === 'android'
-                ? { uri: 'file:///android_asset/web/vditor.html' }
-                : require('../../../../assets/web/vditor.html')
-            }
-            style={{ flex: 1 }}
-            originWhitelist={['*']}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            allowFileAccess={true}
-            scalesPageToFit={false}
-            onMessage={onWebViewMessage}
-            onLoadEnd={() => {
-                if (webViewRef.current) {
-                    webViewRef.current.injectJavaScript(`
-                        if (typeof vditorInstance !== 'undefined' && vditorInstance) {
-                            vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent || '')});
-                        } else {
-                            // Fallback if vditorInstance isn't ready immediately (though 'after' should handle this)
-                            document.addEventListener('VDITOR_READY', () => {
-                                vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent || '')});
-                            }, { once: true }); // Ensure it only runs once
-                        }
-                        true; // Important for injectJavaScript
-                    `);
-                }
-            }}
-          />
-        </View>
-      </Modal>
-    </ScrollView>
+        {/* Upload Progress */}
+        {isUploading && (
+          <View className="items-center mb-4">
+            <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+            {uploadProgress > 0 && (
+              <Text className="mt-1 text-gray-600 dark:text-gray-400">上传中...</Text>
+            )}
+          </View>
+        )}
+
+        {/* Submit Button */}
+        <TouchableOpacity
+          onPress={createPost}
+          disabled={isUploading || (Date.now() - lastSubmitTimeRef.current < 5000)}
+          className={`p-4 rounded-lg items-center mb-10 ${
+            isUploading || (Date.now() - lastSubmitTimeRef.current < 5000) ? 'bg-gray-400' : 'bg-blue-600'
+          }`}
+        >
+          <Text className="text-white font-bold">
+            {isUploading ? '正在创建...' : '创建帖子'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Add Tag Modal */}
+        <Modal
+          visible={showAddTagModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowAddTagModal(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50 p-5">
+            <View className="w-full bg-white dark:bg-gray-800 p-5 rounded-lg">
+              <Text className="text-xl font-bold mb-4 text-gray-900 dark:text-white">新建标签</Text>
+
+              <TextInput
+                placeholder="标签名称"
+                placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                value={newTagName}
+                onChangeText={setNewTagName}
+                className="border border-gray-300 dark:border-gray-600 p-3 mb-4 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+
+              <View className="flex-row justify-end space-x-3">
+                <TouchableOpacity
+                  onPress={() => setShowAddTagModal(false)}
+                  className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg mr-2"
+                >
+                  <Text className="text-gray-800 dark:text-gray-200">取消</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={createNewTag}
+                  disabled={isUploading || !newTagName.trim()}
+                  className={`px-4 py-2 rounded-lg  ${
+                    isUploading || !newTagName.trim() ? 'bg-green-400' : 'bg-green-600'
+                  }`}
+                >
+                  <Text className="text-white">创建</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Vditor Modal */}
+        <Modal
+          visible={showVditorModal}
+          animationType="slide"
+          onRequestClose={() => setShowVditorModal(false)}
+        >
+          <View style={{ flex: 1 }}>
+            <WebView
+              ref={webViewRef}
+              source={
+                Platform.OS === 'android'
+                  ? { uri: 'file:///android_asset/web/vditor.html' }
+                  : require('../../../../assets/web/vditor.html')
+              }
+              style={{ flex: 1 }}
+              originWhitelist={['*']}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+              allowFileAccess={true}
+              scalesPageToFit={false}
+              onMessage={onWebViewMessage}
+              onLoadEnd={() => {
+                  if (webViewRef.current) {
+                      webViewRef.current.injectJavaScript(`
+                          if (typeof vditorInstance !== 'undefined' && vditorInstance) {
+                              vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent || '')});
+                          } else {
+                              // Fallback if vditorInstance isn't ready immediately (though 'after' should handle this)
+                              document.addEventListener('VDITOR_READY', () => {
+                                  vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent || '')});
+                              }, { once: true }); // Ensure it only runs once
+                          }
+                          true; // Important for injectJavaScript
+                      `);
+                  }
+              }}
+            />
+          </View>
+        </Modal>
+      </ScrollView>
+    </View>
+    
   );
 };
 

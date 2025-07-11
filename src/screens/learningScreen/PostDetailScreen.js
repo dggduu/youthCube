@@ -256,6 +256,15 @@ const mdStyle = {
       backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
       magrin: 10,
     },
+     list_item: {
+      color: isDark ? '#E6E6E6' : '#1A1A1A',
+    },
+    unordered_list_icon: {
+      color: isDark ? '#FF9800' : '#F57C00', // 修改圆点颜色
+    },
+    ordered_list_icon: {
+      color: isDark ? '#4CAF50' : '#388E3C', // 编号颜色
+    },
 };
 
   return (
