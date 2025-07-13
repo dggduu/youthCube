@@ -10,6 +10,7 @@ import ProfileScreen from '@screens/MainTabScreen/profileScreen';
 import ProfileNavigtor from "../navigation/profileNavigator/ProfileNavigtor";
 import PostNavgator from "./learningNavigtor/PostNavigtor";
 import FunctionNavigator from "./learningNavigtor/FunctionNavigator";
+import TeamNavigtor from "./ideaMaketNavigtor/TeamNavigtor";
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
@@ -76,7 +77,7 @@ const MainTabNavigator = () => {
       })}
     >
       <Tab.Screen name="聪宝" component={ChatScreen} />
-      <Tab.Screen name="想法市场" component={IdeaMarketScreen} />
+      <Tab.Screen name="想法市场" component={TeamNavigtor} />
       <Tab.Screen name="学习中心" component={FunctionNavigator} />
       <Tab.Screen name="我的" component={ProfileNavigtor} />
     </Tab.Navigator>

@@ -17,3 +17,9 @@ export const GRADES = [
   { label: '博士', value: 'phd' },
   { label: '成年人', value: 'mature' },
 ];
+
+export const PartyGrade = [
+  {grade: '队长' ,value: 'owner'},
+  {grade: '管理员' ,value: 'co_owner'},
+  {grade: '成员' ,value: 'member'},
+];
