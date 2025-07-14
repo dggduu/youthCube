@@ -5,6 +5,8 @@ import ChatGroupSetting from "../../screens/ideaScreen/Chat/ChatGroupSetting";
 import ChatSingle from "../../screens/ideaScreen/Chat/ChatSingle";
 import HelpChat from "../../components/aiChat/HelpChat";
 import HelpScreen from "../../screens/helperScreen/helpScreen";
+import { TouchableOpacity } from "react-native";
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 const Stack = createNativeStackNavigator();
 
 const ChatNavigator = () => {
@@ -29,26 +31,40 @@ const ChatNavigator = () => {
         component={ChatSingle}
         options={{
           headerShown: true,
-          title: '',
+          title: '私聊',
           headerBackTitle: '返回'
         }}
       />
       <Stack.Screen
         name="setting"
-        component={ChatGroup}
+        component={ChatGroupSetting}
         options={{
           headerShown: true,
-          title: '',
+          title: '群聊设置',
           headerBackTitle: '返回'
         }}
       />
       <Stack.Screen
         name="group"
         component={ChatGroup}
-        options={{
-          headerShown: true,
-          title: '团队详情',
-          headerBackTitle: '返回'
+        options={({ navigation, route }) => {
+          const { team_id } = route.params || {};
+
+          return {
+            headerShown: true,
+            title: '队内聊天',
+            headerBackTitle: '返回',
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('setting', { team_id });
+                }}
+                style={{ marginRight: 10 }}
+              >
+                <MaterialIcon name="density-medium" size={24} color="#333" />
+              </TouchableOpacity>
+            ),
+          };
         }}
       />
       <Stack.Screen
@@ -65,3 +81,4 @@ const ChatNavigator = () => {
 };
 
 export default ChatNavigator;
+

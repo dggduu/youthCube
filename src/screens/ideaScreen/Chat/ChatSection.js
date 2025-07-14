@@ -125,7 +125,7 @@ const ChatSection = () => {
     const renderPrivateChat = ({ item }) => (
         <TouchableOpacity
             className={`p-4 border-b border-gray-200 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50' : 'bg-transparent'}`}
-            onPress={() => navigation.navigate('single', { chatId: item.room_id })}
+            onPress={() => navigation.navigate('single', { chatId: item.room_id, name:item.other_user.name })}
         >
             <MaterialIcons
                 name={item.other_user.is_following ? 'favorite' : 'person'}
@@ -137,7 +137,7 @@ const ChatSection = () => {
                     {item.other_user.name}
                 </Text>
                 <Text className="text-gray-500 text-xs">
-                    最后消息: {item.lastMessage || '暂无消息'}
+                    最近消息: {item.last_message || '暂无消息'}
                 </Text>
             </View>
             {item.unreadCount > 0 && (
@@ -156,7 +156,7 @@ const ChatSection = () => {
                     <Text className="font-bold mb-2 dark:text-gray-200">团队聊天</Text>
                     <TouchableOpacity
                         className="p-4 bg-blue-50 rounded-lg flex-row items-center"
-                        onPress={() => navigation.navigate('group', { chatId: teamChat.chatRoomId })}
+                        onPress={() => navigation.navigate('group', { chatId: teamChat.chatRoomId, team_id:teamChat.teamId, name:teamChat.name })}
                     >
                         <MaterialIcons name="groups" size={24} color="#1976d2" />
                         <View className="flex-1 ml-2">
@@ -193,7 +193,7 @@ const ChatSection = () => {
                     <FlatList
                         data={privateChats}
                         renderItem={renderPrivateChat}
-                        keyExtractor={(item) => item.chatRoomId}
+                        keyExtractor={(item) => item.room_id}
                         onEndReached={() => !loading && hasMore && fetchPrivateChats(page + 1)}
                         onEndReachedThreshold={0.5}
                         ListFooterComponent={() =>

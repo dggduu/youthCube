@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
 } from 'react-native-gifted-chat';
 import { LinearGradient } from 'react-native-linear-gradient';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import { useRoute } from '@react-navigation/native';
+import { useRoute,useNavigation } from '@react-navigation/native';
 import { useToast } from '../../components/tip/ToastHooks';
 import {
   getItemFromAsyncStorage,

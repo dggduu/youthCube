@@ -1,14 +1,18 @@
 import { View, Text } from 'react-native'
-import React from 'react'
-import { useRoute } from "@react-navigation/native";
-import { GiftedChatContext } from "react-native-gifted-chat";
+import React, { use, useLayoutEffect } from 'react'
+import { useRoute, useNavigation } from "@react-navigation/native";
 import PersonChat from "../../../components/aiChat/PersonChat";
 const ChatGroup = () => {
   const route = useRoute();
-  const { chatId } = route.params;
+  const { chatId, name } = route.params;
+  const navigation = useNavigation();
+  useLayoutEffect(()=>{
+    navigation.setOptions({
+      'title': name
+    });
+  },[]);
   return (
     <View className='flex-1'>
-      <Text>{chatId}</Text>
       <PersonChat chatId={chatId}/>
     </View>
   )
