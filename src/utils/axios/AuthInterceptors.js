@@ -28,7 +28,8 @@ export default function setupAuthInterceptors(instance) {
     async (error) => {
       const { config: originalRequest, response } = error;
 
-      if (response && response.status === 403) {
+      // 支持 401 和 403，防止某些后端用 401 表示 token 失效
+      if (response && (response.status === 401 || response.status === 403)) {
         if (originalRequest._retry) {
           return Promise.reject(error);
         }
