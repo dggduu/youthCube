@@ -22,4 +22,5 @@
 - [ ] 接入Oauth2(x)
 - [ ] FCM推送（后台推送）
 - [ ] 懒加载策略
+- [ ] webTrans
 - [ ] 数据报告生成（jsPdf react-native-chart-kit）

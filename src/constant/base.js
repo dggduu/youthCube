@@ -1,9 +1,10 @@
 export const BASE_INFO={
     chat:{
-        url: 'http://10.0.2.2:1234',
+        url: 'http://192.168.0.103:1234',
         model: 'qwen2-vl-2b-instruct',
     },
-    BASE_URL: 'http://10.0.2.2:3000/v1/',
+    BASE_URL: 'http://192.168.0.103:3000/v1/',
+    BASE_SOCKET_URL: 'http://192.168.0.103:3000',
     fakeUser: {
         id: '8',
         email: 'dev@example.com',

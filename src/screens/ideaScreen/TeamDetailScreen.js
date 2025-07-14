@@ -6,6 +6,7 @@ import { GRADES, PartyGrade } from '../../constant/user';
 import { getItemFromAsyncStorage, setItemInAsyncStorage } from "../../utils/LocalStorage";
 import { Screen } from 'react-native-screens';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
+import { setTSpan } from 'react-native-svg/lib/typescript/lib/extract/extractText';
 const TeamDetailScreen = () => {
   const route = useRoute();
   const { teamId, teamName } = route.params || {};
@@ -20,6 +21,7 @@ const TeamDetailScreen = () => {
     description: ''
   });
   const navigation = useNavigation();
+  const [userId, setUserId] = useState('');
   const [associatedArticles, setAssociatedArticles] = useState([]);
   const [articlesLoading, setArticlesLoading] = useState(false);
   const [lastApplicationTime, setLastApplicationTime] = useState(null);
@@ -44,8 +46,12 @@ const TeamDetailScreen = () => {
         setLoading(false);
       }
     };
-
+    const loadUserID = async()=>{
+      const user = await getItemFromAsyncStorage('user');
+      setUserId(user.id);
+    }
     fetchTeamDetails();
+    loadUserID();
   }, [teamId]);
 
   const fetchAssociatedArticles = async (projectResults) => {
@@ -166,10 +172,27 @@ const TeamDetailScreen = () => {
         </View>
         {/* 申请加入按钮 */}
         <TouchableOpacity
-          className="bg-blue-500 dark:bg-blue-700 py-3 rounded-lg"
-          onPress={() => setShowApplyModal(true)}
+          className={`${
+            teamData.chatRoom.members.some(member => member.user_id === userId)
+              ? 'bg-gray-300 dark:bg-gray-600'
+              : 'bg-blue-500 dark:bg-blue-700'
+          } py-3 rounded-lg`}
+          onPress={() => {
+            if (!teamData.chatRoom.members.some(member => member.user_id === userId)) {
+              setShowApplyModal(true);
+            }
+          }}
+          disabled={teamData.chatRoom.members.some(member => member.user_id === userId)}
         >
-          <Text className="text-white text-center font-bold">申请加入队伍</Text>
+          <Text className={`text-center font-bold ${
+            teamData.chatRoom.members.some(member => member.user_id === userId)
+              ? 'text-gray-700 dark:text-gray-300'
+              : 'text-white'
+          }`}>
+            {teamData.chatRoom.members.some(member => member.user_id === userId)
+              ? '你已经是队伍成员'
+              : '申请加入队伍'}
+          </Text>
         </TouchableOpacity>
       </View>
 
