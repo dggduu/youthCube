@@ -10,7 +10,6 @@ const axiosClient = axios.create({
         "Content-Type": 'application/json',
     },
 });
-setupAuthInterceptors(axiosClient);
 
 /**
  * 登录函数，通过邮箱和密码获取访问令牌和刷新令牌
@@ -63,6 +62,7 @@ export const refreshAccessToken = async (refreshToken) => {
 export const checkAuthExpire = async () => {
     try {
         const accessToken = await getItemFromAsyncStorage('accessToken');
+        console.log("现在正在检查密钥");
         if (!accessToken) throw new Error('无可用的密钥');
 
         const response = await axiosClient.get('/auth/status', {
@@ -76,6 +76,7 @@ export const checkAuthExpire = async () => {
     } catch (error) {
         // 如果是401/403错误，直接抛出
         if (error.response?.status === 401 || error.response?.status === 403) {
+            console.log("抛出403");
             throw error;
         }
         throw new Error('检查认证状态失败');

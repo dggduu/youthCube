@@ -245,13 +245,23 @@ const authSlice = createSlice({
             })
             .addCase(refreshAuthToken.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || '刷新令牌失败';
+                state.error = action.payload;
                 state.isAuthenticated = false;
                 state.accessToken = null;
                 state.refreshToken = null;
                 state.userData = {
-                    id: null, email: null, is_member: null, learn_stage: null,
-                    sex: null, ava_url: null,
+                    id: null,
+                    name: null,
+                    birth_date: null,
+                    learn_stage: null,
+                    email: null,
+                    sex: null,
+                    avatar_key: null,
+                    bio: null,
+                    team_id: null,
+                    is_member: null,
+                    posts: [],
+                    team: null
                 };
             })
             .addCase(loadAuthData.pending, (state) => {

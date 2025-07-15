@@ -3,13 +3,14 @@ import ideaMarketScreen from "../../screens/MainTabScreen/ideaMarketScreen";
 import TeamDetailScreen from "../../screens/ideaScreen/TeamDetailScreen";
 import TagSection from "../../screens/ideaScreen/TagSection";
 import ChatNavigtor from "./ChatNavigtor";
-import PostNavigator from "../../navigation/learningNavigtor/PostNavigtor";
+import PersonalProfile from "../../components/PresonalProfile";
+import PostNavigator from "./PostNavigtor";
 const Stack = createNativeStackNavigator();
 
 const TeamNavigator = () => {
   return (
     <Stack.Navigator 
-      screenOptions={{ 
+      screenOptions={{
         headerShown: false,
         animation: 'slide_from_right'
       }}
@@ -34,6 +35,15 @@ const TeamNavigator = () => {
           title: '根据 Tag 查询文章',
           headerBackTitle: '返回'
         }}
+      />
+      <Stack.Screen
+        name="profile"
+        component={PersonalProfile}
+        options={{
+          headerShown: true,
+          title: '',
+          headerBackTitle: '返回'
+        }}  
       />
     </Stack.Navigator>
   );

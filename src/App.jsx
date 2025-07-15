@@ -11,7 +11,7 @@ import { ActivityIndicator, View, Text } from 'react-native';
 import { useToast } from "./components/tip/ToastHooks";
 import '../global.css' 
 import { BASE_INFO } from "./constant/base";
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const RootAppContent = () => {
     const dispatch = useDispatch();
     // 从 Redux中获取认证相关的状态
@@ -46,9 +46,12 @@ const RootAppContent = () => {
 };
 
 const App = () => {
+    const queryClient = new QueryClient();
     return (
         <Provider store={store}>
-            <RootAppContent />
+            <QueryClientProvider client={queryClient}>
+                <RootAppContent />
+            </QueryClientProvider>
         </Provider>
     );
 };

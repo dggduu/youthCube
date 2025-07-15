@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -19,6 +19,7 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import { useToast } from "../../components/tip/ToastHooks";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
 import Markdown from 'react-native-markdown-display';
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 const PostDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -38,7 +39,24 @@ const PostDetailScreen = () => {
   const { showToast } = useToast();
   const [authToken, setAuthToken] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
-
+  // 处理生成嵌套问题，但嵌套深度为复数个时显示跳转主页按钮
+  const state = navigation.getState();
+  const index = state.routes.findIndex(r => r.key === route.key);
+  const depth = state.routes.length - index - 1;
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => navigation.popToTop()}
+            style={{ marginRight: 10 }}
+          >
+            <MaterialIcons name="home" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [depth, navigation, route.params?.team_id]);
   const fetchPost = useCallback(async () => {
     try {
       setLoading(true);

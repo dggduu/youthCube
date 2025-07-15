@@ -221,7 +221,17 @@ const TeamDetailScreen = () => {
           <Text className='font-semibold text-dark dark:text-gray-300'>队伍成员：</Text>
           <View className='flex-row px-1 py-2'>
             {teamData.chatRoom.members.map((member, index) => (
-              <TouchableOpacity key={index} className='mr-4 p-2 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900' >
+              <TouchableOpacity
+                key={index}
+                className='mr-4 p-2 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900' 
+                onPress={()=>{
+                  navigation.navigate("profile", {
+                    team_id : teamData.team_id,
+                    user_id : member.user_id,
+                    user_name: member.name
+                  });
+                }}
+              >
                 <MaterialIcons 
                   name={member.role === 'member' ? 'person' : 'star'} 
                   color={isDark ? "#fff" : "#000"} 

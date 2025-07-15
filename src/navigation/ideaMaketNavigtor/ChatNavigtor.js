@@ -5,6 +5,9 @@ import ChatGroupSetting from "../../screens/ideaScreen/Chat/ChatGroupSetting";
 import ChatSingle from "../../screens/ideaScreen/Chat/ChatSingle";
 import HelpChat from "../../components/aiChat/HelpChat";
 import HelpScreen from "../../screens/helperScreen/helpScreen";
+import InviteFriend from "../../screens/ideaScreen/Chat/InviteFriend";
+import InviteRedux from "../../screens/ideaScreen/Chat/InviteRedux";
+
 import { TouchableOpacity } from "react-native";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 const Stack = createNativeStackNavigator();
@@ -73,6 +76,24 @@ const ChatNavigator = () => {
         options={{
           headerShown: true,
           title: '',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen 
+        name="Invite"
+        component={InviteFriend}
+        options={{
+          headerShown: true,
+          title: '邀请好友',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen
+        name="InviteRedux"
+        component={InviteRedux}
+        options={{
+          headerShown: true,
+          title: '入群申请管理',
           headerBackTitle: '返回'
         }}
       />
