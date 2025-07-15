@@ -205,7 +205,9 @@ const TeamDetailScreen = () => {
               <TouchableOpacity 
                 key={tag.tag_id}
                 onPress={()=>{
-                  navigation.navigate("Tag");
+                  navigation.navigate("Tag",{
+                    tagId: tag.tag_id
+                  });
                 }}
                 className="bg-indigo-100 dark:bg-indigo-900 px-3 py-1 rounded-full mr-2 mb-2"
               >

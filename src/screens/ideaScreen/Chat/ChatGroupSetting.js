@@ -448,7 +448,7 @@ const ChatGroupSetting = () => {
               </TouchableOpacity>
             )}
             
-            {selectedMember?.role !== 'member' && (
+            {['member', 'co_owner'].includes(currentUserRole) && (
               <TouchableOpacity 
                 className="p-4 border-b border-gray-200 dark:border-gray-700"
                 onPress={() => updateMemberRole(selectedMember.user_id, 'member')}
@@ -471,10 +471,10 @@ const ChatGroupSetting = () => {
 
             {currentUserRole === 'owner' && selectedMember?.user_id !== currentUser?.userId && (
                 <TouchableOpacity 
-                className="p-4 mt-2"
+                className="p-4"
                 onPress={() => transferOwnership(selectedMember.user_id)}
                 >
-                <Text className="text-base font-bold text-red-500">转移组长权限</Text>
+                <Text className="text-base text-red-500">转移组长权限</Text>
                 </TouchableOpacity>
             )}
             

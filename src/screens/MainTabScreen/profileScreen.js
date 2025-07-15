@@ -44,11 +44,11 @@ export default function ProfileScreen({ navigation }) {
   return (
     <SafeAreaProvider style={{ backgroundColor: isDark ? '#121212' : '#f9f9f9' }}>
       <ScrollView className="flex-1">
-        <View className="px-1 pt-4 pb-8" style={{ maxWidth: 900, alignSelf: 'center' }}>
+        <View className="px-6 pt-4 pb-8">
 
           {/* --- 用户信息卡片 --- */}
           <View
-            className={`p-8 rounded-2xl mb-6 shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`p-10 rounded-2xl mb-6 border border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
             style={{
               elevation: 2,
               shadowColor: isDark ? '#000' : '#ccc',
@@ -67,11 +67,6 @@ export default function ProfileScreen({ navigation }) {
                     <Text className="text-xl font-bold dark:text-white mr-2">
                       {userData.name}
                     </Text>
-                    <CrownIcon
-                      width={20}
-                      height={20}
-                      fill={userData.is_member ? (isDark ? '#B89230' : '#DA954B') : isDark ? '#ddd' : '#000'}
-                    />
                   </View>
                   <Text className="text-sm mt-1 text-neutral-500 dark:text-gray-300">
                     {getLabelByValueFromMap(userData.learn_stage)}
@@ -96,19 +91,17 @@ export default function ProfileScreen({ navigation }) {
 
           {/* --- 我的学习模块 --- */}
           <View
-            className={`p-5 rounded-2xl mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`p-5 rounded-2xl border border-gray-200 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
             <Text className="text-lg font-semibold mb-4 ml-1 text-neutral-800 dark:text-white">
               我的学习
             </Text>
 
-            <View className="gap-3">
+            <View>
               {learningItems.map((item, index) => (
                 <TouchableOpacity
                   key={index}
-                  className={`flex-row items-center p-4 rounded-xl ${
-                    isDark ? 'bg-gray-700' : 'bg-gray-100'
-                  }`}
+                  className={`flex-row items-center p-2 py-4 rounded-xl border-b border-gray-200`}
                   onPress={() => navigation.navigate(item.screen, item.params)}
                 >
                   <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#666'} />
@@ -122,7 +115,7 @@ export default function ProfileScreen({ navigation }) {
 
           {/* --- 设置和其他选项 --- */}
           <View
-            className={`rounded-2xl overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`rounded-2xl overflow-hidden border p-3 border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
             {otherItems.map((item, idx) => (
               <React.Fragment key={idx}>
@@ -130,7 +123,7 @@ export default function ProfileScreen({ navigation }) {
                   className="flex-row items-center px-4 py-4"
                   onPress={() => navigation.navigate(item.screen, item.params)}
                 >
-                  <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#888'} />
+                  <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#666'} />
                   <Text className="text-base ml-5 text-neutral-800 dark:text-white">
                     {item.label}
                   </Text>

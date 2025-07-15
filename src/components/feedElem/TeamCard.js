@@ -14,8 +14,7 @@ const TeamCard = ({ title, tags, onPress }) => {
               <TouchableOpacity
                 onPress={()=>{
                   navigation.navigate("Tag", {
-                    tag_id: tag.tag_id,
-                    tag_name: tag.tag_name
+                    tagId: tag.tag_id,
                   });
                 }}
                 key={tag.tag_id}
