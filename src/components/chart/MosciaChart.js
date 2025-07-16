@@ -11,7 +11,20 @@ import {
 import { useToast } from '../../components/tip/ToastHooks';
 import { getItemFromAsyncStorage } from '../../utils/LocalStorage';
 import { BASE_INFO } from '../../constant/base';
-import {  } from "@tanstack/react-query";
+
+// 颜色色阶：从浅绿到深绿
+const GREEN_SHADES = [
+  '#e8f5e9', // 最浅
+  '#c8e6c9',
+  '#a5d6a7',
+  '#81c784',
+  '#66bb6a',
+  '#4caf50',
+  '#43a047',
+  '#388e3c',
+  '#2e7d32',
+  '#1b5e20'  // 最深
+];
 
 // 格式化日期为 Y-m-d
 const date = (timestamp) => {
@@ -28,7 +41,6 @@ const getDates = () => {
   const oneYearAgo = new Date(now);
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-  // 找到过去一年的第一天是周几，计算从最近的周日开始
   const startDay = new Date(oneYearAgo);
   const dayOfWeek = startDay.getDay();
   startDay.setDate(startDay.getDate() - dayOfWeek);
@@ -71,8 +83,7 @@ const calculateMonthLabels = (weeks) => {
   return monthLabels;
 };
 
-// 根据 timeline_type 返回颜色
-const getColorByType = (types, isDarkMode) => {
+const getColorByType = (types, isDarkMode, maxCount) => {
   if (!types || types.length === 0) {
     return isDarkMode ? '#1a1a1a' : '#ebedf0';
   }
@@ -81,10 +92,18 @@ const getColorByType = (types, isDarkMode) => {
   for (const type of priority) {
     if (types.includes(type)) {
       switch (type) {
-        case 'meeting': return '#facc15'; // yellow-400
-        case 'deadline': return '#ef4444'; // red-500
-        case 'competition': return '#3b82f6'; // blue-500
-        case 'progress_report': return '#10b981'; // green-500
+        case 'meeting': return '#facc15';
+        case 'deadline': return '#ef4444';
+        case 'competition': return '#3b82f6';
+        case 'progress_report':
+          const count = types.filter(t => t === 'progress_report').length;
+          if (count === 0) return isDarkMode ? '#1a1a1a' : '#ebedf0';
+
+          const index = Math.min(
+            Math.floor((count / maxCount) * (GREEN_SHADES.length - 1)),
+            GREEN_SHADES.length - 1
+          );
+          return GREEN_SHADES[index];
       }
     }
   }
@@ -92,23 +111,17 @@ const getColorByType = (types, isDarkMode) => {
   return isDarkMode ? '#1a1a1a' : '#ebedf0';
 };
 
-// 获取深色/浅色模式样式
 const useChartStyles = (isDarkMode) => {
   const colors = {
     bg: isDarkMode ? '#121212' : '#fff',
     itemBg: isDarkMode ? '#1a1a1a' : '#ebedf0',
-    todayBorder: isDarkMode ? '#fff' : '#000',
+    todayBorder: isDarkMode ? '#fff' : '#333',
     monthLabel: isDarkMode ? '#ccc' : '#000',
     weekdayLabel: isDarkMode ? '#999' : '#000',
     legendText: isDarkMode ? '#fff' : '#000',
   };
 
   return StyleSheet.create({
-    container: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      backgroundColor: colors.bg,
-    },
     legendContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -143,12 +156,11 @@ const useChartStyles = (isDarkMode) => {
       color: colors.monthLabel,
     },
     days: {
-      position: 'absolute',
       left: 3,
       width: 16,
       height: '100%',
       zIndex: 1,
-      marginTop:20
+      marginTop:13
     },
     weekDay: {
       position: 'absolute',
@@ -166,7 +178,7 @@ const useChartStyles = (isDarkMode) => {
       width: 12,
       height: 12,
       marginBottom: 3,
-      borderRadius: 2,
+      borderRadius: 4,
       backgroundColor: colors.itemBg,
     },
     todayHighlight: {
@@ -175,6 +187,7 @@ const useChartStyles = (isDarkMode) => {
     },
     scrollView: {
       width: Dimensions.get('window').width - 32,
+      marginLeft:4
     },
     scrollViewContent: {
       paddingRight: 16,
@@ -184,12 +197,12 @@ const useChartStyles = (isDarkMode) => {
 
 const MosciaChart = ({ team_id }) => {
   const [mosaicTile, setMosaicTile] = useState({});
+  const [maxCount, setMaxCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const colorScheme = useColorScheme();
-  const isDark = colorScheme == "dark";
+  const isDark = colorScheme === "dark";
   const { showToast } = useToast();
   const scrollViewRef = useRef(null);
-
   const days = getDates();
   const today = date(Date.now());
 
@@ -214,6 +227,7 @@ const MosciaChart = ({ team_id }) => {
         const result = await response.json();
 
         const eventsByDay = {};
+        let max = 0;
 
         if (result.success && Array.isArray(result.data)) {
           result.data.forEach((item) => {
@@ -223,10 +237,16 @@ const MosciaChart = ({ team_id }) => {
             if (!eventsByDay[day]) eventsByDay[day] = [];
 
             eventsByDay[day].push(item.timeline_type);
+
+            if (item.timeline_type === 'progress_report') {
+              const count = (eventsByDay[day].filter(t => t === 'progress_report') || []).length;
+              max = Math.max(max, count);
+            }
           });
         }
 
         setMosaicTile(eventsByDay);
+        setMaxCount(max);
       } catch (error) {
         console.error('Error fetching team progress:', error);
       } finally {
@@ -248,90 +268,93 @@ const MosciaChart = ({ team_id }) => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: isDark ? '#fff' : '#000' }}>加载中...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* 星期标签 */}
-      <View style={styles.days}>
-        <Text style={[styles.weekDay, { top: 0 }]}>日</Text>
-        <Text style={[styles.weekDay, { top: 15 }]}>一</Text>
-        <Text style={[styles.weekDay, { top: 30 }]}>二</Text>
-        <Text style={[styles.weekDay, { top: 45 }]}>三</Text>
-        <Text style={[styles.weekDay, { top: 60 }]}>四</Text>
-        <Text style={[styles.weekDay, { top: 75 }]}>五</Text>
-        <Text style={[styles.weekDay, { top: 90 }]}>六</Text>
+    <View className='justify-center bg-white dark:bg-gray-500 py-5 px-3 mx-3 rounded-xl items-center'>
+      {/* <Text className='font-semibold self-start text-lg mb-3 ml-2'>过去一年的时间线：</Text> */}
+      <View className=' flex-row'>
+        {/* 星期标签 */}
+        <View style={styles.days}>
+          <Text style={[styles.weekDay, { top: 0 }]}>日</Text>
+          <Text style={[styles.weekDay, { top: 15 }]}>一</Text>
+          <Text style={[styles.weekDay, { top: 30 }]}>二</Text>
+          <Text style={[styles.weekDay, { top: 45 }]}>三</Text>
+          <Text style={[styles.weekDay, { top: 60 }]}>四</Text>
+          <Text style={[styles.weekDay, { top: 75 }]}>五</Text>
+          <Text style={[styles.weekDay, { top: 90 }]}>六</Text>
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
+        >
+          <View>
+            {/* 月份标签 */}
+            <View style={styles.months}>
+              {monthLabels.map((label, index) => (
+                <Text
+                  key={`${label.month}-${label.weekIndex}`}
+                  style={[
+                    styles.monthLabel,
+                    {
+                      left: label.weekIndex * 15 + 2,
+                    },
+                  ]}
+                >
+                  {label.month}月
+                </Text>
+              ))}
+            </View>
+
+            {/* 热力图格子 */}
+            <View style={styles.gridContainer}>
+              {weeks.map((week, weekIndex) => (
+                <View key={weekIndex} style={styles.weekColumn}>
+                  {week.map((day, dayIndex) => (
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.gridItem,
+                        day === today && styles.todayHighlight,
+                        {
+                          backgroundColor: getColorByType(mosaicTile[day], isDark, maxCount),
+                        },
+                      ]}
+                      onPress={() => {
+                        const count = mosaicTile[day]?.length || 0;
+                        showToast(`${day}\n ${count} 个提交`);
+                      }}
+                    />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-      >
-        <View>
-          {/* 月份标签 */}
-          <View style={styles.months}>
-            {monthLabels.map((label, index) => (
-              <Text
-                key={`${label.month}-${label.weekIndex}`}
-                style={[
-                  styles.monthLabel,
-                  {
-                    left: label.weekIndex * 15 + 2,
-                  },
-                ]}
-              >
-                {label.month}月
-              </Text>
-            ))}
-          </View>
-
-          {/* 热力图格子 */}
-          <View style={styles.gridContainer}>
-            {weeks.map((week, weekIndex) => (
-              <View key={weekIndex} style={styles.weekColumn}>
-                {week.map((day, dayIndex) => (
-                  <TouchableOpacity
-                    key={day}
-                    style={[
-                      styles.gridItem,
-                      day === today && styles.todayHighlight,
-                      {
-                        backgroundColor: getColorByType(mosaicTile[day], isDark),
-                      },
-                    ]}
-                    onPress={() => {
-                      const count = mosaicTile[day]?.length || 0;
-                      showToast(`${day}\n ${count} 个提交`);
-                    }}
-                  />
-                ))}
-              </View>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
       {/* 图例 */}
-      <View className='flex-row mt-2'>
+      <View className='flex-row mt-3 self-start'>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#facc15' }]} />
           <Text style={styles.legendText}>会议</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#ef4444' }]} />
-          <Text style={styles.legendText}>截止</Text>
+          <Text style={styles.legendText}>截止时间</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#3b82f6' }]} />
           <Text style={styles.legendText}>比赛</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#10b981' }]} />
+          <View style={[styles.legendColor, { backgroundColor: '#66bb6a' }]} />
           <Text style={styles.legendText}>进度报告</Text>
         </View>
       </View>
