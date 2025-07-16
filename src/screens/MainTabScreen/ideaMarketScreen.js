@@ -15,7 +15,13 @@ export default function IeaMarketScreen() {
         alignItems: 'center',
         padding: 10,
       }}>
-        <TouchableOpacity>
+        <TouchableOpacity
+            onPress={()=>{
+              navigation.navigate("Progress", {
+                screen : "TimeLine"
+              });
+            }}
+        >
           <View style={{
             backgroundColor: '#fae287',
             padding: 45,

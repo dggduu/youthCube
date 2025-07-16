@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, ToastAndroid, Modal, TextInput, useColorScheme } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
@@ -25,6 +25,21 @@ const TeamDetailScreen = () => {
   const [associatedArticles, setAssociatedArticles] = useState([]);
   const [articlesLoading, setArticlesLoading] = useState(false);
   const [lastApplicationTime, setLastApplicationTime] = useState(null);
+
+  useLayoutEffect(()=>{
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => navigation.popToTop()}
+            style={{ marginRight: 10 }}
+          >
+            <MaterialIcons name="home" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  },[navigation]);
 
   useEffect(() => {
     const fetchTeamDetails = async () => {

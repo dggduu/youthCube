@@ -5,11 +5,14 @@ import Icon from 'react-native-vector-icons/MaterialIcons'
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage"
 import axios from 'axios'
 import { BASE_INFO } from '../../../constant/base';
+import { GRADES } from "../../../constant/user";
+import { useToast } from "../../../components/tip/ToastHooks";
 
 const ChatGroupSetting = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
-  const route = useRoute()
+  const route = useRoute();
+  const { showToast } = useToast();
   const navigation = useNavigation();
   const { team_id } = route.params
   const [teamData, setTeamData] = useState(null)
@@ -19,17 +22,25 @@ const ChatGroupSetting = () => {
   const [editValue, setEditValue] = useState('')
   const [roleModalVisible, setRoleModalVisible] = useState(false)
   const [selectedMember, setSelectedMember] = useState(null)
+  const [gradeLabel, setGradeLabel] = useState('未知');
   const [currentUser, setCurrentUser] = useState(null)
   const [accessToken, setAccessToken] = useState(null)
   const [transferOwnerModalVisible, setTransferOwnerModalVisible] = useState(false);
-
+  
   const refreshTeamData = async () => {
     try {
       const response = await axios.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
+
+    if (response.data?.grade !== undefined && response.data?.grade !== null) {
+      const foundGrade = GRADES.find(grade => grade.value === response.data.grade);
+      setGradeLabel(foundGrade?.label || '未知');
+    } else {
+      setGradeLabel('未知');
+    }
+
       setTeamData(response.data)
     } catch (error) {
-      console.error('刷新团队数据出错:', error)
-      Alert.alert('错误', '刷新团队数据失败')
+      showToast('刷新团队数据出错', 'error');
     }
   }
 
@@ -45,11 +56,18 @@ const ChatGroupSetting = () => {
         }
         
         const response = await axios.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
+
+        if (response.data?.grade !== undefined && response.data?.grade !== null) {
+          const foundGrade = GRADES.find(grade => grade.value === response.data.grade);
+          setGradeLabel(foundGrade?.label || '未知');
+        } else {
+          setGradeLabel('未知');
+        }
+
         console.log("团队数据",response.data);
         setTeamData(response.data)
       } catch (error) {
-        console.error('获取数据出错:', error)
-        Alert.alert('错误', '加载团队数据失败')
+        showToast("错误！加载团队数据失败",'error');
       } finally {
         setLoading(false)
       }
@@ -70,8 +88,7 @@ const ChatGroupSetting = () => {
 
   const saveChanges = async () => {
     try {
-      console.log('保存更改:', { editField, editValue });
-      if (editField === 'team_name' || editField === 'description' || editField === 'is_public') {
+      if (editField === 'team_name' || editField === 'description' || editField === 'is_public' || editField === 'grade') {
         await axios.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
           [editField]: editField === 'is_public' ? (editValue === '公开' ? 1 : 0) : editValue
         }, {
@@ -90,12 +107,12 @@ const ChatGroupSetting = () => {
           }
         })
       }
-      
+      showToast("更新成功","success");
       await refreshTeamData();
       setEditModalVisible(false)
     } catch (error) {
       console.error('更新出错:', error)
-      Alert.alert('错误', '更新失败')
+      showToast("更新失败","error");
     }
   }
 
@@ -115,15 +132,15 @@ const ChatGroupSetting = () => {
       setRoleModalVisible(false)
     } catch (error) {
       console.error('更新角色出错:', error)
-      Alert.alert('错误', '更新角色失败')
+      showToast("更新失败","error");
     }
   }
 
   const transferOwnership = async (newOwnerId) => {
     const newOwnerName = teamData.chatRoom.members.find(m => m.user_id === newOwnerId)?.name;
     Alert.alert(
-      "转移所有权",
-      `确定要将所有权转移给 ${newOwnerName} 吗？您将成为共同所有者。`,
+      "转移队长权限",
+      `确定要将队长权限转移给 ${newOwnerName} 吗？您将成为共同所有者。`,
       [
         {
           text: "取消",
@@ -146,10 +163,10 @@ const ChatGroupSetting = () => {
               await refreshTeamData();
               setRoleModalVisible(false);
               setTransferOwnerModalVisible(false);
-              Alert.alert('成功', '所有权转移成功!');
+              showToast("成功转移队长权限","success");
             } catch (error) {
               console.error('转移所有权出错:', error)
-              Alert.alert('错误', '转移所有权失败')
+              showToast("转移权限失败","error");
             }
           }
         }
@@ -160,7 +177,7 @@ const ChatGroupSetting = () => {
   const handleRemoveMember = async (userId, userName) => {
     Alert.alert(
       "移除成员",
-      `确定要将 ${userName} 从群组中移除吗？`,
+      `确定要将 ${userName} 从队伍中移除吗？`,
       [
         {
           text: "取消",
@@ -180,10 +197,10 @@ const ChatGroupSetting = () => {
               )
               await refreshTeamData();
               setRoleModalVisible(false);
-              Alert.alert('成功', `${userName} 已被移除。`);
+              showToast(`${userName} 已被移除`,"success");
             } catch (error) {
               console.error('移除成员出错:', error);
-              Alert.alert('错误', '移除成员失败');
+              showToast("移除成员失败","error");
             }
           }
         }
@@ -198,7 +215,7 @@ const ChatGroupSetting = () => {
     Alert.alert(
       "离开群组",
       userIsOwner && numMembers > 1
-        ? "您是群组所有者。在离开前必须将所有权转移给其他成员。"
+        ? "您是队长。在离开前必须将队长权限转移给其他成员。"
         : "确定要离开这个群组吗？",
       [
         {
@@ -212,10 +229,10 @@ const ChatGroupSetting = () => {
               return; 
             }
             try {
-              Alert.alert('成功', '您已离开群组。');
+              showToast("你已离开队伍","success");
             } catch (error) {
               console.error('离开群组出错:', error);
-              Alert.alert('错误', '离开群组失败');
+              showToast("离开队伍失败","error");
             }
           }
         }
@@ -278,6 +295,18 @@ const ChatGroupSetting = () => {
             <Text className="text-base text-gray-900 dark:text-gray-100">{teamData.chatRoom.name || '未命名聊天'}</Text>
             {['owner', 'co_owner'].includes(currentUserRole) && (
               <TouchableOpacity onPress={() => handleEditField('chatroom_name', teamData.chatRoom.name)}>
+                <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">推荐参加年龄</Text>
+          <View className="flex-row items-center flex-[2] justify-between">
+            <Text className="text-base text-gray-900 dark:text-gray-100">{gradeLabel}</Text>
+            {['owner', 'co_owner'].includes(currentUserRole) && (
+              <TouchableOpacity onPress={() => handleEditField('grade', teamData.grade)}>
                 <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
               </TouchableOpacity>
             )}
@@ -563,7 +592,26 @@ const ChatGroupSetting = () => {
                   <Text className="ml-2 text-gray-900 dark:text-gray-100">私有</Text>
                 </TouchableOpacity>
               </View>
-            ) : (
+            ) : editField === 'grade' ? (
+                <View className="mb-4 max-h-60">
+                  <ScrollView nestedScrollEnabled={true}>
+                    {GRADES.map((item, index) => (
+                      <TouchableOpacity 
+                        key={index}
+                        className="flex-row items-center p-3"
+                        onPress={() => setEditValue(item.value)}
+                      >
+                        <Icon 
+                          name={editValue === item.value ? 'radio-button-checked' : 'radio-button-unchecked'} 
+                          size={24} 
+                          color={editValue === item.value ? (isDarkMode ? '#3B82F6' : '#2563EB') : '#9CA3AF'}
+                        />
+                        <Text className="ml-2 text-gray-900 dark:text-gray-100">{item.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : (
               <TextInput
                 className="border border-gray-300 dark:border-gray-600 rounded p-3 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700"
                 value={editValue}

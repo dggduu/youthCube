@@ -5,6 +5,8 @@ import TagSection from "../../screens/ideaScreen/TagSection";
 import ChatNavigtor from "./ChatNavigtor";
 import PersonalProfile from "../../components/PresonalProfile";
 import PostNavigator from "./PostNavigtor";
+import ProgressNavigtor from "./ProgressNavigtor";
+
 const Stack = createNativeStackNavigator();
 
 const TeamNavigator = () => {
@@ -18,6 +20,7 @@ const TeamNavigator = () => {
       <Stack.Screen name="IdeaMarket" component={ideaMarketScreen} />
       <Stack.Screen name="Post" component={PostNavigator} />
       <Stack.Screen name="Chat" component={ChatNavigtor} />
+      <Stack.Screen name="Progress" component={ProgressNavigtor} />
       <Stack.Screen 
         name="TeamDetail" 
         component={TeamDetailScreen}

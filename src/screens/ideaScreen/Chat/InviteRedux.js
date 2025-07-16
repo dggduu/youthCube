@@ -177,7 +177,7 @@ const InviteRedux = () => {
                     </ScrollView>
 
                     {data?.totalPages > 1 && (
-                        <View className="flex-row justify-between items-center mt-4">
+                        <View className="flex-row justify-between items-center">
                             <TouchableOpacity
                                 className="px-4 py-2 bg-gray-200 rounded-lg dark:bg-gray-700"
                                 onPress={handlePrevPage}
