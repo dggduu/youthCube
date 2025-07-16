@@ -65,7 +65,7 @@ const TimeLine = ({ teamId }) => {
       );
 
       const result = await response.json();
-
+      console.log(result);
       if (result.items && result.items.length > 0) {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
@@ -91,7 +91,8 @@ const TimeLine = ({ teamId }) => {
               statusKey: item.status,
               type: item.timeline_type || 'default',
               eventTime: item.event_time,
-              progressId: item.progress_id
+              progressId: item.progress_id,
+              userName : item.submitter.name
             };
           })
           .sort((a, b) => new Date(b.eventTime) - new Date(a.eventTime));
@@ -153,7 +154,9 @@ const TimeLine = ({ teamId }) => {
         <Text style={{ fontWeight: '600', color: isDark ? 'white' : 'black' }}>
           {rowData.title}
         </Text>
+        <Text className='text-sm text-black mt-1'>发送者：{rowData.userName}</Text>
       </View>
+    {rowData.type == "progress_report" &&
       <View
         style={{
           backgroundColor: 'white',
@@ -171,7 +174,7 @@ const TimeLine = ({ teamId }) => {
         >
           {rowData.status}
         </Text>
-      </View>
+      </View>}
     </View>
   );
 

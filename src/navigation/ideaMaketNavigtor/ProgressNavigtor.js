@@ -1,9 +1,11 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import { TouchableOpacity } from "react-native";
 import AddProgress from "../../screens/ideaScreen/Progress/AddProgress";
 import ProgessComment from "../../screens/ideaScreen/Progress/ProgessComment";
 import ProgressAdmin from "../../screens/ideaScreen/Progress/ProgressAdmin";
 import ProgressScreen from "../../screens/ideaScreen/Progress/ProgressScreen";
+
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,10 +20,24 @@ const ProgressNavigator = () => {
       <Stack.Screen 
         name="TimeLine" 
         component={ProgressScreen}
-        options={{
-          headerShown: true,
-          title: '时间线',
-          headerBackTitle: '返回'
+        options={({ navigation, route }) => {
+          const { team_id } = route.params || {};
+
+          return {
+            headerShown: true,
+            title: '时间线',
+            headerBackTitle: '返回',
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('Admin');
+                }}
+                style={{ marginRight: 10 }}
+              >
+                <MaterialIcon name="density-medium" size={24} color="#333" />
+              </TouchableOpacity>
+            ),
+          };
         }}
       />
       <Stack.Screen 
