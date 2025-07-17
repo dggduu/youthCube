@@ -45,7 +45,7 @@ const TimeLine = ({ teamId, role}) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { showToast } = useToast();
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   // 获取数据
   const fetchData = async (pageNum = 0, isRefresh = false) => {
