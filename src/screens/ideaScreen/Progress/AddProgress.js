@@ -13,7 +13,6 @@ import { getItemFromAsyncStorage } from '../../../utils/LocalStorage';
 import { BASE_INFO } from '../../../constant/base';
 import { useToast } from '../../../components/tip/ToastHooks';
 import { useColorScheme } from 'nativewind';
-import BackIcon from '../../../components/backIcon/backIcon';
 import { WebView } from 'react-native-webview';
 
 const AddProgress = () => {

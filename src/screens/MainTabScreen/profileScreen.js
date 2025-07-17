@@ -29,7 +29,7 @@ export default function ProfileScreen({ navigation }) {
 
   // 学习模块数据
   const learningItems = [
-    { icon: 'chat', label: '聊天群组', screen: 'LearningNavigtor', params: { screen: 'ChatGroup' } },
+    { icon: 'chat', label: '聊天群组', screen: 'TeamNavigtor', params: { screen: 'Chat' } },
     { icon: 'favorite', label: '我的收藏', screen: 'LearningNavigtor', params: { screen: 'Collect' } },
     { icon: 'edit', label: '我的笔记', screen: 'LearningNavigtor', params: { screen: 'Note' } },
     { icon: 'publish', label: '我的投稿', screen: 'LearningNavigtor', params: { screen: 'Uploader' } },
@@ -48,7 +48,7 @@ export default function ProfileScreen({ navigation }) {
 
           {/* --- 用户信息卡片 --- */}
           <View
-            className={`p-10 rounded-2xl mb-6 border border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`py-8 px-4 rounded-2xl mb-6 border border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
             style={{
               elevation: 2,
               shadowColor: isDark ? '#000' : '#ccc',
