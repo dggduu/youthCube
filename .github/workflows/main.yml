@@ -18,6 +18,7 @@ jobs:
       - name: Install npm dependencies
         run: |
           npm install
+          npm install lightningcss-linux-x64-gnu
 
       - name: Generate JS Bundle for Android
         run: |
