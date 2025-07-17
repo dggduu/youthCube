@@ -4,7 +4,7 @@ import TeamFeed from "../../components/feedElem/TeamFeed";
 import { useNavigation } from "@react-navigation/native";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
 import { BASE_INFO } from "../../constant/base";
-
+import { navigate } from "../../navigation/NavigatorRef";
 const screenWidth = Dimensions.get('window').width;
 
 export default function IeaMarketScreen() {
@@ -63,13 +63,13 @@ export default function IeaMarketScreen() {
       >
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Progress", {
+            navigate('RootIdea', { screen: 'Progress', params: { screen: 'TimeLine', params:{
               screen: "TimeLine",
               params:{
                 role:role,
                 userId: userID,
               }
-            });
+            } } })
           }}
         >
           <View style={{
@@ -99,9 +99,7 @@ export default function IeaMarketScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("Chat", {
-                screen: "section"
-              });
+              navigate('RootIdea', { screen: 'Chat', params: { screen: 'section' } });
             }}
           >
             <View style={{

@@ -10,11 +10,11 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { useSelector } from 'react-redux';
-
+import { navigate } from '../../navigation/NavigatorRef'
 import CrownIcon from '../../assets/registerScreen/crown.svg';
 import { GRADES } from '../../constant/index';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen() {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { userData, isAuthReady, isAuthenticated } = useSelector((state) => state.auth);
@@ -29,16 +29,40 @@ export default function ProfileScreen({ navigation }) {
 
   // 学习模块数据
   const learningItems = [
-    { icon: 'chat', label: '聊天群组', screen: 'TeamNavigtor', params: { screen: 'Chat' } },
-    { icon: 'favorite', label: '我的收藏', screen: 'LearningNavigtor', params: { screen: 'Collect' } },
-    { icon: 'edit', label: '我的笔记', screen: 'LearningNavigtor', params: { screen: 'Note' } },
-    { icon: 'publish', label: '我的投稿', screen: 'LearningNavigtor', params: { screen: 'Uploader' } },
+    { 
+      icon: 'chat', 
+      label: '聊天群组', 
+      action: () => navigate('RootIdea', { screen: 'Chat', params: { screen:'section' } }) 
+    },
+    { 
+      icon: 'favorite', 
+      label: '我的收藏', 
+      action: () => navigate('RootLearn', { screen: 'Collect', params: { screen: 'IdeaMarket' } }) 
+    },
+    { 
+      icon: 'edit', 
+      label: '我的笔记', 
+      action: () => navigate('RootLearn', { screen: 'LearningNavigtor', params: { screen: 'Note' } }) 
+    },
+    { 
+      icon: 'publish', 
+      label: '我的投稿', 
+      action: () => navigate('RootLearn', { screen: 'Upload'}) 
+    },
   ];
 
   // 其他设置项
   const otherItems = [
-    { icon: 'verified-user', label: '用户协议', screen: 'MiscStack', params: { screen: 'QualityCheck' } },
-    { icon: 'help', label: '帮助中心', screen: 'HelpScreen'},
+    { 
+      icon: 'verified-user', 
+      label: '用户协议', 
+      action: () => navigate('RootProfile', { screen: 'MiscStack', params: { screen: 'QualityCheck' } })
+    },
+    { 
+      icon: 'help', 
+      label: '帮助中心', 
+       action: () => navigate('RootProfile', { screen: 'HelpScreen' })
+    },
   ];
 
   return (
@@ -76,12 +100,12 @@ export default function ProfileScreen({ navigation }) {
               <View className="flex-row">
                 <TouchableOpacity
                   className="mr-4"
-                  onPress={() => navigation.navigate('TopBar', { screen: 'Message' })}
+                  onPress={() => navigate('RootProfile', { screen: 'TopBar', params: {screen:"Message"} })}
                 >
                   <MaterialIcon name="people" size={24} color={isDark ? '#A9A9A9' : '#888'} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('TopBar', { screen: 'Setting' })}
+                  onPress={() => navigate('RootProfile', { screen: 'TopBar', params: { screen:"Setting"} })}
                 >
                   <MaterialIcon name="settings" size={24} color={isDark ? '#A9A9A9' : '#888'} />
                 </TouchableOpacity>
@@ -102,7 +126,7 @@ export default function ProfileScreen({ navigation }) {
                 <TouchableOpacity
                   key={index}
                   className={`flex-row items-center p-2 py-4 rounded-xl border-b border-gray-200`}
-                  onPress={() => navigation.navigate(item.screen, item.params)}
+                  onPress={item.action}
                 >
                   <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#666'} />
                   <Text className="text-base ml-4 text-neutral-800 dark:text-white">
@@ -117,11 +141,11 @@ export default function ProfileScreen({ navigation }) {
           <View
             className={`rounded-2xl overflow-hidden border p-3 border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
-            {otherItems.map((item, idx) => (
+{otherItems.map((item, idx) => (
               <React.Fragment key={idx}>
                 <TouchableOpacity
                   className="flex-row items-center px-4 py-4"
-                  onPress={() => navigation.navigate(item.screen, item.params)}
+                  onPress={item.action}
                 >
                   <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#666'} />
                   <Text className="text-base ml-5 text-neutral-800 dark:text-white">

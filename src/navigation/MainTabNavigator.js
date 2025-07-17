@@ -77,9 +77,9 @@ const MainTabNavigator = () => {
       })}
     >
       <Tab.Screen name="聪宝" component={ChatScreen} />
-      <Tab.Screen name="想法市场" component={TeamNavigtor} />
-      <Tab.Screen name="学习中心" component={FunctionNavigator} />
-      <Tab.Screen name="我的" component={ProfileNavigtor} />
+      <Tab.Screen name="想法市场" component={IdeaMarketScreen} />
+      <Tab.Screen name="学习中心" component={LearningHomeScreen} />
+      <Tab.Screen name="我的" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

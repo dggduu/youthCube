@@ -10,6 +10,7 @@ import InviteRedux from "../../screens/ideaScreen/Chat/InviteRedux";
 
 import { TouchableOpacity } from "react-native";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { HeaderBackButton } from "@react-navigation/elements";
 const Stack = createNativeStackNavigator();
 
 const ChatNavigator = () => {
@@ -23,11 +24,19 @@ const ChatNavigator = () => {
       <Stack.Screen
         name="section"
         component={ChatSection}
-        options={{
+        options={({ navigation }) => ({
           headerShown: true,
           title: '选择聊天',
-          headerBackTitle: '返回'
-        }}
+          headerBackTitle: '返回',
+          headerLeft: (props) => (
+            <HeaderBackButton
+              {...props}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          ),
+        })}
       />
       <Stack.Screen
         name="single"

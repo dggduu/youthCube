@@ -18,7 +18,7 @@ export default function TopBarNavigtor() {
       />
       <Stack.Screen name="Message" component={MessageScreen}
         options={{
-          headerShown: true,
+          headerShown: false,
           title: '个人信息',
           headerBackTitle: '返回'
         }}

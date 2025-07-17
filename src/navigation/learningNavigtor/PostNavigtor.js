@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PostDetailScreen from "../../screens/learningScreen/PostDetailScreen";
 import learningHomeScreen from "../../screens/MainTabScreen/learningHomeScreen";
 import TagSection from "../../screens/learningScreen/TagSection";
-
+import { HeaderBackButton } from '@react-navigation/elements';
 const Stack = createNativeStackNavigator();
 
 const PostNavigator = () => {
@@ -17,11 +17,19 @@ const PostNavigator = () => {
       <Stack.Screen 
         name="PostDetail" 
         component={PostDetailScreen}
-        options={{
+        options={({ navigation }) => ({
           headerShown: true,
           title: '帖子详情',
-          headerBackTitle: '返回'
-        }}
+          headerBackTitle: '返回',
+          headerLeft: (props) => (
+            <HeaderBackButton
+              {...props}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          ),
+        })}
       />
       <Stack.Screen 
         name="Tag" 

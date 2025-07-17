@@ -11,8 +11,8 @@ const ProgressScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
   const route = useRoute();
-  const { role } = route.params;
-  const [userId, setUserId] = useState(null);
+  const { role=[], userId } = route.params;
+
   useEffect(() => {
     const updateNavigationHeader = async () => {
         try {
@@ -54,10 +54,8 @@ const ProgressScreen = () => {
         const data = await getItemFromAsyncStorage("user");
         if (!data) {
           setTeamId(0);
-          setUserId(0);
         } else {
           setTeamId(data.team_id);
-          setUserId(data.id);
         }
       } catch (error) {
         console.error("Error fetching team ID:", error);

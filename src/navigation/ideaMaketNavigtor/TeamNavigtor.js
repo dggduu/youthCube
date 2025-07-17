@@ -7,6 +7,8 @@ import PersonalProfile from "../../components/PresonalProfile";
 import PostNavigator from "./PostNavigtor";
 import ProgressNavigtor from "./ProgressNavigtor";
 
+import { HeaderBackButton } from "@react-navigation/elements";
+
 const Stack = createNativeStackNavigator();
 
 const TeamNavigator = () => {
@@ -24,20 +26,36 @@ const TeamNavigator = () => {
       <Stack.Screen 
         name="TeamDetail" 
         component={TeamDetailScreen}
-        options={{
+        options={({ navigation }) => ({
           headerShown: true,
           title: '团队详情',
-          headerBackTitle: '返回'
-        }}
+          headerBackTitle: '返回',
+          headerLeft: (props) => (
+            <HeaderBackButton
+              {...props}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          ),
+        })}
       />
       <Stack.Screen 
         name="Tag" 
         component={TagSection}
-        options={{
+        options={({ navigation }) => ({
           headerShown: true,
-          title: '根据 Tag 查询文章',
-          headerBackTitle: '返回'
-        }}
+          title: '根据Tag查询文章',
+          headerBackTitle: '返回',
+          headerLeft: (props) => (
+            <HeaderBackButton
+              {...props}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          ),
+        })}
       />
       <Stack.Screen
         name="profile"

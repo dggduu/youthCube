@@ -12,7 +12,7 @@ import TeamCard from './TeamCard';
 import { useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import MatrialIcons from "@react-native-vector-icons/material-icons";
-
+import { navigate } from "../../navigation/NavigatorRef";
 const TeamFeed = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -137,10 +137,10 @@ const TeamFeed = () => {
   };
 
   const onTeamPress = (item) => {
-    navigation.navigate('TeamDetail', {
+    navigate('RootIdea', { screen: 'TeamDetail', params: {
       teamId: item.id,
       teamName: item.title,
-    });
+    } });
   };
 
   const scrollToTop = () => {

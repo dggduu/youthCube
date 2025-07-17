@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from "@react-navigation/native";
+import { navigate } from "../../navigation/NavigatorRef";
 const TeamCard = ({ title, tags, onPress }) => {
   const navigation = useNavigation();
   return (
@@ -13,9 +14,9 @@ const TeamCard = ({ title, tags, onPress }) => {
             {tags.slice(0, 4).map((tag) => (
               <TouchableOpacity
                 onPress={()=>{
-                  navigation.navigate("Tag", {
+                  navigate('RootIdea', { screen:"Tag" ,params:{
                     tagId: tag.tag_id,
-                  });
+                  }});
                 }}
                 key={tag.tag_id}
                 className="bg-indigo-100 dark:bg-indigo-700 px-3 py-1 rounded-full mr-2">

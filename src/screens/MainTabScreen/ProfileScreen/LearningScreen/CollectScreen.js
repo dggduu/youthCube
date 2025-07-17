@@ -6,7 +6,6 @@ import BackIcon from '../../../../components/backIcon/backIcon';
 const CollectScreen = () => {
   return (
     <View className='flex-1 bg-white dark:bg-gray-900'>
-      <BackIcon/>
       <CollectPostFeed/>
     </View>
   )

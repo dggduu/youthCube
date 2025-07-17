@@ -13,7 +13,7 @@ import FeedElem from './feedElem';
 import { useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import MatrialIcons from "@react-native-vector-icons/material-icons";
-
+import { navigate } from "../../navigation/NavigatorRef";
 const PostFeed = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -142,11 +142,11 @@ const PostFeed = () => {
   };
 
   const onFeedElemPress = (item) => {
-    navigation.navigate('PostDetail', {
+    navigate('RootLearn', { screen: 'Post', params: { screen: "PostDetail" , params:{
       postId: item.id,
       title: item.title,
       coverImage: item.imgUrl,
-    });
+    } }})
   };
 
   const scrollToTop = () => {

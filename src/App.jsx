@@ -7,11 +7,14 @@ import { loadAuthData, fetchUserInfo } from './store/auth/authSlice';
 
 import AuthStack from './navigation/AuthStack';
 import MainTabNavigator from './navigation/MainTabNavigator';
+import MainNav from "./navigation/MainNav";
+
 import { ActivityIndicator, View, Text } from 'react-native';
 import { useToast } from "./components/tip/ToastHooks";
 import '../global.css' 
 import { BASE_INFO } from "./constant/base";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { navigationRef } from "./navigation/NavigatorRef";
 const RootAppContent = () => {
     const dispatch = useDispatch();
     // 从 Redux中获取认证相关的状态
@@ -39,8 +42,8 @@ const RootAppContent = () => {
     }
 
     return (
-        <NavigationContainer>
-            {isAuthenticated ? <MainTabNavigator /> : <AuthStack />}
+        <NavigationContainer ref={navigationRef}>
+            {isAuthenticated ? <MainNav/> : <AuthStack />}
         </NavigationContainer>
     );
 };

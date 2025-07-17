@@ -5,7 +5,7 @@ import { getItemFromAsyncStorage } from '../../../utils';
 import { BASE_INFO } from '../../../constant/base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useToast } from '../../../components/tip/ToastHooks';
-
+import BackIcon from "../../../components/backIcon/backIcon";
 const ChatSection = () => {
     const [teamChat, setTeamChat] = useState(null);
     const [privateChats, setPrivateChats] = useState([]);

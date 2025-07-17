@@ -15,6 +15,7 @@ import { GRADES } from "../../../constant/user";
 import { BASE_INFO } from "../../../constant/base";
 import WaterfallFlow from 'react-native-waterfall-flow';
 import FeedElem from "../../../components/feedElem/feedElem";
+import BackIcon from "../../../components/backIcon/backIcon";
 const MessageScreen = ({ navigation }) => {
   // 状态管理
   const [currentUser, setCurrentUser] = useState(null);
@@ -189,55 +190,60 @@ const MessageScreen = ({ navigation }) => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         ListHeaderComponent={
-          <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm shadow-gray-200 dark:shadow-gray-900">
-            {/* 用户资料卡片 */}
-            <View className="items-center mb-4">
-              <Image
-                source={require("../../../assets/logo/ava.png")}
-                className="w-24 h-24 rounded-full border-2 border-blue-200 dark:border-gray-600"
-              />
-              <Text className="text-xl font-bold text-gray-800 dark:text-white mt-3">
-                {currentUser.name}
-              </Text>
-              <Text className="text-blue-500 dark:text-blue-400 text-sm mt-1">
-                {currentUser.is_member ? '高级会员' : '普通用户'}
-              </Text>
-            </View>
-
-            <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-500 dark:text-gray-400">用户ID</Text>
-                <Text className="text-gray-800 dark:text-gray-200">{currentUser.id}</Text>
-              </View>
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-500 dark:text-gray-400">邮箱</Text>
-                <Text className="text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
-              </View>
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-500 dark:text-gray-400">学习阶段</Text>
-                <Text className="text-gray-800 dark:text-gray-200">
-                  {getLearnStageLabel(currentUser.learn_stage)}
+          <View>
+            <BackIcon/>
+  <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm shadow-gray-200 dark:shadow-gray-900">
+              
+              {/* 用户资料卡片 */}
+              <View className="items-center mb-4">
+                <Image
+                  source={require("../../../assets/logo/ava.png")}
+                  className="w-24 h-24 rounded-full border-2 border-blue-200 dark:border-gray-600"
+                />
+                <Text className="text-xl font-bold text-gray-800 dark:text-white mt-3">
+                  {currentUser.name}
+                </Text>
+                <Text className="text-blue-500 dark:text-blue-400 text-sm mt-1">
+                  {currentUser.is_member ? '高级会员' : '普通用户'}
                 </Text>
               </View>
-              {currentUser.bio && (
-                <View className="mt-3">
-                  <Text className="text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
-                  <Text className="text-gray-800 dark:text-gray-200">{currentUser.bio}</Text>
-                </View>
-              )}
-              {/* 团队信息 */}
-              {currentUser.team_id && (
+
+              <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-500 dark:text-gray-400">所属团队</Text>
-                  <View className="items-end">
-                    <Text className="text-gray-800 dark:text-gray-200">
-                      {teamInfo?.team_name || '加载中...'}
-                    </Text>
-                  </View>
+                  <Text className="text-gray-500 dark:text-gray-400">用户ID</Text>
+                  <Text className="text-gray-800 dark:text-gray-200">{currentUser.id}</Text>
                 </View>
-              )}
+                <View className="flex-row justify-between mb-3">
+                  <Text className="text-gray-500 dark:text-gray-400">邮箱</Text>
+                  <Text className="text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
+                </View>
+                <View className="flex-row justify-between mb-3">
+                  <Text className="text-gray-500 dark:text-gray-400">学习阶段</Text>
+                  <Text className="text-gray-800 dark:text-gray-200">
+                    {getLearnStageLabel(currentUser.learn_stage)}
+                  </Text>
+                </View>
+                {currentUser.bio && (
+                  <View className="mt-3">
+                    <Text className="text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
+                    <Text className="text-gray-800 dark:text-gray-200">{currentUser.bio}</Text>
+                  </View>
+                )}
+                {/* 团队信息 */}
+                {currentUser.team_id && (
+                  <View className="flex-row justify-between mb-3">
+                    <Text className="text-gray-500 dark:text-gray-400">所属团队</Text>
+                    <View className="items-end">
+                      <Text className="text-gray-800 dark:text-gray-200">
+                        {teamInfo?.team_name || '加载中...'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
+
           
         }
         ListEmptyComponent={

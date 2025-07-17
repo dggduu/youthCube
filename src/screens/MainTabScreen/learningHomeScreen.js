@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity,SafeAreaView } from 'react-native';
 import React from 'react';
 import PostFeed from '../../components/feedElem/postFeed';
 import { useNavigation } from '@react-navigation/native';
-
+import { navigate } from "../../navigation/NavigatorRef";
 export default function LearningHomeScreen() {
   const navigation = useNavigation();
 
@@ -12,14 +12,14 @@ export default function LearningHomeScreen() {
       <View className="flex-row justify-between px-4 py-3 bg-gray-100 dark:bg-gray-800">
         <TouchableOpacity
           className="flex-1 p-3 bg-white dark:bg-black rounded-lg mr-2 items-center"
-          onPress={() => navigation.navigate('Collect')}
+          onPress={() => navigate('RootLearn', { screen: 'Collect', params: { screen: 'IdeaMarket' } })}
         >
           <Text className="text-base text-black dark:text-gray-300">我的收藏</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className="flex-1 p-3 bg-white dark:bg-black rounded-lg ml-2 items-center"
-          onPress={() => navigation.navigate('Upload')}
+          onPress={() => navigate('RootLearn', { screen: 'Upload'})}
         >
           <Text className="text-base text-black dark:text-gray-300">发布新帖</Text>
         </TouchableOpacity>

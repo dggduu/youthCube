@@ -4,7 +4,7 @@ import AddProgress from "../../screens/ideaScreen/Progress/AddProgress";
 import ProgessComment from "../../screens/ideaScreen/Progress/ProgessComment";
 import ProgressAdmin from "../../screens/ideaScreen/Progress/ProgressAdmin";
 import ProgressScreen from "../../screens/ideaScreen/Progress/ProgressScreen";
-
+import { HeaderBackButton } from "@react-navigation/elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
 const Stack = createNativeStackNavigator();
@@ -20,11 +20,19 @@ const ProgressNavigator = () => {
       <Stack.Screen 
         name="TimeLine" 
         component={ProgressScreen}
-        options={{
-          title: "进度管理",
+       options={({ navigation }) => ({
           headerShown: true,
-          headerBackTitle: "返回"
-        }}
+          title: '进度管理',
+          headerBackTitle: '返回',
+          headerLeft: (props) => (
+            <HeaderBackButton
+              {...props}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          ),
+        })}
       />
       <Stack.Screen 
         name="Add" 
