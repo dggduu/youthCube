@@ -18,7 +18,6 @@ const CommentItem = ({ comment, authToken, progressId }) => {
   const [replyText, setReplyText] = useState('');
   const [showReplyInput, setShowReplyInput] = useState(false);
   const { showToast } = useToast();
-
   const fetchReplies = useCallback(async (page = 0) => {
     try {
       setLoadingReplies(true);
@@ -97,7 +96,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
   }, [repliesCurrentPage, repliesTotalPages, fetchReplies]);
 
   return (
-    <View className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-3">
+    <View className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-3">
       <View className="flex-row items-center mb-2">
         <Image
           source={comment.author?.avatar_key ? { uri: comment.author.avatar_key } : require("../../../assets/logo/ava.png")}
@@ -373,7 +372,8 @@ const ProgressComment = () => {
     }
 
     return (
-      <View style={{ marginBottom: 16, backgroundColor: "#f9f9f9", padding: 12, borderRadius: 8 }}>
+      <View className='bg-white rounded-xl p-6 border border-gray-200 mb-3 mt-4'>
+        <Text className='font-semibold text-xl text-black dark:text-gray-300 mb-4 mt-2'>{progressData.title}</Text>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
           <Image
             source={
@@ -398,7 +398,7 @@ const ProgressComment = () => {
 
         {progressData.event_time && (
           <Text style={{ fontSize: 12, color: "#999", marginTop: 8 }}>
-            事件时间: {new Date(progressData.event_time).toLocaleString()}
+            时间: {new Date(progressData.event_time).toLocaleString()}
           </Text>
         )}
       </View>
@@ -406,12 +406,12 @@ const ProgressComment = () => {
   };
 
   const renderCommentInput = () => (
-    <View style={{ marginBottom: 16 }}>
+    <View style={{ marginBottom: 12 }} className='mt-4'>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <TextInput
           style={{
             flex: 1,
-            backgroundColor: "#f0f0f0",
+            backgroundColor: "#fff",
             borderRadius: 12,
             paddingHorizontal: 12,
             paddingVertical: 8,
@@ -454,7 +454,7 @@ const ProgressComment = () => {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: "#fff", padding: 16 }}
+      className='flex-1 bg-gray-100 dark:bg-gray-900 mx-3 mb-8'
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#3b82f6"]} />
       }

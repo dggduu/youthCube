@@ -273,7 +273,7 @@ const MosciaChart = ({ team_id }) => {
   }
 
   return (
-    <View className='justify-center bg-white dark:bg-gray-500 py-5 px-3 mx-3 rounded-xl items-center'>
+    <View className='justify-center bg-white dark:bg-black py-5 px-3 mx-3 rounded-xl items-center border border-gray-300'>
       {/* <Text className='font-semibold self-start text-lg mb-3 ml-2'>过去一年的时间线：</Text> */}
       <View className=' flex-row'>
         {/* 星期标签 */}
@@ -340,22 +340,25 @@ const MosciaChart = ({ team_id }) => {
       </View>
 
       {/* 图例 */}
-      <View className='flex-row mt-3 self-start'>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#facc15' }]} />
-          <Text style={styles.legendText}>会议</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#ef4444' }]} />
-          <Text style={styles.legendText}>截止时间</Text>
-        </View>
+      <View className='flex-row mt-3 self-center'>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#3b82f6' }]} />
           <Text style={styles.legendText}>比赛</Text>
         </View>
         <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#facc15' }]} />
+          <Text style={styles.legendText}>会议</Text>
+        </View>
+        <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#66bb6a' }]} />
+          <View style={[styles.legendColor, { backgroundColor: '#81c784' }]} />
+          <View style={[styles.legendColor, { backgroundColor: '#43a047' }]} />
+          <View style={[styles.legendColor, { backgroundColor: '#1b5e20' }]} />
           <Text style={styles.legendText}>进度报告</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#ef4444' }]} />
+          <Text style={styles.legendText}>截止时间</Text>
         </View>
       </View>
     </View>

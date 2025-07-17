@@ -154,7 +154,7 @@ const AddProgress = () => {
   return (
     <View className="flex-1 dark:bg-gray-900">
       <ScrollView className="flex-1 p-5">
-        <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text>
+        {/* <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text> */}
 
         {/* 标题 */}
         <TextInput
@@ -164,18 +164,6 @@ const AddProgress = () => {
           onChangeText={setTitle}
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-
-        {/* Markdown 编辑按钮 */}
-        <TouchableOpacity
-          className="bg-blue-500 py-2 px-4 rounded-lg mb-3"
-          onPress={() => {
-            setVditorMarkdownContent(description);
-            setShowVditorModal(true);
-          }}
-        >
-          <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
-        </TouchableOpacity>
-
         {/* 描述输入 */}
         <TextInput
           placeholder="进度内容 *"
@@ -184,8 +172,19 @@ const AddProgress = () => {
           onChangeText={setDescription}
           multiline
           numberOfLines={5}
-          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
+        {/* Markdown 编辑按钮 */}
+        <TouchableOpacity
+          className="bg-blue-500 py-4 px-4 rounded-lg mb-3"
+          onPress={() => {
+            setVditorMarkdownContent(description);
+            setShowVditorModal(true);
+          }}
+        >
+          <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
+        </TouchableOpacity>
+        <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text>
 
         {/* 提交按钮 */}
         <TouchableOpacity

@@ -20,24 +20,10 @@ const ProgressNavigator = () => {
       <Stack.Screen 
         name="TimeLine" 
         component={ProgressScreen}
-        options={({ navigation, route }) => {
-          const { team_id } = route.params || {};
-
-          return {
-            headerShown: true,
-            title: '时间线',
-            headerBackTitle: '返回',
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate('Admin');
-                }}
-                style={{ marginRight: 10 }}
-              >
-                <MaterialIcon name="density-medium" size={24} color="#333" />
-              </TouchableOpacity>
-            ),
-          };
+        options={{
+          title: "进度管理",
+          headerShown: true,
+          headerBackTitle: "返回"
         }}
       />
       <Stack.Screen 

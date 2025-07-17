@@ -9,10 +9,10 @@ import { useNavigation } from "@react-navigation/native";
 // 类型颜色
 const getColorByType = (type, isDark) => {
   switch (type) {
-    case 'meeting': return '#fcd34d';
+    case 'meeting': return '#f8e287';
     case 'deadline': return '#f87171';
-    case 'competition': return '#60a5fa';
-    case 'progress_report': return '#34d399';
+    case 'competition': return '#bcece7';
+    case 'progress_report': return '#c5ecce';
     default: return isDark ? '#1a1a1a' : '#888';
   }
 };
@@ -36,7 +36,7 @@ const formatDate = (dateString) => {
   return `${year}\n${month}月${day}日`;
 };
 
-const TimeLine = ({ teamId }) => {
+const TimeLine = ({ teamId, role}) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -138,40 +138,20 @@ const TimeLine = ({ teamId }) => {
   // 自定义渲染详情内容
   const renderDetail = (rowData) => (
     <View
+      className='mr-2 justify-between items-center flex-row rounded-xl border border-gray-300'
       style={{
-        marginLeft: 10,
-        marginRight: 10,
-        marginBottom: 10,
-        padding: 10,
         backgroundColor: getColorByType(rowData.type, isDark),
-        borderRadius: 12,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
       }}
     >
-      <View>
-        <Text style={{ fontWeight: '600', color: isDark ? 'white' : 'black' }}>
+      <View className='p-4'>
+        <Text style={{ fontWeight: '600'}} className='overflow-hidden'>
           {rowData.title}
         </Text>
-        <Text className='text-sm text-black mt-1'>发送者：{rowData.userName}</Text>
+        <Text className='text-sm text-black mt-1 overflow-hidden'>提交者：{rowData.userName}</Text>
       </View>
     {rowData.type == "progress_report" &&
-      <View
-        style={{
-          backgroundColor: 'white',
-          borderRadius: 10,
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: '600',
-            color: getColorByStatus(rowData.statusKey),
-          }}
-        >
+      <View className='px-4 h-full bg-[#73a273] rounded-r-xl items-center justify-center'>
+        <Text className='text-sm text-white font-medium'>
           {rowData.status}
         </Text>
       </View>}
@@ -218,8 +198,9 @@ const TimeLine = ({ teamId }) => {
           timeStyle={{
             textAlign: 'center',
             backgroundColor: 'transparent',
-            color: '#444',
+            color: isDark ? '#bbb' : "#666",
             fontWeight: 500,
+            fontSize: 12,
           }}
           descriptionStyle={{ color: isDark ? '#ccc' : '#666' }}
           titleStyle={{ color: isDark ? 'white' : 'black' }}
@@ -236,7 +217,8 @@ const TimeLine = ({ teamId }) => {
           )}
           onEventPress={(event) => {
             navigation.navigate("Comment", {
-              progress_id: event.progressId
+              progress_id: event.progressId,
+              role: role
             });
           }}
           listViewContainerStyle={{ paddingTop: 0 }}
