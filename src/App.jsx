@@ -6,7 +6,6 @@ import store from './store/auth/authStore';
 import { loadAuthData, fetchUserInfo } from './store/auth/authSlice';
 
 import AuthStack from './navigation/AuthStack';
-import MainTabNavigator from './navigation/MainTabNavigator';
 import MainNav from "./navigation/MainNav";
 
 import { ActivityIndicator, View, Text } from 'react-native';
@@ -42,7 +41,7 @@ const RootAppContent = () => {
     }
 
     return (
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={navigationRef} key={isAuthenticated ? "main" : "auth"}>
             {isAuthenticated ? <MainNav/> : <AuthStack />}
         </NavigationContainer>
     );

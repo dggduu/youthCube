@@ -184,7 +184,7 @@ const TimeLine = ({ teamId, role}) => {
           circleSize={20}
           innerCircle={'dot'}
           options={{
-            style: { paddingTop: 20, paddingBottom: 20 },
+            style: { paddingTop: 0, paddingBottom: 20 },
             refreshControl: (
               <RefreshControl
                 refreshing={isRefreshing}

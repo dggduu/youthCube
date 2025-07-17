@@ -5,7 +5,6 @@ import BackIcon from "../../components/backIcon/backIcon";
 const SafeDeclare = () => {
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
-      <BackIcon/>
       <ScrollView className="px-6 py-6">
         <Text className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           户外活动安全声明

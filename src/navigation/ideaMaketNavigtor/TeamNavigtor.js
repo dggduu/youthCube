@@ -6,8 +6,9 @@ import ChatNavigtor from "./ChatNavigtor";
 import PersonalProfile from "../../components/PresonalProfile";
 import PostNavigator from "./PostNavigtor";
 import ProgressNavigtor from "./ProgressNavigtor";
-
+import CreactTeamNavigtor from "./CreactTeamNavigtor";
 import { HeaderBackButton } from "@react-navigation/elements";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -62,6 +63,15 @@ const TeamNavigator = () => {
         component={PersonalProfile}
         options={{
           headerShown: true,
+          title: '',
+          headerBackTitle: '返回'
+        }}  
+      />
+      <Stack.Screen
+        name="CreateFlow"
+        component={CreactTeamNavigtor}
+        options={{
+          headerShown: false,
           title: '',
           headerBackTitle: '返回'
         }}  

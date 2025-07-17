@@ -3,7 +3,7 @@ import { BASE_INFO } from "../../../constant/base";
 
 const apiClient = axios.create({
   baseURL: BASE_INFO.BASE_URL,
-  timeout: 10000, 
+  timeout: 50000, 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,14 +15,14 @@ const apiClient = axios.create({
  */
 export const sendVerificationCode = async (email) => {
   try {
+    console.log("ewhdu");
     const response = await apiClient.post('/api/send-verification-code', {
       email,
     });
+    
     return { success: true, message: response.data.message };
   } catch (error) {
-    const errorMessage = error.response?.data?.error 
-      || `${email}:发送验证码失败，请稍后再试`;
-    return { success: false, error: errorMessage };
+    return { success: false, error: "服务运行不正常" };
   }
 };
 

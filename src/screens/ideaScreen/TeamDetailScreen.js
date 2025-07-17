@@ -188,23 +188,23 @@ const TeamDetailScreen = () => {
         {/* 申请加入按钮 */}
         <TouchableOpacity
           className={`${
-            teamData.chatRoom.members.some(member => member.user_id === userId)
+            teamData.chatRoom.members?.some(member => member.user_id === userId)
               ? 'bg-gray-300 dark:bg-gray-600'
               : 'bg-blue-500 dark:bg-blue-700'
           } py-3 rounded-lg`}
           onPress={() => {
-            if (!teamData.chatRoom.members.some(member => member.user_id === userId)) {
+            if (!teamData.chatRoom?.members?.some(member => member.user_id === userId)) {
               setShowApplyModal(true);
             }
           }}
-          disabled={teamData.chatRoom.members.some(member => member.user_id === userId)}
+          disabled={teamData.chatRoom?.members?.some(member => member.user_id === userId)}
         >
           <Text className={`text-center font-bold ${
-            teamData.chatRoom.members.some(member => member.user_id === userId)
+            teamData.chatRoom?.members?.some(member => member.user_id === userId)
               ? 'text-gray-700 dark:text-gray-300'
               : 'text-white'
           }`}>
-            {teamData.chatRoom.members.some(member => member.user_id === userId)
+            {teamData.chatRoom?.members?.some(member => member.user_id === userId)
               ? '你已经是队伍成员'
               : '申请加入队伍'}
           </Text>

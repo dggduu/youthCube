@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Text, View, Image } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import BackIcon from '../../../../components/backIcon/backIcon'; 
-import BASE_INFO from '../../../../constant/base';
+import { BASE_INFO } from '../../../../constant/base';
 
 export default function PartyInfo() {
   const { colorScheme } = useColorScheme();
@@ -33,13 +33,13 @@ export default function PartyInfo() {
           应用版本
         </Text>
         <Text className={`text-base leading-6 mb-2 ${textColor}`}>
-          <Text className="font-semibold">版本号：</Text>{'0.0.0.0.0.0.1'}
+          <Text className="font-semibold">版本号：</Text>{BASE_INFO.Version}
         </Text>
         <Text className={`text-base leading-6 mb-2 ${textColor}`}>
-          <Text className="font-semibold">构建号：</Text>{'Alpha'}
+          <Text className="font-semibold">构建号：</Text>{BASE_INFO.Release}
         </Text>
         <Text className={`text-base leading-6 mb-4 ${textColor}`}>
-          <Text className="font-semibold">最近更新：</Text>{'2025 年 7 月 3 日'}
+          <Text className="font-semibold">最近更新：</Text>{BASE_INFO.LastUpdate}
         </Text>
         <Text className={`text-sm text-center ${subTextColor}`}>
           感谢您的支持！

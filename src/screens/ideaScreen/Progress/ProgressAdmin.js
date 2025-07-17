@@ -53,6 +53,7 @@ const ProgressAdmin = () => {
       
       const data = await response.json();
       setProgressList(data.items);
+      console.log("progress",teamId);
     } catch (error) {
       showToast(error.message, 'error');
     } finally {

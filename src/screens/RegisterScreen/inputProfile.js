@@ -8,7 +8,8 @@ import {
   SafeAreaView,
   TextInput,
   useColorScheme,
-  ScrollView
+  ScrollView,
+  Alert
 
 } from 'react-native';
 
@@ -123,11 +124,11 @@ export default function InputProfile({ route }) {
 
     if (!email.trim()) {
       setEmailError('请输入邮箱');
-      showToast('网络错误', 'warnning');
+      showToast('网络错误','error');
       hasError = true;
     } else if (!isValidEmail(email)) {
       setEmailError('邮箱格式不正确');
-      showToast('网络错误', 'error');
+      showToast('网络错误','error');
       hasError = true;
     } else {
       setEmailError('');
@@ -138,11 +139,13 @@ export default function InputProfile({ route }) {
     console.log('发送验证码至:', email);
     try {
       const result = await sendVerificationCode(email);
+      console.log("res",result);
       if (result.success) {
         showToast('验证码已发送', 'success');
         setCountdown(60); // 启动倒计时
       } else {
-        showToast(result.error, 'error');
+        showToast("邮件发送失败", 'error');
+        Alert.alert("error");
       }
     } catch (error) {
       showToast('网络错误', 'error');
@@ -192,7 +195,8 @@ export default function InputProfile({ route }) {
 
     const result = await registerUser(formData);
     if (result.success) {
-      navigation.navigate('choseLove');
+      navigation.navigate('Login');
+      showToast("创建账号成功！","success");
     } else {
       setFormError(result.error || '注册失败，请重试');
     }
@@ -331,16 +335,15 @@ export default function InputProfile({ route }) {
           <View className="mb-4">
             <Text
               className={`mb-3 ml-1 font-normal ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
               }`}
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg border-gray-600">
+            <View className="flex-row items-center border rounded-lg border-gray-300">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}
-                style={{height:55}}
                 onChangeText={setCode}
                 className={`flex-1 pl-5 ${
                   isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-black'
@@ -349,8 +352,7 @@ export default function InputProfile({ route }) {
               <TouchableOpacity
                 onPress={handleSendCode}
                 disabled={countdown > 0}
-                style={{height:55}}
-                className={`px-3 justify-center rounded-lg ${
+                className={`px-3 justify-center rounded-r-lg h-16 ${
                   countdown > 0 ? 'bg-gray-300 dark:bg-gray-700' : 'bg-blue-500'
                 }`}
               >
@@ -396,7 +398,7 @@ export default function InputProfile({ route }) {
                 : 'bg-gray-400'
             }`}
           >
-            <Text className="text-white font-semibold text-base">下一步</Text>
+            <Text className="text-white font-semibold text-base">完成注册</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={()=>{
             navigation.navigate('helpSolvor');

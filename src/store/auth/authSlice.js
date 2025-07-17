@@ -184,6 +184,7 @@ const authSlice = createSlice({
     },
     reducers: {
         logout: (state) => {
+            state.isAuthenticated = false;
             state.accessToken = null;
             state.refreshToken = null;
             state.userData = {
@@ -200,7 +201,6 @@ const authSlice = createSlice({
                 posts: [],
                 team: null
             };
-            state.isAuthenticated = false;
             state.error = null;
             removeItemFromAsyncStorage('accessToken');
             removeItemFromAsyncStorage('refreshToken');

@@ -6,10 +6,10 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useDispatch } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useColorScheme } from 'nativewind';
-
+import { useNavigation } from "@react-navigation/native";
 const SettingItem = ({ description, iconName, onPress }) => {
   const { colorScheme } = useColorScheme();
-
+  const navigation = useNavigation();
   const iconColor = colorScheme === 'dark' ? '#D1D5DB' : '#333';
   const chevronColor = colorScheme === 'dark' ? '#9CA3AF' : '#555';
 
@@ -32,12 +32,8 @@ const SettingItem = ({ description, iconName, onPress }) => {
 const MainSetting = ( {navigation} ) => {
   const dispatch = useDispatch();
 
-  const handlePressAbout = () => {
-    Alert.alert("关于", "这是一个关于页面的示例。");
-  };
-
   const handlePressNotifications = () => {
-    Alert.alert("通知", "这里可以跳转到通知设置。");
+    Alert.alert("通知", "前面的道路以后再来探索吧");
   };
 
   const handlePressLogout = () => {
@@ -52,7 +48,6 @@ const MainSetting = ( {navigation} ) => {
         {
           text: "确定",
           onPress: () => {
-            console.log("执行登出操作...");
             dispatch(logout());
           }
         }

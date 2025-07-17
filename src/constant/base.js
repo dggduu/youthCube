@@ -18,5 +18,7 @@ export const BASE_INFO={
         isSkipLoginPage: false,
         isSkipRegisterVerify: false,
     },
-    Version: "0.0.1",
+    Version: "0.1",
+    LastUpdate:"2025 年 7 月 18 日",
+    Release: "测试版"
 };

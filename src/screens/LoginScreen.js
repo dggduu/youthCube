@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearAuthError } from "../store/auth/authSlice";
 import { BASE_INFO } from "../constant/base";
 import { useToast } from "../components/tip/ToastHooks";
+import { useNavigation } from "@react-navigation/native";
 const LoginPage = ({ navigation }) => {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
@@ -44,10 +45,23 @@ const LoginPage = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showToast('发送失败，请重试。', 'error');
+      showToast('请输入邮箱和密码', 'error');
       return;
     }
-    dispatch(loginUser({ email, pswd: password }));
+
+    try {
+      const resultAction = await dispatch(loginUser({ email, pswd: password }));
+      
+      if (loginUser.fulfilled.match(resultAction)) {
+        // 登录成功，跳转页面
+        navigation.navigate("MainTabNavigator", { screen: "聪宝" });
+      } else {
+        const error = resultAction.payload || resultAction.error?.message;
+        showToast(`登录失败,请检查网络`, 'error');
+      }
+    } catch (err) {
+      showToast('网络错误，请重试。', 'error');
+    }
   };
 
   return (

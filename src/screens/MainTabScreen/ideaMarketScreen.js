@@ -9,47 +9,6 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function IeaMarketScreen() {
   const navigation = useNavigation();
-  const [userID, setUserID] = useState(null);
-  const [role, setRole] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [teamId, setTeamId] = useState(null);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setIsLoading(true);
-
-        // 获取用户信息
-        const userData = await getItemFromAsyncStorage("user");
-        if (!userData) throw new Error("用户数据不存在");
-
-        const { id, team_id } = userData;
-        setUserID(id);
-        setTeamId(team_id);
-        if (!team_id) return;
-        const response = await fetch(`${BASE_INFO.BASE_URL}api/teams/${team_id}`);
-        if (!response.ok) throw new Error('加载失败');
-        const result = await response.json();
-
-        setRole(result.chatRoom?.members || []);
-
-      } catch (error) {
-        console.error("初始化失败", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    init();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#3b82f6" />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -64,11 +23,7 @@ export default function IeaMarketScreen() {
         <TouchableOpacity
           onPress={() => {
             navigate('RootIdea', { screen: 'Progress', params: { screen: 'TimeLine', params:{
-              screen: "TimeLine",
-              params:{
-                role:role,
-                userId: userID,
-              }
+              screen: "TimeLine"
             } } })
           }}
         >
@@ -85,7 +40,11 @@ export default function IeaMarketScreen() {
         </TouchableOpacity>
 
         <View style={{ flex: 1, marginLeft: 10 }}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigate('RootIdea', { screen: 'CreateFlow', params: { screen: 'Create' } });
+            }}
+          >
             <View style={{
               backgroundColor: '#eee2bc',
               padding: 15,
