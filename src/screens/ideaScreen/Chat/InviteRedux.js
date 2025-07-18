@@ -7,6 +7,10 @@ import axios from 'axios';
 import { BASE_INFO } from '../../../constant/base';
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
 
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const InviteRedux = () => {
     const route = useRoute();
     const navigation = useNavigation();
@@ -58,7 +62,7 @@ const InviteRedux = () => {
 
     const { mutateAsync } = useMutation({
         mutationFn: async ({ invitationId, action }) => {
-            return axios.put(
+            return api.put(
                 `${BASE_INFO.BASE_URL}api/chatrooms/${room_id}/invitations/${invitationId}/respond`,
                 { action },
                 {

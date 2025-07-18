@@ -34,7 +34,7 @@ const TeamDetailScreen = () => {
             onPress={() => navigate('MainTabNavigator', { screen: '想法市场'})}
             style={{ marginRight: 10 }}
           >
-            <MaterialIcons name="home" size={24} color="#333" />
+            <MaterialIcons name="home" size={24} color={isDark ? "#eee" : "#333"}/>
           </TouchableOpacity>
         </View>
       ),

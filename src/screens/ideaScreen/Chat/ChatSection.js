@@ -5,7 +5,12 @@ import { getItemFromAsyncStorage } from '../../../utils';
 import { BASE_INFO } from '../../../constant/base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useToast } from '../../../components/tip/ToastHooks';
-import BackIcon from "../../../components/backIcon/backIcon";
+import axios from "axios";
+
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const ChatSection = () => {
     const [teamChat, setTeamChat] = useState(null);
     const [privateChats, setPrivateChats] = useState([]);
@@ -23,13 +28,13 @@ const ChatSection = () => {
     const fetchTeamChat = async (teamId) => {
         try {
             const accessToken = await getItemFromAsyncStorage('accessToken');
-            const response = await fetch(`${BASE_INFO.BASE_URL}api/chatrooms/team/${teamId}`, {
+            const response = await api.get(`${BASE_INFO.BASE_URL}api/chatrooms/team/${teamId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
 
-            const data = await response.json();
+            const data = response.data;
 
             if (data.message === "未找到该团队的聊天室") {
                 setTeamChat(null);
@@ -53,19 +58,22 @@ const ChatSection = () => {
             }
 
             const accessToken = await getItemFromAsyncStorage('accessToken');
-            const url = `${BASE_INFO.BASE_URL}api/chatrooms/private?page=${pageNum}&size=10`;
+            const url = `${BASE_INFO.BASE_URL}api/chatrooms/private`;
 
-            const response = await fetch(url, {
+            const response = await api.get(url, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
+                },
+                params: {
+                    page: pageNum,
+                    size: 10
                 }
             });
-
-            if (!response.ok) {
-                throw new Error('网络异常，请检查您的连接');
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error(`请求失败，状态码：${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
 
             const newChats = Array.isArray(data.items) ? data.items : [];
 
@@ -124,7 +132,7 @@ const ChatSection = () => {
 
     const renderPrivateChat = ({ item }) => (
         <TouchableOpacity
-            className={`p-4 border border-gray-200 dark:border-gray-600 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50 dark:bg-blue-900' : 'bg-transparent'}`}
+            className={`p-4 border border-gray-300 dark:border-gray-600 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50 dark:bg-blue-900' : 'bg-transparent'}`}
             onPress={() => navigation.navigate('single', { chatId: item.room_id, name:item.other_user.name })}
         >
             <MaterialIcons
@@ -133,7 +141,7 @@ const ChatSection = () => {
                 color={item.other_user.is_following ? '#4B77D1' : '#666'}
             />
             <View className="flex-1 ml-2">
-                <Text className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black'}`}>
+                <Text className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black dark:text-gray-300'}`}>
                     {item.other_user.name}
                 </Text>
                 <Text className="text-gray-500 text-xs dark:text-gray-300">
@@ -149,7 +157,26 @@ const ChatSection = () => {
     );
 
     return (
-        <View className="flex-1 bg-white dark:bg-gray-900">
+        <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+            <View className='px-4 mt-3'>
+                <TouchableOpacity
+                    onPress={()=>{
+                        navigation.navigate("FriendInvite");
+                    }}
+                    className='items-center rounded-lg justify-center p-3 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600'
+                >
+                    <Text className='dark:text-white'>新朋友</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                className='items-center rounded-lg justify-center p-3 mt-3 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600'
+                    onPress={()=>{
+                        navigation.navigate("TeamInvite");
+                    }}
+                >
+                    <Text className='dark:text-white'>群通知</Text>
+                </TouchableOpacity>
+            </View>
+
             {/* 团队聊天 */}
             {teamChat && (
                 <View className="p-4">

@@ -14,7 +14,7 @@ export default function IeaMarketScreen() {
   const isDark = colorScheme == "dark";
   return (
     <SafeAreaView style={{ flex: 1 }} className='bg-white dark:bg-gray-600'>
-      <View className='mt-10 px-4 mb-3 '
+      <View className='mt-10 px-5 mb-3 '
       style={{
         flexDirection: 'column',
         gap: 10,
@@ -36,7 +36,7 @@ export default function IeaMarketScreen() {
           </Text>
 
           <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-800'
+          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600'
             onPress={() => {
               navigate('RootIdea', { screen: 'CreateFlow', params: { screen: 'Create' } });
             }}
@@ -47,7 +47,7 @@ export default function IeaMarketScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 8,
-              width: screenWidth / 2 - 15,
+              width: screenWidth / 2 - 35,
             }}>
               <Text className='text-dark dark:text-gray-300'>创建项目</Text>
             </View>
@@ -60,7 +60,7 @@ export default function IeaMarketScreen() {
           gap: 10,
         }}>
           <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-800'
+          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600'
             onPress={() => {
               navigate('RootIdea', { screen: 'Progress', params: { screen: 'TimeLine', params: { screen: "TimeLine" } } });
             }}
@@ -71,14 +71,14 @@ export default function IeaMarketScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 8,
-              width: screenWidth / 2 - 25,
+              width: screenWidth / 2 - 15,
             }}>
               <Text className='text-dark dark:text-gray-300'>项目进度</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity
-          className='border border-gray-300 dark:border-gray-400 rounded-xl bg-white dark:bg-gray-800'
+          className='border border-gray-300 dark:border-gray-400 rounded-xl bg-white dark:bg-gray-600'
             onPress={() => {
               navigate('RootIdea', { screen: 'Chat', params: { screen: 'section' } });
             }}
@@ -89,7 +89,7 @@ export default function IeaMarketScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 8,
-              width: screenWidth / 2 - 15,
+              width: screenWidth / 2 - 35,
             }}>
               <Text className='text-dark dark:text-gray-300'>聊天服务</Text>
             </View>

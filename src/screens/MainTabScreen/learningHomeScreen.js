@@ -15,14 +15,14 @@ export default function LearningHomeScreen() {
       >学习中心</Text>
       <View className="flex-row justify-between px-4 py-3">
         <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-800 flex-1 items-center p-3 mr-2'
+          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600 flex-1 items-center p-3 mr-2'
           onPress={() => navigate('RootLearn', { screen: 'Collect', params: { screen: 'IdeaMarket' } })}
         >
           <Text className="text-base text-black dark:text-gray-300">我的收藏</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-800 flex-1 items-center p-3'
+          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600 flex-1 items-center p-3'
           onPress={() => navigate('RootLearn', { screen: 'Upload'})}
         >
           <Text className="text-base text-black dark:text-gray-300">发布新帖</Text>

@@ -5,8 +5,12 @@ import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
 import { BASE_INFO } from "../../../constant/base";
 import { useToast } from "../../../components/tip/ToastHooks";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import axios from "axios";
 import Markdown from "react-native-markdown-display";
+
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const CommentItem = ({ comment, authToken, progressId }) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -20,12 +24,19 @@ const CommentItem = ({ comment, authToken, progressId }) => {
   const fetchReplies = useCallback(async (page = 0) => {
     try {
       setLoadingReplies(true);
-      const response = await fetch(
-        `${BASE_INFO.BASE_URL}api/progress/comments/${comment.comment_id}/replies?size=5&page=${page}`
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/progress/comments/${comment.comment_id}/replies`,{
+          params:{
+            page,
+            size: 5
+          }
+        }
       );
-      if (!response.ok) throw new Error('Failed to fetch replies');
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
+      }
 
-      const data = await response.json();
+      const data = response.data;
       setReplies(prev => page === 0 ? data.items : [...prev, ...data.items]);
       setRepliesCurrentPage(data.currentPage || 0);
       setRepliesTotalPages(data.totalPages || 1);
@@ -43,32 +54,37 @@ const CommentItem = ({ comment, authToken, progressId }) => {
     }
 
     try {
-      const response = await fetch(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/progress/${progressId}/comments`,
         {
-          method: 'POST',
+          content: replyText,
+          parent_comment_id: comment.comment_id
+        },
+        {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: replyText,
-            parent_comment_id: comment.comment_id
-          })
+          }
         }
       );
 
-      if (response.ok) {
-        setReplyText('');
-        setShowReplyInput(false);
-        showToast("回复成功", "success");
-        fetchReplies(0);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '回复失败');
-      }
+      setReplyText('');
+      setShowReplyInput(false);
+      showToast("回复成功", "success");
+      fetchReplies(0);
+
     } catch (err) {
-      showToast(`回复失败: ${err.message}`, "error");
+      let errorMessage = '回复失败';
+
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+
+      showToast(`回复失败: ${errorMessage}`, "error");
     }
   }, [progressId, authToken, replyText, comment.comment_id, showToast, fetchReplies]);
 

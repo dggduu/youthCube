@@ -7,6 +7,11 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useToast } from "../../../components/tip/ToastHooks";
+import axios from "axios";
+
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const STORAGE_KEY = 'invited_users';
 
@@ -64,20 +69,23 @@ const InviteFriend = () => {
 
   // 获取用户关注列表
   const { data: followingData, isLoading: isFollowingLoading, refetch } = useQuery({
-    queryKey: ['userFollowing', userData?.id, page],
+    queryKey: ['userFollowing', userData?.id, page, size],
     queryFn: async () => {
-      const response = await fetch(
-        `${BASE_INFO.BASE_URL}api/users/${userData?.id}/following?page=${page}&size=${size}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/users/${userData?.id}/following`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        params: {
+          page,
+          size,
+        },
+      });
+
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
       }
-      return response.json();
+
+      return response.data;
     },
     enabled: !!userData?.id && !!accessToken,
   });
@@ -86,7 +94,7 @@ const InviteFriend = () => {
   const { data: teamData, isLoading: isTeamLoading } = useQuery({
     queryKey: ['team', team_id],
     queryFn: async () => {
-      const response = await fetch(
+      const response = await api.get(
         `${BASE_INFO.BASE_URL}api/teams/${team_id}`,
         {
           headers: {
@@ -94,10 +102,10 @@ const InviteFriend = () => {
           },
         }
       );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
       }
-      return response.json();
+      return response.data;
     },
     enabled: !!team_id && !!accessToken,
   });
@@ -105,24 +113,25 @@ const InviteFriend = () => {
   // 邀请好友加入聊天室
   const inviteMutation = useMutation({
     mutationFn: async (userId) => {
-      const response = await fetch(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/chatrooms/${chatRoom_id}/invitations`,
         {
-          method: 'POST',
+          user_id: userId,
+          description: `邀请您加入小组 ${teamData?.team_name}`
+        },
+        {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({
-            user_id: userId,
-            description: `邀请您加入小组 ${teamData?.team_name}`
-          }),
         }
       );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
       }
-      return response.json();
+
+      return response.data;
     },
     onSuccess: (data, userId) => {
       addInvitedUser(userId);

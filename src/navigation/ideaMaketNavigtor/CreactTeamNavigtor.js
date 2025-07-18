@@ -5,7 +5,7 @@ import safeDeclare from "../../screens/helperScreen/safeDeclare";
 const Stack = createNativeStackNavigator();
 
 import CreateTeam from "../../screens/ideaScreen/Team/CreateTeam";
-import AiChat from "../../screens/ideaScreen/Team/AiChat";
+import HelpChat from "../../components/aiChat/HelpChat";
 import InviteToTeam from "../../screens/ideaScreen/Team/InviteToTeam";
 import UploadProgress from "../../screens/ideaScreen/Team/UploadProgress";
 
@@ -48,10 +48,10 @@ const CreateTeamNavigtor = () => {
       />
       <Stack.Screen
         name="AI"
-        component={AiChat}
+        component={HelpChat}
         options={()=> ({
           headerShown: true,
-          title: '聪宝',
+          title: '问聪宝',
           headerBackTitle: '返回',
           })}
       />

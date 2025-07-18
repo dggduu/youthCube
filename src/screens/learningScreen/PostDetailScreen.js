@@ -55,7 +55,7 @@ const PostDetailScreen = () => {
             onPress={() => navigate('MainTabNavigator', { screen: '学习中心'})}
             style={{ marginRight: 10 }}
           >
-            <MaterialIcons name="home" size={24} color="#333" />
+            <MaterialIcons name="home" size={24} color={isDark ? "#eee" : "333"} />
           </TouchableOpacity>
         </View>
       ),

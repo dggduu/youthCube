@@ -14,6 +14,10 @@ import { BASE_INFO } from '../../../constant/base';
 import { useToast } from '../../../components/tip/ToastHooks';
 import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
+import axios from "axios";
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const AddProgress = () => {
   const route = useRoute();
@@ -65,21 +69,18 @@ const AddProgress = () => {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(
+      const response = await axios.post(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
+        newProgressData,
         {
-          method: 'POST',
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(newProgressData)
+          }
         }
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '提交进度失败');
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
       }
 
       showToast("进度提交成功", "success");

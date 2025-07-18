@@ -40,11 +40,6 @@ export default function ProfileScreen() {
       action: () => navigate('RootLearn', { screen: 'Collect', params: { screen: 'IdeaMarket' } }) 
     },
     { 
-      icon: 'edit', 
-      label: '我的笔记', 
-      action: () => navigate('RootLearn', { screen: 'LearningNavigtor', params: { screen: 'Note' } }) 
-    },
-    { 
       icon: 'publish', 
       label: '我的投稿', 
       action: () => navigate('RootLearn', { screen: 'Upload'}) 

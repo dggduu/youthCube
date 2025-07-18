@@ -8,12 +8,17 @@ import HelpScreen from "../../screens/helperScreen/helpScreen";
 import InviteFriend from "../../screens/ideaScreen/Chat/InviteFriend";
 import InviteRedux from "../../screens/ideaScreen/Chat/InviteRedux";
 
+import FriendInvitationSolve from "../../screens/ideaScreen/Chat/FriendInvitationSolve";
+import TeamInviteationSolve from "../../screens/ideaScreen/Chat/TeamInviteationSolve";
+
 import { TouchableOpacity } from "react-native";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { HeaderBackButton } from "@react-navigation/elements";
+import { useColorScheme } from "react-native";
 const Stack = createNativeStackNavigator();
 
 const ChatNavigator = () => {
+  const isDark = useColorScheme() == "dark";
   return (
     <Stack.Navigator
       screenOptions={{ 
@@ -57,6 +62,24 @@ const ChatNavigator = () => {
         }}
       />
       <Stack.Screen
+        name="FriendInvite"
+        component={FriendInvitationSolve}
+        options={{
+          headerShown: true,
+          title: '新朋友',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen
+        name="TeamInvite"
+        component={TeamInviteationSolve}
+        options={{
+          headerShown: true,
+          title: '群消息',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen
         name="group"
         component={ChatGroup}
         options={({ navigation, route }) => {
@@ -73,7 +96,7 @@ const ChatNavigator = () => {
                 }}
                 style={{ marginRight: 10 }}
               >
-                <MaterialIcon name="density-medium" size={24} color="#333" />
+                <MaterialIcon name="density-medium" size={24} color={isDark ? "#eee" : "#333"} />
               </TouchableOpacity>
             ),
           };

@@ -21,6 +21,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Markdown from "react-native-markdown-display";
 import InputBox from "../../../components/inputBox/inputBox";
+import { useNavigation } from "@react-navigation/native";
+
 const ProgressCard = ({ progress, onEdit, onDelete}) => {
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? 'text-white' : 'text-gray-900';
@@ -144,6 +146,8 @@ const UploadProgress = () => {
   const [showVditorModal, setShowVditorModal] = useState(false);
   const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
   const webViewRef = useRef(null);
+
+  const navigation = useNavigation();
 
   const ALLOWED_TIMELINE_TYPES = ['meeting', 'deadline', 'competition'];
 
@@ -446,13 +450,23 @@ const UploadProgress = () => {
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
+      <View className="absolute bottom-6 right-6 bg-blue-600 rounded-full justify-center items-center border border-gray-600">
+        <TouchableOpacity
+          onPress={() => openProgressModal()}
+          className='p-2 self-center justify-center'
+        >
+          <Icon name="add" size={30} color="white" />
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        className="absolute bottom-6 right-6 bg-blue-600 rounded-full p-4 shadow-lg"
-        onPress={() => openProgressModal()}
-      >
-        <Icon name="add" size={30} color="white" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={()=>{
+            navigation.navigate("AI");
+          }}
+          className='border-t p-2 border-gray-300'
+        >
+          <Icon name="help" size={30} color="#fff"/>
+        </TouchableOpacity>
+      </View>
 
       <Modal
         visible={showProgressModal}

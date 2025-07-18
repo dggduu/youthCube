@@ -13,6 +13,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { GRADES } from "../../constant/user";
 
 const TagSection = () => {
   const route = useRoute();
@@ -164,7 +165,7 @@ const TagSection = () => {
 
   const renderTeamItem = ({ item }) => (
     <TouchableOpacity 
-      className="m-2 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
+      className="m-2 p-4 mx-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600"
       onPress={() => onTeamPress(item)}
     >
       <View className="flex-row justify-between items-start">
@@ -182,11 +183,6 @@ const TagSection = () => {
             </Text>
           </View>
           <View className="flex-row flex-wrap">
-            {item.tags?.slice(0, 3).map(tag => (
-              <View key={tag.tag_id} className="bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 mr-2 mb-2">
-                <Text className="text-xs text-blue-600 dark:text-blue-300">#{tag.tag_name}</Text>
-              </View>
-            ))}
           </View>
         </View>
         <View className="bg-gray-100 dark:bg-gray-700 rounded-full w-10 h-10 items-center justify-center ml-2">
@@ -198,7 +194,7 @@ const TagSection = () => {
           创建于 {new Date(item.create_at).toLocaleDateString()}
         </Text>
         <Text className="text-xs text-gray-500 dark:text-gray-400">
-          {item.grade === 'mature' ? '成熟团队' : '成长团队'}
+          推荐加入等级：{GRADES.find(grade => grade.value ===item.grade)?.label || '未知'}
         </Text>
       </View>
     </TouchableOpacity>

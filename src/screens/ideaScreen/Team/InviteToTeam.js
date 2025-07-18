@@ -6,6 +6,8 @@ import { getItemFromAsyncStorage } from '../../../utils/LocalStorage';
 import { BASE_INFO } from '../../../constant/base';
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import Icon from "@react-native-vector-icons/material-icons";
+
 
 const InviteToTeam = () => {
   const route = useRoute();
@@ -188,6 +190,16 @@ const InviteToTeam = () => {
 
   return (
     <View className='flex-1 bg-gray-100 dark:bg-gray-900'>
+        {/* 帮助AI */}
+        <TouchableOpacity
+          onPress={()=>{
+            navigation.navigate("AI");
+          }}
+          style={{zIndex:1}}
+          className='h-14 w-14 bg-green-600 rounded-full absolute bottom-6 right-6 items-center justify-center'
+        >
+          <Icon name="help" size={20} color="#fff"/>
+        </TouchableOpacity>
       <FlatList
         data={followers}
         renderItem={renderItem}

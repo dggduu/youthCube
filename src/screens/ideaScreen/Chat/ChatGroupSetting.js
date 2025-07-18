@@ -8,6 +8,10 @@ import { BASE_INFO } from '../../../constant/base';
 import { GRADES } from "../../../constant/user";
 import { useToast } from "../../../components/tip/ToastHooks";
 
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const ChatGroupSetting = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -29,7 +33,7 @@ const ChatGroupSetting = () => {
   
   const refreshTeamData = async () => {
     try {
-      const response = await axios.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
 
     if (response.data?.grade !== undefined && response.data?.grade !== null) {
       const foundGrade = GRADES.find(grade => grade.value === response.data.grade);
@@ -55,7 +59,7 @@ const ChatGroupSetting = () => {
           setCurrentUser(userString) 
         }
         
-        const response = await axios.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
+        const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`)
 
         if (response.data?.grade !== undefined && response.data?.grade !== null) {
           const foundGrade = GRADES.find(grade => grade.value === response.data.grade);
@@ -89,7 +93,7 @@ const ChatGroupSetting = () => {
   const saveChanges = async () => {
     try {
       if (editField === 'team_name' || editField === 'description' || editField === 'is_public' || editField === 'grade') {
-        await axios.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
+        await api.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
           [editField]: editField === 'is_public' ? (editValue === '公开' ? 1 : 0) : editValue
         }, {
           headers: {
@@ -98,7 +102,7 @@ const ChatGroupSetting = () => {
           }
         })
       } else if (editField === 'chatroom_name') {
-        await axios.put(`${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/update`, {
+        await api.put(`${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/update`, {
           name: editValue
         }, {
           headers: {
@@ -118,7 +122,7 @@ const ChatGroupSetting = () => {
 
   const updateMemberRole = async (userId, newRole) => {
     try {
-      await axios.put(
+      await api.put(
         `${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/members/${userId}/role`,
         { role: newRole },
         {
@@ -150,7 +154,7 @@ const ChatGroupSetting = () => {
           text: "确认",
           onPress: async () => {
             try {
-              await axios.post(
+              await api.post(
                 `${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/transfer-owner`,
                 { newOwnerId },
                 {
@@ -187,7 +191,7 @@ const ChatGroupSetting = () => {
           text: "确认",
           onPress: async () => {
             try {
-              await axios.delete(
+              await api.delete(
                 `${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/members/${userId}`,
                 {
                   headers: {
