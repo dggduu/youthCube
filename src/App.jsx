@@ -31,7 +31,7 @@ const RootAppContent = () => {
     };
 
     init();
-  }, [dispatch, hasPermissions]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {

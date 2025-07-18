@@ -16,7 +16,7 @@ const checkAllPermissions = async () => {
     const results = await PermissionsAndroid.requestMultiple(REQUIRED_PERMISSIONS);
 
     const allDenied = Object.values(results).every(
-      (result) => result === PermissionsAndroid.RESULTS.DENIED || PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN
+      (result) => result === PermissionsAndroid.RESULTS.DENIED
     );
 
     if (allDenied) {
