@@ -124,7 +124,7 @@ const ChatSection = () => {
 
     const renderPrivateChat = ({ item }) => (
         <TouchableOpacity
-            className={`p-4 border-b border-gray-200 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50' : 'bg-transparent'}`}
+            className={`p-4 border border-gray-200 dark:border-gray-600 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50 dark:bg-blue-900' : 'bg-transparent'}`}
             onPress={() => navigation.navigate('single', { chatId: item.room_id, name:item.other_user.name })}
         >
             <MaterialIcons
@@ -133,16 +133,16 @@ const ChatSection = () => {
                 color={item.other_user.is_following ? '#4B77D1' : '#666'}
             />
             <View className="flex-1 ml-2">
-                <Text className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold' : 'text-black'}`}>
+                <Text className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black'}`}>
                     {item.other_user.name}
                 </Text>
-                <Text className="text-gray-500 text-xs">
+                <Text className="text-gray-500 text-xs dark:text-gray-300">
                     最近消息: {item.last_message || '暂无消息'}
                 </Text>
             </View>
             {item.unreadCount > 0 && (
                 <View className="bg-red-500 rounded-full w-5 h-5 justify-center items-center">
-                    <Text className="text-white text-xs">{item.unreadCount}</Text>
+                    <Text className="text-white text-xs dark:text-gray-300">{item.unreadCount}</Text>
                 </View>
             )}
         </TouchableOpacity>
@@ -155,13 +155,13 @@ const ChatSection = () => {
                 <View className="p-4">
                     <Text className="font-bold mb-2 dark:text-gray-200">团队聊天</Text>
                     <TouchableOpacity
-                        className="p-4 bg-blue-50 rounded-lg flex-row items-center"
+                        className="p-4 bg-blue-50 rounded-lg flex-row items-center dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
                         onPress={() => navigation.navigate('group', { chatId: teamChat.chatRoomId, team_id:teamChat.teamId, name:teamChat.name })}
                     >
                         <MaterialIcons name="groups" size={24} color="#1976d2" />
                         <View className="flex-1 ml-2">
-                            <Text className="text-base font-bold">{teamChat.name}</Text>
-                            <Text className="text-gray-500 text-xs">团队 ID: {teamChat.teamId}</Text>
+                            <Text className="text-base font-bold dark:text-gray-300">{teamChat.name}</Text>
+                            <Text className="text-gray-500 text-xs dark:text-gray-300">团队 ID: {teamChat.teamId}</Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={24} color="#666" />
                     </TouchableOpacity>

@@ -10,23 +10,25 @@ import {
   Alert,
   ScrollView,
   Platform,
+  useColorScheme
 } from 'react-native';
 import { useRoute, useIsFocused } from '@react-navigation/native';
 import { getItemFromAsyncStorage } from '../../../utils/LocalStorage';
 import { BASE_INFO } from '../../../constant/base';
 import { useToast } from '../../../components/tip/ToastHooks';
-import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Markdown from "react-native-markdown-display";
-
-const ProgressCard = ({ progress, onEdit, onDelete, colorScheme }) => {
+import InputBox from "../../../components/inputBox/inputBox";
+const ProgressCard = ({ progress, onEdit, onDelete}) => {
+  const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? 'text-white' : 'text-gray-900';
   const subTextColor = colorScheme === 'dark' ? 'text-gray-400' : 'text-gray-600';
   const cardBg = colorScheme === 'dark' ? 'bg-gray-800' : 'bg-white';
   const borderColor = colorScheme === 'dark' ? 'border-gray-700' : 'border-gray-300';
 
+  const isDark = colorScheme == "dark";
   const formattedEventTime = new Date(progress.event_time).toLocaleString();
   const formattedCreatedAt = new Date(progress.created_at).toLocaleString();
 
@@ -37,14 +39,65 @@ const ProgressCard = ({ progress, onEdit, onDelete, colorScheme }) => {
     progress_report: '进度报告'
   };
 
+  const mdStyle = {
+    body: {
+      fontSize: 12,
+      color: isDark ? '#FFFFFF' : '#000000',
+    },
+    heading1: {
+      fontWeight: 800,
+      padding: 5,
+    },
+    heading2: {
+      fontWeight:700,
+      margin: 5,
+    },
+    heading3: {
+      fontWeight:600,
+      margin: 5,
+    },
+    code: { // 内联代码样式
+        backgroundColor: isDark ? '#333333' : '#F5F5F5',
+        padding: 2,
+        borderRadius: 3,
+        color: isDark ? '#FFFFFF' : '#000000',
+      },
+      codeBlock: { // 代码块样式
+        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+        padding: 10,
+        borderRadius: 5,
+        overflow: 'hidden',
+        magrin: 10,
+      },
+      fence: { // 特定于 fenced code blocks 的样式
+        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+        magrin: 10,
+      },
+      list_item: {
+        color: isDark ? '#E6E6E6' : '#1A1A1A',
+      },
+      unordered_list_icon: {
+        color: isDark ? '#FF9800' : '#F57C00', // 修改圆点颜色
+      },
+      ordered_list_icon: {
+        color: isDark ? '#4CAF50' : '#388E3C', // 编号颜色
+      },
+  };
+
   return (
     <View className={`border ${borderColor} rounded-lg p-4 mb-4 shadow-md ${cardBg}`}>
       <Text className={`text-lg font-bold mb-2 ${textColor}`}>{progress.title || '无标题'}</Text>
       <Text className={`text-sm mb-2 ${subTextColor}`}>类型: {timelineTypeMap[progress.timeline_type] || progress.timeline_type}</Text>
-      <Text className={`text-sm mb-2 ${subTextColor}`}>状态: {progress.status}</Text>
+      <Text className={`text-sm mb-2 ${subTextColor}`}>状态: {
+        progress.status === 'pending'
+          ? '待处理'
+          : progress.status === 'accept'
+          ? '已通过'
+          : '已拒绝'
+      }</Text>
       <Text className={`text-sm mb-2 ${subTextColor}`}>事件时间: {formattedEventTime}</Text>
       <Text className={`text-sm mb-4 ${subTextColor}`}>提交人: {progress.submitter?.name || '未知'}</Text>
-      <Markdown>{progress.content}</Markdown>
+      <Markdown style={mdStyle}>{progress.content}</Markdown>
 
       <View className="flex-row justify-end mt-4">
         <TouchableOpacity
@@ -375,7 +428,6 @@ const UploadProgress = () => {
             progress={item}
             onEdit={openProgressModal}
             onDelete={handleDeleteProgress}
-            colorScheme={colorScheme}
           />
         )}
         contentContainerStyle={{ padding: 20 }}
@@ -412,7 +464,7 @@ const UploadProgress = () => {
             {currentProgressId ? '编辑进度报告' : '创建进度报告'}
           </Text>
 
-          <TextInput
+          <InputBox
             placeholder="标题 *"
             placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
             value={title}
@@ -468,7 +520,7 @@ const UploadProgress = () => {
             className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           />
           <TouchableOpacity
-            className="bg-blue-500 py-4 px-4 rounded-lg mb-3"
+            className="bg-blue-600 py-4 px-4 rounded-lg mb-3"
             onPress={() => {
               setVditorMarkdownContent(description);
               setShowVditorModal(true);

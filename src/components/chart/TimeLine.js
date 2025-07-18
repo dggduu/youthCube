@@ -9,10 +9,10 @@ import { useNavigation } from "@react-navigation/native";
 // 类型颜色
 const getColorByType = (type, isDark) => {
   switch (type) {
-    case 'meeting': return '#f8e287';
-    case 'deadline': return '#f87171';
-    case 'competition': return '#bcece7';
-    case 'progress_report': return '#c5ecce';
+    case 'meeting': return isDark? "#887628" : '#f8e287';
+    case 'deadline': return isDark? "#93000a" : '#f87171';
+    case 'competition': return isDark? "#517f7c" : '#bcece7';
+    case 'progress_report': return isDark? '#4c662b' : '#c5ecce';
     default: return isDark ? '#1a1a1a' : '#888';
   }
 };
@@ -138,20 +138,20 @@ const TimeLine = ({ teamId, role}) => {
   // 自定义渲染详情内容
   const renderDetail = (rowData) => (
     <View
-      className='mr-2 justify-between items-center flex-row rounded-xl border border-gray-300'
+      className='mr-2 justify-between items-center flex-row rounded-xl border border-gray-300 dark:border-gray-600'
       style={{
         backgroundColor: getColorByType(rowData.type, isDark),
       }}
     >
       <View className='p-4'>
-        <Text style={{ fontWeight: '600'}} className='overflow-hidden'>
+        <Text style={{ fontWeight: '600'}} className='overflow-hidden dark:text-gray-300'>
           {rowData.title}
         </Text>
-        <Text className='text-sm text-black mt-1 overflow-hidden'>提交者：{rowData.userName}</Text>
+        <Text className='text-sm text-black dark:text-gray-300 mt-1 overflow-hidden'>提交者：{rowData.userName}</Text>
       </View>
     {rowData.type == "progress_report" &&
-      <View className='px-4 h-full bg-[#73a273] rounded-r-xl items-center justify-center'>
-        <Text className='text-sm text-white font-medium'>
+      <View className='px-4 h-full bg-[#73a273] dark:bg-[#172b00] rounded-r-xl items-center justify-center'>
+        <Text className={`text-sm text-white  dark:text-gray-300 font-medium`}>
           {rowData.status}
         </Text>
       </View>}
@@ -181,10 +181,11 @@ const TimeLine = ({ teamId, role}) => {
       ) : (
         <Timeline
           data={data}
+          key={isDark ? 'dark' : 'light'}
           circleSize={20}
           innerCircle={'dot'}
           options={{
-            style: { paddingTop: 0, paddingBottom: 20 },
+            style: { paddingTop: 5, paddingBottom: 20 },
             refreshControl: (
               <RefreshControl
                 refreshing={isRefreshing}

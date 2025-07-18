@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, FlatList, RefreshControl, ScrollView } from 'react-native'
+import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, FlatList, RefreshControl, ScrollView,useColorScheme } from 'react-native'
 import React, { useState, useCallback, useEffect } from 'react'
 import { useRoute } from "@react-navigation/native";
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
@@ -7,7 +7,6 @@ import { useToast } from "../../../components/tip/ToastHooks";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Markdown from "react-native-markdown-display";
-import { useColorScheme } from 'nativewind';
 
 const CommentItem = ({ comment, authToken, progressId }) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -155,6 +154,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
               placeholderTextColor="#9ca3af"
               value={replyText}
               onChangeText={setReplyText}
+              style={{height:40}}
               multiline
             />
             <TouchableOpacity
@@ -227,33 +227,52 @@ const ProgressComment = () => {
   const [commentText, setCommentText] = useState("");
   const [progressData, setProgressData] = useState('');
   const [loadingProgress, setLoadingProgress] = useState(true);
-  const colorScheme = "dark"; // 示例：模拟深色模式
+  const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
   const mdStyle = {
     body: {
       fontSize: 12,
-      color: isDark ? "#FFFFFF" : "#000000",
+      color: isDark ? '#FFFFFF' : '#000000',
     },
     heading1: {
-      fontWeight: "800",
+      fontWeight: 800,
       padding: 5,
     },
-    code: {
-      backgroundColor: isDark ? "#333333" : "#F5F5F5",
-      padding: 2,
-      borderRadius: 3,
-      color: isDark ? "#FFFFFF" : "#000000",
+    heading2: {
+      fontWeight:700,
+      margin: 5,
     },
-    codeBlock: {
-      backgroundColor: isDark ? "#2E2E2E" : "#F9F9F9",
-      padding: 10,
-      borderRadius: 5,
-      overflow: "hidden",
+    heading3: {
+      fontWeight:600,
+      margin: 5,
     },
-    list_item: {
-      color: isDark ? "#E6E6E6" : "#1A1A1A",
-    },
+    code: { // 内联代码样式
+        backgroundColor: isDark ? '#333333' : '#F5F5F5',
+        padding: 2,
+        borderRadius: 3,
+        color: isDark ? '#FFFFFF' : '#000000',
+      },
+      codeBlock: { // 代码块样式
+        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+        padding: 10,
+        borderRadius: 5,
+        overflow: 'hidden',
+        magrin: 10,
+      },
+      fence: { // 特定于 fenced code blocks 的样式
+        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
+        magrin: 10,
+      },
+      list_item: {
+        color: isDark ? '#E6E6E6' : '#1A1A1A',
+      },
+      unordered_list_icon: {
+        color: isDark ? '#FF9800' : '#F57C00', // 修改圆点颜色
+      },
+      ordered_list_icon: {
+        color: isDark ? '#4CAF50' : '#388E3C', // 编号颜色
+      },
   };
 
   const fetchProgressData = useCallback(async (token) => {
@@ -372,8 +391,8 @@ const ProgressComment = () => {
     }
 
     return (
-      <View className='bg-white rounded-xl p-6 border border-gray-200 mb-3 mt-4'>
-        <Text className='font-semibold text-xl text-black dark:text-gray-300 mb-4 mt-2'>{progressData.title}</Text>
+      <View className='bg-white rounded-xl dark:bg-black p-6 border border-gray-200 dark:border-gray-600 mb-3 mt-4'>
+      <Text className='font-semibold text-2xl text-black dark:text-gray-300 mb-4 mt-2' style={{fontFamily:"NotoSerifSC"}}>{progressData.title || "未填写标题"}</Text>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
           <Image
             source={
@@ -384,7 +403,7 @@ const ProgressComment = () => {
             style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }}
           />
           <View>
-            <Text style={{ fontWeight: "bold" }}>
+            <Text style={{ fontWeight: "bold" }} className='dark:text-gray-300'>
               {progressData.submitter?.name || "匿名用户"}
             </Text>
             <Text style={{ fontSize: 12, color: "#999" }}>
@@ -393,7 +412,7 @@ const ProgressComment = () => {
           </View>
         </View>
         <View>
-            <Markdown>{progressData.content}</Markdown>
+            <Markdown style={mdStyle}>{progressData.content}</Markdown>
         </View>
 
         {progressData.event_time && (
@@ -411,11 +430,12 @@ const ProgressComment = () => {
         <TextInput
           style={{
             flex: 1,
-            backgroundColor: "#fff",
+            backgroundColor: isDark? "#444":"#fff",
             borderRadius: 12,
             paddingHorizontal: 12,
             paddingVertical: 8,
-            color: "#333",
+            height:40,
+            color: isDark? "#fff" : "#333",
           }}
           placeholder="写下你的评论..."
           placeholderTextColor="#9ca3af"
@@ -454,7 +474,7 @@ const ProgressComment = () => {
 
   return (
     <ScrollView
-      className='flex-1 bg-gray-100 dark:bg-gray-900 mx-3 mb-8'
+      className='flex-1 bg-gray-100 dark:bg-gray-900 px-3'
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#3b82f6"]} />
       }

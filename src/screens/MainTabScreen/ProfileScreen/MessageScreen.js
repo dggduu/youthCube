@@ -192,7 +192,7 @@ const MessageScreen = ({ navigation }) => {
         ListHeaderComponent={
           <View>
             <BackIcon/>
-  <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm shadow-gray-200 dark:shadow-gray-900">
+            <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm shadow-gray-200 dark:shadow-gray-900 mx-3">
               
               {/* 用户资料卡片 */}
               <View className="items-center mb-4">

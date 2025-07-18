@@ -153,7 +153,7 @@ const AddProgress = () => {
   return (
     <View className="flex-1 dark:bg-gray-900">
       <ScrollView className="flex-1 p-5">
-        {/* <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text> */}
+        <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text>
 
         {/* 标题 */}
         <TextInput
@@ -161,6 +161,7 @@ const AddProgress = () => {
           placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
           value={title}
           onChangeText={setTitle}
+          style={{height:50}}
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
         {/* 描述输入 */}

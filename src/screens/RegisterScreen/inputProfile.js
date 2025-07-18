@@ -10,7 +10,6 @@ import {
   useColorScheme,
   ScrollView,
   Alert
-
 } from 'react-native';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -308,7 +307,7 @@ export default function InputProfile({ route }) {
                 style={{
                   color: isDarkMode ? 'white' : 'gray',
                   backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                  height:60,
+                  height:55,
                 }}
                 dropdownIconColor={isDarkMode ? 'white' : 'black'}
                 mode="dropdown"
@@ -340,10 +339,11 @@ export default function InputProfile({ route }) {
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg border-gray-300">
+            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-300">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}
+                style={{height:55}}
                 onChangeText={setCode}
                 className={`flex-1 pl-5 ${
                   isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-black'

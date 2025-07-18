@@ -133,7 +133,7 @@ const CollectPostFeed = () => {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900 mt-2">
       <WaterfallFlow
         ref={scrollViewRef}
         key={`waterfall-${page}`}

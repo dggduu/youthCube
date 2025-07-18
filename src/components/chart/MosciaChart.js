@@ -85,7 +85,7 @@ const calculateMonthLabels = (weeks) => {
 
 const getColorByType = (types, isDarkMode, maxCount) => {
   if (!types || types.length === 0) {
-    return isDarkMode ? '#1a1a1a' : '#ebedf0';
+    return isDarkMode ? '#777' : '#ebedf0';
   }
 
   const priority = ['deadline', 'competition', 'meeting', 'progress_report'];
@@ -273,7 +273,7 @@ const MosciaChart = ({ team_id }) => {
   }
 
   return (
-    <View className='justify-center bg-white dark:bg-black py-5 px-3 mx-3 rounded-xl items-center border border-gray-300'>
+    <View className='justify-center bg-white dark:bg-gray-700 py-5 px-3 mx-3 rounded-xl items-center border border-gray-300 dark:border-gray-600'>
       {/* <Text className='font-semibold self-start text-lg mb-3 ml-2'>过去一年的时间线：</Text> */}
       <View className=' flex-row'>
         {/* 星期标签 */}

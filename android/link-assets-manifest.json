@@ -2,12 +2,12 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "node_modules/@ant-design/icons-react-native/fonts/antfill.ttf",
-      "sha1": "56960e7721fc92b62e0f7c4d131ffe34ed042c49"
+      "path": "src/assets/fonts/NotoSerifSC.ttf",
+      "sha1": "05ed83823fbc52a96a4e90bf821a1d899f9de209"
     },
     {
-      "path": "node_modules/@ant-design/icons-react-native/fonts/antoutline.ttf",
-      "sha1": "66720607b7496a48f145425386b2082b73662fd1"
+      "path": "src/assets/fonts/ZCOOLXiaoWei.ttf",
+      "sha1": "31d46dc59cc7d48ad08cb0f8e203d67197c5b094"
     }
   ]
 }

@@ -7,6 +7,8 @@ import { BASE_INFO } from '../../../../constant/base';
 import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
 import BackIcon from "../../../../components/backIcon/backIcon";
+import InputBox from "../../../../components/inputBox/inputBox";
+
 const VDITOR_CACHE_KEY = 'vditor_draft_content';
 
 const UploaderScreen = () => {
@@ -298,20 +300,18 @@ const UploaderScreen = () => {
         <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建新帖子</Text>
 
         {/* Title Input */}
-        <TextInput
+        <InputBox
           placeholder="标题 *"
-          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
           value={title}
+          style={{height:50}}
           onChangeText={setTitle}
-          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-
         {/* Content Edit Button */}
         <TouchableOpacity
           onPress={() => setShowVditorModal(true)}
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800"
         >
-          <Text className="text-gray-700 dark:text-gray-300 font-semibold">
+          <Text className=" dark:text-gray-600 text-gray-400 font-semibold">
             {contentDisplay ? '已编辑内容 (点击编辑)' : '点击编辑内容 *'}
           </Text>
           {contentDisplay ? (
@@ -346,7 +346,7 @@ const UploaderScreen = () => {
         )}
 
         {/* Tags Selection */}
-        <View className="flex-row justify-between items-center mb-3">
+        <View className="flex-row justify-between items-center mb-3 mt-3">
           <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>
           <TouchableOpacity
             onPress={() => setShowAddTagModal(true)}
@@ -357,12 +357,10 @@ const UploaderScreen = () => {
         </View>
 
         {/* Tag Search */}
-        <TextInput
+        <InputBox
           placeholder="搜索标签..."
-          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
           value={tagSearch}
           onChangeText={setTagSearch}
-          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
 
         {isLoadingTags ? (
@@ -450,7 +448,7 @@ const UploaderScreen = () => {
             <View className="w-full bg-white dark:bg-gray-800 p-5 rounded-lg">
               <Text className="text-xl font-bold mb-4 text-gray-900 dark:text-white">新建标签</Text>
 
-              <TextInput
+              <InputBox
                 placeholder="标签名称"
                 placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
                 value={newTagName}

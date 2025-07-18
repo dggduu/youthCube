@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, useColorScheme } from 'react-native';
 import React, { useState, useEffect } from "react";
 import MosciaChart from "../../../components/chart/MosciaChart";
 import TimeLine from "../../../components/chart/TimeLine";
@@ -15,12 +15,12 @@ const ProgressScreen = () => {
   const [userId, setUserId] = useState(null);
   const [isOwnerOrCoOwner, setIsOwnerOrCoOwner] = useState(false);
   const navigation = useNavigation();
-
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme == "dark";
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 1. 获取用户数据
         const userData = await getItemFromAsyncStorage("user");
         if (!userData) {
           throw new Error("用户数据不存在");
@@ -29,7 +29,6 @@ const ProgressScreen = () => {
         setUserId(userData.id);
         setTeamId(userData.team_id || null);
 
-        // 2. 如果有团队，获取团队详情
         if (userData.team_id) {
           const response = await axios.get(
             `${BASE_INFO.BASE_URL}api/teams/${userData.team_id}`,
@@ -43,7 +42,6 @@ const ProgressScreen = () => {
           const teamData = response.data;
           setRole(teamData.chatRoom?.members || []);
 
-          // 3. 检查用户角色
           const currentUserInTeam = teamData.chatRoom?.members?.find(
             (member) => member.user_id === userData.id
           );
@@ -71,15 +69,16 @@ const ProgressScreen = () => {
   return (
     <View className='flex-1 bg-gray-100 dark:bg-gray-900'>
       <View className='flex-row mt-3'>
-        <TouchableOpacity
+        {/* 多队伍管理，待讨论 */}
+        {/* <TouchableOpacity
           className='bg-white p-3 rounded-full w-20 ml-3 items-center justify-center'
         >
           <Text>队伍</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {isOwnerOrCoOwner && (
           <TouchableOpacity
-            className='p-3 bg-white rounded-full ml-3'
+            className='p-3 bg-white rounded-full ml-3 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'
             onPress={() => {
               navigation.navigate('Admin', {
                 teamId: teamId,
@@ -87,7 +86,7 @@ const ProgressScreen = () => {
               });
             }}
           >
-            <MaterialIcons name='settings' size={15} color="#33f"/>
+            <MaterialIcons name='settings' size={15} color={`${isDark? "#eee" : "#000"}`}/>
           </TouchableOpacity>
         )}
       </View>
@@ -102,7 +101,7 @@ const ProgressScreen = () => {
       
       {teamId && (
         <TouchableOpacity
-          className='absolute bottom-6 right-6 bg-blue-500 p-4 rounded-full shadow-lg'
+          className='absolute bottom-6 right-6 bg-blue-500 dark:bg-blue-700 p-5 rounded-full shadow-lg dark:border-gray-600 border border-gray-300'
           onPress={() => {
             navigation.navigate("Add", {
               teamId: teamId

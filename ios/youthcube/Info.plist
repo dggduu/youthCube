@@ -37,14 +37,14 @@
 	<true/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>antfill.ttf</string>
-		<string>antoutline.ttf</string>
 		<string>EvilIcons.ttf</string>
 		<string>FontAwesome6_Brands.ttf</string>
 		<string>FontAwesome6_Regular.ttf</string>
 		<string>FontAwesome6_Solid.ttf</string>
 		<string>.DS_Store</string>
 		<string>MaterialIcons.ttf</string>
+		<string>ZCOOLXiaoWei.ttf</string>
+		<string>NotoSerifSC.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

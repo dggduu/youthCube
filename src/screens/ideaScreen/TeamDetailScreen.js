@@ -6,7 +6,7 @@ import { GRADES, PartyGrade } from '../../constant/user';
 import { getItemFromAsyncStorage, setItemInAsyncStorage } from "../../utils/LocalStorage";
 import { Screen } from 'react-native-screens';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-import { setTSpan } from 'react-native-svg/lib/typescript/lib/extract/extractText';
+import { navigate } from "../../navigation/NavigatorRef";
 const TeamDetailScreen = () => {
   const route = useRoute();
   const { teamId, teamName } = route.params || {};
@@ -31,7 +31,7 @@ const TeamDetailScreen = () => {
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
-            onPress={() => navigation.popToTop()}
+            onPress={() => navigate('MainTabNavigator', { screen: '想法市场'})}
             style={{ marginRight: 10 }}
           >
             <MaterialIcons name="home" size={24} color="#333" />
@@ -168,7 +168,7 @@ const TeamDetailScreen = () => {
       <View className='mb-4 bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-xl justify-between'>
         <View className="flex-row justify-between items-center mb-4">
           <View className='ml-1'>
-            <Text className="text-2xl font-bold dark:text-white">{teamData.team_name}</Text>
+            <Text className="text-2xl dark:text-white mb-2" style={{fontFamily:"NotoSerifSC"}}>{teamData.team_name}</Text>
             <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               创建于 {new Date(teamData.create_at).toLocaleDateString()}
             </Text>
@@ -178,8 +178,8 @@ const TeamDetailScreen = () => {
             <View className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-t-lg">
               <Text className="text-blue-700 dark:text-gray-200 text-sm">推荐加入等级: {gradeLabel}</Text>
             </View>
-            <View className="bg-green-100 dark:bg-gray-200 px-3 py-2 rounded-b-lg">
-              <Text className="text-green-700 dark:text-green-900 text-sm">
+            <View className="bg-green-100 dark:bg-cyan-600 px-3 py-2 rounded-b-lg">
+              <Text className="text-green-700 dark:text-gray-300 text-sm">
                 {teamData.is_public ? '公开团队' : '私密团队'}
               </Text>
             </View>
@@ -214,7 +214,7 @@ const TeamDetailScreen = () => {
       {/* 标签 */}
       {teamData.tags?.length > 0 && 
         <View className="mb-4">
-          <Text className="font-semibold text-gray-700 dark:text-gray-300 mb-2">标签</Text>
+          <Text className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-lg">标签</Text>
           <View className="flex-row flex-wrap">
             {teamData.tags.map((tag) => (
               <TouchableOpacity 
@@ -235,12 +235,12 @@ const TeamDetailScreen = () => {
       {/* 队伍成员 */}
       { teamData.chatRoom &&
         <View className='mb-4 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-          <Text className='font-semibold text-dark dark:text-gray-300'>队伍成员：</Text>
+          <Text className='font-semibold text-dark dark:text-gray-300 mt-1 text-lg'>队伍成员：</Text>
           <View className='flex-row px-1 py-2'>
             {teamData.chatRoom.members.map((member, index) => (
               <TouchableOpacity
                 key={index}
-                className='mr-4 p-2 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900' 
+                className='mr-4 py-1 px-3 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900' 
                 onPress={()=>{
                   navigation.navigate("profile", {
                     team_id : teamData.team_id,
@@ -265,7 +265,7 @@ const TeamDetailScreen = () => {
       }
       {/* 描述 */}
       <View className="mb-4 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <Text className='font-semibold text-dark dark:text-gray-300'>队伍描述：</Text>
+        <Text className='font-semibold text-dark dark:text-gray-300 mt-1 text-lg'>队伍描述：</Text>
         <Text className="text-gray-700 dark:text-gray-300 leading-relaxed">
           {teamData.description}
         </Text>

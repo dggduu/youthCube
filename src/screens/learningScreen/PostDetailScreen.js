@@ -20,6 +20,9 @@ import { useToast } from "../../components/tip/ToastHooks";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
 import Markdown from 'react-native-markdown-display';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { navigate } from "../../navigation/NavigatorRef";
+
+import { mdStyle } from "../../constant/user";
 const PostDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -39,6 +42,7 @@ const PostDetailScreen = () => {
   const { showToast } = useToast();
   const [authToken, setAuthToken] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
+
   // 处理生成嵌套问题，但嵌套深度为复数个时显示跳转主页按钮
   const state = navigation.getState();
   const index = state.routes.findIndex(r => r.key === route.key);
@@ -48,7 +52,7 @@ const PostDetailScreen = () => {
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
-            onPress={() => navigation.popToTop()}
+            onPress={() => navigate('MainTabNavigator', { screen: '学习中心'})}
             style={{ marginRight: 10 }}
           >
             <MaterialIcons name="home" size={24} color="#333" />
@@ -299,7 +303,11 @@ const mdStyle = {
         }
       >
         <View className="p-4">
-          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <Text
+            style={{
+              fontFamily:"NotoSerifSC"
+            }} 
+            className="text-3xl text-gray-900 dark:text-white mb-3">
             {post.title}
           </Text>
 
@@ -510,6 +518,7 @@ const CommentSection = ({ postId, authToken }) => {
             className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
             placeholder="发表一个友善的评论..."
             placeholderTextColor="#9ca3af"
+            style={{height:40}}
             value={commentText}
             onChangeText={setCommentText}
             multiline

@@ -66,13 +66,13 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: isDark ? '#121212' : '#f9f9f9' }}>
-      <ScrollView className="flex-1">
-        <View className="px-6 pt-4 pb-8">
+    <SafeAreaProvider>
+      <ScrollView className="flex-1 bg-gray-100 dark:bg-gray-900">
+        <View className="px-6 pt-4 pb-8 mt-3">
 
           {/* --- 用户信息卡片 --- */}
           <View
-            className={`py-8 px-4 rounded-2xl mb-6 border border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`py-8 px-4 rounded-2xl mb-6 border border-gray-200 dark:border-gray-600 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
             style={{
               elevation: 2,
               shadowColor: isDark ? '#000' : '#ccc',
@@ -97,7 +97,7 @@ export default function ProfileScreen() {
                   </Text>
                 </View>
               </View>
-              <View className="flex-row">
+              <View className="flex-row mr-1">
                 <TouchableOpacity
                   className="mr-4"
                   onPress={() => navigate('RootProfile', { screen: 'TopBar', params: {screen:"Message"} })}
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
 
           {/* --- 我的学习模块 --- */}
           <View
-            className={`p-5 rounded-2xl border border-gray-200 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`p-5 rounded-2xl border border-gray-200 dark:border-gray-600 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
             <Text className="text-lg font-semibold mb-4 ml-1 text-neutral-800 dark:text-white">
               我的学习
@@ -125,7 +125,7 @@ export default function ProfileScreen() {
               {learningItems.map((item, index) => (
                 <TouchableOpacity
                   key={index}
-                  className={`flex-row items-center p-2 py-4 rounded-xl border-b border-gray-200`}
+                  className={`flex-row items-center p-2 py-4 rounded-xl border-b border-gray-200 dark:border-gray-600`}
                   onPress={item.action}
                 >
                   <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#666'} />
@@ -139,7 +139,7 @@ export default function ProfileScreen() {
 
           {/* --- 设置和其他选项 --- */}
           <View
-            className={`rounded-2xl overflow-hidden border p-3 border-gray-200 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`rounded-2xl overflow-hidden border p-3 border-gray-200 dark:border-gray-600 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
           >
 {otherItems.map((item, idx) => (
               <React.Fragment key={idx}>

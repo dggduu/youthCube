@@ -152,8 +152,8 @@ const CreateTeam = () => {
       
       {/* 适龄段选择 */}
       <View className="mb-5">
-        <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">适龄段</Text>
-        <View className="rounded-lg border border-gray-300 overflow-hidden">
+        <Text className="text-base font-medium mb-2 text-gray-900 dark:text-gray-300">适龄段</Text>
+        <View className="rounded-lg border border-gray-300 overflow-hidden dark:border-gray-600">
           <Picker
             selectedValue={selectedGrade}
             onValueChange={(itemValue) => setSelectedGrade(itemValue)}
@@ -178,19 +178,19 @@ const CreateTeam = () => {
       
       {/* 公开/私有设置 */}
       <View className="mb-5">
-        <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">加入方式</Text>
+        <Text className="text-base font-medium mb-2 text-gray-900 dark:text-gray-300">加入方式</Text>
         <View className="flex-row">
           <TouchableOpacity 
             className={`px-4 py-2 border rounded mr-2 ${isPublic ? 'bg-blue-500 border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
             onPress={() => setIsPublic(true)}
           >
-            <Text className={`${isPublic ? 'text-white' : 'text-gray-900 dark:text-white'}`}>公开加入</Text>
+            <Text className={`${isPublic ? 'text-white' : 'text-gray-900 dark:text-gray-300'}`}>公开加入</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             className={`px-4 py-2 border rounded ${!isPublic ? 'bg-blue-500 border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
             onPress={() => setIsPublic(false)}
           >
-            <Text className={`${!isPublic ? 'text-white' : 'text-gray-900 dark:text-white'}`}>仅邀请</Text>
+            <Text className={`${!isPublic ? 'text-white' : 'text-gray-900 dark:text-gray-300'}`}>仅邀请</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -200,7 +200,7 @@ const CreateTeam = () => {
         <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">选择标签</Text>
         <TouchableOpacity 
           onPress={fetchTags} 
-          className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl self-start mb-3 border border-gray-300"
+          className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl self-start mb-3 border border-gray-300 dark:border-gray-600"
         >
           <Text className="text-blue-500 dark:text-blue-400">加载标签</Text>
         </TouchableOpacity>
@@ -208,14 +208,14 @@ const CreateTeam = () => {
           {allTags.map(tag => (
             <TouchableOpacity
               key={tag.tag_id}
-              className={`px-3 py-1.5 rounded-full border border-gray-300 mr-2 mb-2 ${selectedTags.some(t => t.tag_id === tag.tag_id) 
+              className={`px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 mr-2 mb-2 ${selectedTags.some(t => t.tag_id === tag.tag_id) 
                 ? 'bg-blue-500' 
                 : 'bg-gray-100 dark:bg-gray-800'}`}
               onPress={() => toggleTagSelection(tag)}
             >
               <Text className={`${selectedTags.some(t => t.tag_id === tag.tag_id) 
                 ? 'text-white' 
-                : 'text-gray-900 dark:text-white'}`}>
+                : 'text-gray-900 dark:text-gray-300'}`}>
                 {tag.tag_name}
               </Text>
             </TouchableOpacity>

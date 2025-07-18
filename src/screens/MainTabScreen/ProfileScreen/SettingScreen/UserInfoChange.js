@@ -245,10 +245,9 @@ const UserInfoChange = () => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         keyboardShouldPersistTaps="handled"
-        className="pt-12"
       >
         
-        <View className="px-4 pt-6 mt-8 mb-20">
+        <View className="px-4 pt-6 mb-20">
           <Text
             className={`text-2xl font-bold text-center mb-6 ${
               isDarkMode ? 'text-gray-300' : 'text-gray-800'
