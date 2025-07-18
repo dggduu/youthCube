@@ -7,8 +7,14 @@ import { getItemFromAsyncStorage, setItemInAsyncStorage } from "../../utils/Loca
 import { Screen } from 'react-native-screens';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { navigate } from "../../navigation/NavigatorRef";
+import { useToast } from "../../components/tip/ToastHooks";
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 const TeamDetailScreen = () => {
   const route = useRoute();
+  const { showToast } = useToast();
   const { teamId, teamName } = route.params || {};
   const isDark = useColorScheme() == 'dark';
   const [teamData, setTeamData] = useState(null);
@@ -44,19 +50,35 @@ const TeamDetailScreen = () => {
   useEffect(() => {
     const fetchTeamDetails = async () => {
       try {
-        const response = await fetch(`${BASE_INFO.BASE_URL}api/teams/${teamId}`);
-        if (!response.ok) throw new Error('加载失败');
-        const result = await response.json();
+        const response = await api.get(
+          `${BASE_INFO.BASE_URL}api/teams/${teamId}`
+        );
+
+        const result = response.data;
+
         setTeamData(result);
         console.log(result);
+
         if (result.projectResults && result.projectResults.length > 0) {
           fetchAssociatedArticles(result.projectResults);
         }
-        
-        const lastApply = await getItemFromAsyncStorage(`lastApply_${teamId}`);
+
+        const lastApply = await getItemFromAsyncStorage(
+          `lastApply_${teamId}`
+        );
         setLastApplicationTime(lastApply ? parseInt(lastApply) : null);
       } catch (err) {
-        setError(err.message);
+        let errorMessage = '获取团队信息失败';
+
+        if (err.response && err.response.data) {
+          errorMessage = err.response.data.message || errorMessage;
+        } else if (err.request) {
+          errorMessage = '网络错误，请检查您的连接';
+        } else {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -75,16 +97,12 @@ const TeamDetailScreen = () => {
       const articleResults = projectResults.filter(pr => pr.type === 'article' && pr.post_id && pr.is_completed);
       const articles = await Promise.all(
         articleResults.map(async (result) => {
-          const response = await fetch(`${BASE_INFO.BASE_URL}api/posts/${result.post_id}`);
-          if (response.ok) {
-            return await response.json();
-          }
-          return null;
+          const response = await api.get(`${BASE_INFO.BASE_URL}api/posts/${result.post_id}`);
+          return response.data;
         })
       );
       setAssociatedArticles(articles.filter(article => article !== null));
     } catch (err) {
-      console.error('Error fetching articles:', err);
     } finally {
       setArticlesLoading(false);
     }
@@ -110,34 +128,39 @@ const TeamDetailScreen = () => {
     setIsApplying(true);
     try {
       const accessToken = await getItemFromAsyncStorage("accessToken");
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/invite/team`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
+
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/invite/team`,
+        {
           team_id: teamId,
           email: applicationData.email,
           description: applicationData.description
-        })
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+      setShowApplyModal(false);
+      setApplicationData({ email: '', description: '' });
+      showToast("申请发送成功","success");
+      const now = Date.now();
+      setLastApplicationTime(now);
+      await setItemInAsyncStorage(`lastApply_${teamId}`, now.toString());
 
-      const result = await response.json();
-
-      if (response.ok) {
-        ToastAndroid.show('申请已发送', ToastAndroid.SHORT);
-        setShowApplyModal(false);
-        setApplicationData({ email: '', description: '' });
-
-        const now = Date.now();
-        setLastApplicationTime(now);
-        await setItemInAsyncStorage(`lastApply_${teamId}`, now.toString());
-      } else {
-        throw new Error(result.message || '申请失败');
-      }
     } catch (err) {
-      ToastAndroid.show(err.message, ToastAndroid.SHORT);
+      let errorMessage = '申请发送失败';
+      showToast("申请发送失败","error");
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+
     } finally {
       setIsApplying(false);
     }

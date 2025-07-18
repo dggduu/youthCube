@@ -8,6 +8,10 @@ import { useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../../constant/base';
 import axios from 'axios';
 
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const ProgressScreen = () => {
   const [teamId, setTeamId] = useState(null);
   const [role, setRole] = useState([]);
@@ -30,7 +34,7 @@ const ProgressScreen = () => {
         setTeamId(userData.team_id || null);
 
         if (userData.team_id) {
-          const response = await axios.get(
+          const response = await api.get(
             `${BASE_INFO.BASE_URL}api/teams/${userData.team_id}`,
             {
               headers: {

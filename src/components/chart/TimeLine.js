@@ -6,6 +6,11 @@ import { getItemFromAsyncStorage } from '../../utils/LocalStorage';
 import { BASE_INFO } from '../../constant/base';
 import { useToast } from '../../components/tip/ToastHooks';
 import { useNavigation } from "@react-navigation/native";
+
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 // 类型颜色
 const getColorByType = (type, isDark) => {
   switch (type) {
@@ -55,7 +60,7 @@ const TimeLine = ({ teamId, role}) => {
       else setIsLoading(true);
 
       const token = await getItemFromAsyncStorage('accessToken');
-      const response = await fetch(
+      const response = await api.get(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress?page=${pageNum}&size=20`,
         {
           headers: {
@@ -64,7 +69,7 @@ const TimeLine = ({ teamId, role}) => {
         }
       );
 
-      const result = await response.json();
+      const result = response.data;
       console.log(result);
       if (result.items && result.items.length > 0) {
         const now = new Date();

@@ -12,6 +12,11 @@ import { useToast } from '../../components/tip/ToastHooks';
 import { getItemFromAsyncStorage } from '../../utils/LocalStorage';
 import { BASE_INFO } from '../../constant/base';
 
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 // 颜色色阶：从浅绿到深绿
 const GREEN_SHADES = [
   '#e8f5e9', // 最浅
@@ -219,12 +224,12 @@ const MosciaChart = ({ team_id }) => {
     const fetchData = async () => {
       try {
         const token = await getItemFromAsyncStorage('accessToken');
-        const response = await fetch(`${BASE_INFO.BASE_URL}api/team/${team_id}/progress/year`, {
+        const response = await api.get(`${BASE_INFO.BASE_URL}api/team/${team_id}/progress/year`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const result = await response.json();
+        const result = response.data;
 
         const eventsByDay = {};
         let max = 0;

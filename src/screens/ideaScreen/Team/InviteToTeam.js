@@ -8,6 +8,9 @@ import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from "@react-native-vector-icons/material-icons";
 
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const InviteToTeam = () => {
   const route = useRoute();
@@ -53,7 +56,7 @@ const InviteToTeam = () => {
 
   const fetchTeamInfo = async () => {
     try {
-      const res = await axios.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
+      const res = await api.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       setTeam(res.data);
@@ -67,7 +70,7 @@ const InviteToTeam = () => {
     setLoadingMore(true);
 
     try {
-      const res = await axios.get(`${BASE_INFO.BASE_URL}api/users/${userId}/followers`, {
+      const res = await api.get(`${BASE_INFO.BASE_URL}api/users/${userId}/followers`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: { page: pageNum, size: 20 },
       });
@@ -101,7 +104,7 @@ const InviteToTeam = () => {
     }
 
     try {
-      await axios.post(
+      await api.post(
         `${BASE_INFO.BASE_URL}api/invite/team`,
         {
           team_id,

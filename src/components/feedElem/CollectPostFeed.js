@@ -14,6 +14,11 @@ import { BASE_INFO } from '../../constant/base';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
 
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const CollectPostFeed = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -49,7 +54,7 @@ const CollectPostFeed = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(
+      const response = await api.get(
         `${BASE_INFO.BASE_URL}api/collect/post?page=${pageNum}&size=10`,
         {
           headers: {
@@ -59,9 +64,7 @@ const CollectPostFeed = () => {
         }
       );
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const result = await response.json();
+      const result = response.data;
       
       const newData = result.data.map((item, index) => ({
         id: item.post_id || `${pageNum}-${index}`,

@@ -9,6 +9,10 @@ import { useColorScheme } from 'nativewind';
 import WaterfallFlow from 'react-native-waterfall-flow';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { WebView } from 'react-native-webview';
+import axios from "axios";
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const ProgressAdmin = () => {
   const route = useRoute();
@@ -40,7 +44,7 @@ const ProgressAdmin = () => {
       const token = await getItemFromAsyncStorage("accessToken");
       setAccessToken(token);
       
-      const response = await fetch(
+      const response = await api(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         {
           headers: {
@@ -49,9 +53,11 @@ const ProgressAdmin = () => {
         }
       );
       
-      if (!response.ok) throw new Error('Failed to fetch progress');
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(`请求失败，状态码：${response.status}`);
+      }
       
-      const data = await response.json();
+      const data = response.data;
       setProgressList(data.items);
       console.log("progress",teamId);
     } catch (error) {
@@ -64,45 +70,61 @@ const ProgressAdmin = () => {
   
   const handleStatusUpdate = async (progressId, newStatus) => {
     try {
-      const response = await fetch(
+      await axios.put(
         `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
         {
-          method: 'PUT',
+          status: newStatus,
+        },
+        {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ status: newStatus })
         }
       );
-      
-      if (!response.ok) throw new Error('Failed to update status');
-      
+
       showToast('状态更新成功', 'success');
       fetchProgress();
     } catch (error) {
-      showToast(error.message, 'error');
+      let errorMessage = '状态更新失败';
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = '网络错误，请检查连接';
+      } else {
+        errorMessage = error.message;
+      }
+
+      showToast(errorMessage, 'error');
     }
   };
-  
+
   const handleDelete = async (progressId) => {
     try {
-      const response = await fetch(
+      await axios.delete(
         `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
         {
-          method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
-      
-      if (!response.ok) throw new Error('Failed to delete progress');
-      
+
       showToast('进度已删除', 'success');
       fetchProgress();
     } catch (error) {
-      showToast(error.message, 'error');
+      let errorMessage = '删除进度失败';
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = '网络错误，请检查连接';
+      } else {
+        errorMessage = error.message;
+      }
+
+      showToast(errorMessage, 'error');
     }
   };
 
@@ -119,34 +141,40 @@ const ProgressAdmin = () => {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(
+
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         {
-          method: 'POST',
+          title,
+          description,
+          timeline_type: timelineType,
+          event_time: eventTime.toISOString()
+        },
+        {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            title,
-            description,
-            timeline_type: timelineType,
-            event_time: eventTime.toISOString()
-          })
         }
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit progress');
-      }
 
       showToast('进度提交成功', 'success');
       setShowAddModal(false);
       fetchProgress();
       resetForm();
+
     } catch (error) {
-      showToast(error.message, 'error');
+      let errorMessage = '进度提交失败';
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = error.message;
+      }
+
+      showToast(errorMessage, 'error');
     } finally {
       setIsSubmitting(false);
     }

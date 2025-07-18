@@ -22,7 +22,11 @@ import Markdown from 'react-native-markdown-display';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { navigate } from "../../navigation/NavigatorRef";
 
-import { mdStyle } from "../../constant/user";
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const PostDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -64,24 +68,32 @@ const PostDetailScreen = () => {
   const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/posts/${postId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch post');
-      }
-      const data = await response.json();
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/posts/${postId}`);
+      const data = response.data;
 
       setPost(data);
       setLikeCount(data.likes_count);
 
       if (data.tags && data.tags.length > 0) {
         const tagPromises = data.tags.map(tagId =>
-          fetch(`${BASE_INFO.BASE_URL}api/tags/${tagId.tag_id}`).then(res => res.json())
+          axios.get(`${BASE_INFO.BASE_URL}api/tags/${tagId.tag_id}`)
         );
-        const tagData = await Promise.all(tagPromises);
+        const tagResponses = await Promise.all(tagPromises);
+        const tagData = tagResponses.map(res => res.data);
         setTags(tagData);
       }
     } catch (err) {
-      setError(err.message);
+      let errorMessage = '加载帖子失败';
+
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -89,18 +101,17 @@ const PostDetailScreen = () => {
 
   const checkLikeStatus = useCallback(async (token) => {
     try {
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/posts/${postId}/like/status`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/posts/${postId}/like/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
-      if (response.ok) {
-        const result = await response.json();
-        setLiked(result.liked);
-      }
+      setLiked(response.data.liked);
     } catch (err) {
       console.error("Failed to check like status:", err);
     }
@@ -108,19 +119,18 @@ const PostDetailScreen = () => {
 
   const checkCollectStatus = useCallback(async (token) => {
     try {
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/posts/${postId}/collect/status`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/posts/${postId}/collect/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
-      if (response.ok) {
-        const result = await response.json();
-        setCollected(result.collected);
-        setCollectCount(result.collectedCount);
-      }
+      setCollected(response.data.collected);
+      setCollectCount(response.data.collectedCount);
     } catch (err) {
       console.error("Failed to check collect status:", err);
     }
@@ -164,50 +174,42 @@ const PostDetailScreen = () => {
 
   const toggleLike = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${BASE_INFO.BASE_URL}api/posts/${postId}/${liked ? 'unlike' : 'like'}`,
-        {
-          method: liked ? 'DELETE' : 'POST',
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const method = liked ? 'DELETE' : 'POST';
+      const url = `${BASE_INFO.BASE_URL}api/posts/${postId}/${liked ? 'unlike' : 'like'}`;
 
-      if (response.ok) {
-        setLiked(!liked);
-        setLikeCount(prev => liked ? prev - 1 : prev + 1);
-        showToast(liked ? "Unliked successfully" : "Liked successfully", "success");
-      } else {
-        throw new Error(response.statusText);
-      }
+      await api(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setLiked(!liked);
+      setLikeCount(prev => liked ? prev - 1 : prev + 1);
+      showToast(liked ? "取消点赞成功" : "点赞成功", "success");
     } catch (err) {
       showToast("网络遇到问题，请重试", "error");
       console.error('Error toggling like:', err);
     }
-  }, [liked, postId, authToken, showToast, navigation]);
+  }, [liked, postId, authToken, showToast]);
 
   const toggleCollect = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${BASE_INFO.BASE_URL}api/posts/${postId}/${collected ? 'uncollect' : 'collect'}`,
-        {
-          method: collected ? 'DELETE' : 'POST',
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const method = collected ? 'DELETE' : 'POST';
+      const url = `${BASE_INFO.BASE_URL}api/posts/${postId}/${collected ? 'uncollect' : 'collect'}`;
 
-      if (response.ok) {
-        setCollected(!collected);
-        setCollectCount(prev => collected ? prev - 1 : prev + 1);
-        showToast(collected ? "Uncollected successfully" : "Collected successfully", "success");
-      } else {
-        throw new Error(response.statusText);
-      }
+      await api(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setCollected(!collected);
+      setCollectCount(prev => collected ? prev - 1 : prev + 1);
+      showToast(collected ? "取消收藏成功" : "收藏成功", "success");
     } catch (err) {
       showToast("网络遇到问题，请重试", "error");
       console.error('Error toggling collect:', err);
@@ -495,7 +497,7 @@ const CommentSection = ({ postId, authToken }) => {
 
       if (response.ok) {
         setCommentText('');
-        showToast("Comment successful", "success");
+        showToast("评论成功", "success");
         fetchComments(0);
       } else {
         const errorData = await response.json();
@@ -612,7 +614,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
         throw new Error(errorData.message || 'Failed to submit reply');
       }
     } catch (err) {
-      showToast(`Reply failed: ${err.message}`, "error");
+      showToast(`回复时遇到错误`, "error");
     }
   }, [postId, authToken, replyText, comment.comment_id, showToast, navigation, fetchReplies]);
 

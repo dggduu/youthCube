@@ -32,9 +32,6 @@ const CommentItem = ({ comment, authToken, progressId }) => {
           }
         }
       );
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(`请求失败，状态码：${response.status}`);
-      }
 
       const data = response.data;
       setReplies(prev => page === 0 ? data.items : [...prev, ...data.items]);
@@ -314,7 +311,7 @@ const ProgressComment = () => {
     async (page = 0, token = authToken) => {
       try {
         setLoading(page === 0);
-        const response = await fetch(
+        const response = await api.get(
           `${BASE_INFO.BASE_URL}api/progress/${progress_id}/comments?size=10&page=${page}`,
           {
             headers: {
@@ -323,8 +320,7 @@ const ProgressComment = () => {
           }
         );
 
-        if (!response.ok) throw new Error("Failed to fetch comments");
-        const data = await response.json();
+        const data = response.data;
 
         setComments((prev) => (page === 0 ? data.items : [...prev, ...data.items]));
         setCurrentPage(data.currentPage || 0);
@@ -365,25 +361,33 @@ const ProgressComment = () => {
     }
 
     try {
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/progress/${progress_id}/comments`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/progress/${progress_id}/comments`,
+        {
+          content: commentText,
         },
-        body: JSON.stringify({ content: commentText }),
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          }
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "评论失败");
+      showToast("评论成功","success");
+
+    } catch (err) {
+      let errorMessage = '评论失败';
+
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
       }
 
-      setCommentText("");
-      showToast("评论成功", "success");
-      fetchComments(0);
-    } catch (err) {
-      showToast(`评论失败: ${err.message}`, "error");
+      throw new Error(errorMessage);
     }
   }, [progress_id, authToken, commentText, showToast, fetchComments]);
 

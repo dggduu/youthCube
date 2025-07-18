@@ -22,6 +22,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Markdown from "react-native-markdown-display";
 import InputBox from "../../../components/inputBox/inputBox";
 import { useNavigation } from "@react-navigation/native";
+import axios from 'axios'
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const ProgressCard = ({ progress, onEdit, onDelete}) => {
   const colorScheme = useColorScheme();
@@ -172,23 +176,20 @@ const UploadProgress = () => {
 
     try {
       setLoadingList(true);
-      const response = await fetch(
-        `${BASE_INFO.BASE_URL}api/team/${teamId}/progress?page=${currentPageToFetch}&size=10`,
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         {
-          method: 'GET',
           headers: {
             'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
           },
+          params:{
+            page:currentPageToFetch,
+            size:10
+          }
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '获取进度列表失败');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       if (reset) {
         setProgressList(data.items);
       } else {
@@ -268,9 +269,10 @@ const UploadProgress = () => {
       showToast("标题和进度内容不能为空", "warning");
       return;
     }
+
     if (!ALLOWED_TIMELINE_TYPES.includes(timelineType)) {
-        showToast("请选择有效的进度类型 (会议, 截止日期, 比赛)", "warning");
-        return;
+      showToast("请选择有效的进度类型 (会议, 截止日期, 比赛)", "warning");
+      return;
     }
 
     const progressData = {
@@ -283,37 +285,30 @@ const UploadProgress = () => {
 
     try {
       setIsSubmitting(true);
+
       let response;
       if (currentProgressId) {
-
-        response = await fetch(
+        response = await api.put(
           `${BASE_INFO.BASE_URL}api/progress/${currentProgressId}`,
+          progressData,
           {
-            method: 'PUT',
             headers: {
-              'Authorization': `Bearer ${authToken}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify(progressData)
           }
         );
       } else {
-        response = await fetch(
+        response = await api.post(
           `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
+          progressData,
           {
-            method: 'POST',
             headers: {
-              'Authorization': `Bearer ${authToken}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify(progressData)
           }
         );
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '提交进度失败');
       }
 
       showToast(currentProgressId ? "进度更新成功" : "进度提交成功", "success");
@@ -321,8 +316,19 @@ const UploadProgress = () => {
       setPage(0);
       setTotalPages(1);
       fetchProgressList(true);
+
     } catch (err) {
-      showToast(`提交失败: ${err.message}`, "error");
+      let errorMessage = '提交进度失败';
+
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+
+      showToast(`提交失败: ${errorMessage}`, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -338,27 +344,32 @@ const UploadProgress = () => {
           text: "删除",
           onPress: async () => {
             try {
-              const response = await fetch(
+              await api.delete(
                 `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
                 {
-                  method: 'DELETE',
                   headers: {
-                    'Authorization': `Bearer ${authToken}`,
+                    Authorization: `Bearer ${authToken}`,
                   },
                 }
               );
 
-              if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '删除进度失败');
-              }
-
               showToast("进度删除成功", "success");
-              setPage(0); 
+              setPage(0);
               setTotalPages(1);
               fetchProgressList(true);
+
             } catch (err) {
-              showToast(`删除失败: ${err.message}`, "error");
+              let errorMessage = '删除进度失败';
+
+              if (err.response && err.response.data) {
+                errorMessage = err.response.data.message || errorMessage;
+              } else if (err.request) {
+                errorMessage = '网络错误，请检查您的连接';
+              } else {
+                errorMessage = err.message;
+              }
+
+              showToast(`删除失败: ${errorMessage}`, "error");
             }
           },
         },

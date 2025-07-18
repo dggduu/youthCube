@@ -13,6 +13,12 @@ import { useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import MatrialIcons from "@react-native-vector-icons/material-icons";
 import { navigate } from "../../navigation/NavigatorRef";
+
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const TeamFeed = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -58,9 +64,8 @@ const TeamFeed = () => {
 
       try {
         const url = `${BASE_INFO.BASE_URL}api/teams?page=${pageNum}&size=15`;
-        console.log('Fetching:', url);
-        const response = await fetch(url);
-        const result = await response.json();
+        const response = await api.get(url);
+        const result = response.data;
 
         const newData = result.items.map((item) => ({
           id: item.team_id,

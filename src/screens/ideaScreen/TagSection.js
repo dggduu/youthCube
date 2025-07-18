@@ -14,7 +14,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { GRADES } from "../../constant/user";
-
+import axios from 'axios'
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 const TagSection = () => {
   const route = useRoute();
   const { tagId } = route.params;
@@ -40,9 +43,8 @@ const TagSection = () => {
 
   const fetchTag = useCallback(async () => {
     try {
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/tags/${tagId}`);
-      if (!response.ok) throw new Error('Failed to fetch tag');
-      const data = await response.json();
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/tags/${tagId}`);
+      const data = response.data;
       setTag(data);
     } catch (error) {
       console.error('Error fetching tag:', error);
@@ -71,8 +73,8 @@ const TagSection = () => {
 
     try {
       const url = `${BASE_INFO.BASE_URL}api/tags/${tagId}/teams?page=${pageNum}&size=20`;
-      const response = await fetch(url);
-      const result = await response.json();
+      const response = await api.get(url);
+      const result = response.data;
 
       setTotalPages(result.totalPages);
 

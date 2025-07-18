@@ -18,7 +18,7 @@ const data = [
 
 const HelpScreen = () => {
   return (
-    <SafeAreaView className='flex-1 pt-5 bg-white dark:bg-gray-800'>
+    <SafeAreaView className='flex-1 pt-5 bg-white dark:bg-gray-900'>
       <BackIcon />
       <ScrollView className='w-full px-7 mt-5'>
         {data.map((data, index) => (

@@ -33,7 +33,7 @@ const userAgreement = `
 
 const QualityShowScreen = () => {
   return (
-    <SafeAreaView className='flex-1 bg-white dark:bg-gray-800'>
+    <SafeAreaView className='flex-1 bg-white dark:bg-gray-900'>
       <BackIcon isDark={false} />
 
       <ScrollView className='px-5 py-6 mb-7'>

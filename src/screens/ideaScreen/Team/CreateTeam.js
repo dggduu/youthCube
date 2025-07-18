@@ -10,6 +10,11 @@ import { useColorScheme } from 'nativewind';
 import { useNavigation } from "@react-navigation/native";
 import { GRADES } from "../../../constant/user";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const CreateTeam = () => {
   const { colorScheme } = useColorScheme();
   const { showToast } = useToast();
@@ -42,7 +47,7 @@ const CreateTeam = () => {
   const fetchTags = async () => {
     try {
       const accessToken = await getItemFromAsyncStorage("accessToken");
-      const response = await axios.get(`${BASE_INFO.BASE_URL}api/tags`, {
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/tags`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         },
@@ -71,7 +76,7 @@ const CreateTeam = () => {
     setIsLoading(true);
     try {
       const accessToken = await getItemFromAsyncStorage("accessToken");
-      const response = await axios.post(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/teams`,
         {
           team_name: teamName,

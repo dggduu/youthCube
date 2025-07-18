@@ -30,6 +30,10 @@ import { refreshAccessToken } from "../../utils/LoginUtil";
 import SquareGridBackground from "../misc/SquareGridBackground";
 import PatternSVG from "../../assets/background/pattern.svg";
 
+import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const PersonChat = ( {chatId} ) => {
   const { showToast } = useToast();
     const colorScheme = useColorScheme();
@@ -49,7 +53,7 @@ const PersonChat = ( {chatId} ) => {
 
       try {
         setIsChatLoading(true);
-        const response = await axios.get(`${BASE_INFO.BASE_URL}api/chatrooms/history/${chatId}`, {
+        const response = await api.get(`${BASE_INFO.BASE_URL}api/chatrooms/history/${chatId}`, {
           params: { page: pageNum, size: 20 },
           headers: { Authorization: `Bearer ${accessToken}` },
         });

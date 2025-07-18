@@ -81,10 +81,6 @@ const InviteFriend = () => {
         },
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(`请求失败，状态码：${response.status}`);
-      }
-
       return response.data;
     },
     enabled: !!userData?.id && !!accessToken,
@@ -102,9 +98,7 @@ const InviteFriend = () => {
           },
         }
       );
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(`请求失败，状态码：${response.status}`);
-      }
+
       return response.data;
     },
     enabled: !!team_id && !!accessToken,
@@ -126,10 +120,6 @@ const InviteFriend = () => {
           },
         }
       );
-
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(`请求失败，状态码：${response.status}`);
-      }
 
       return response.data;
     },
