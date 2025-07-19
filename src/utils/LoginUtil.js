@@ -3,6 +3,8 @@ import axios from 'axios';
 import ENV, { BASE_INFO } from "../constant/base";
 import setupAuthInterceptors from "../utils/axios/AuthInterceptors";
 import { getItemFromAsyncStorage } from "../utils/LocalStorage";
+import store from "../store/auth/authStore";
+import { logout } from "../store/auth/authSlice";
 const axiosClient = axios.create({
     baseURL: BASE_INFO.BASE_URL + 'api',
     timeout: 10000,
@@ -10,6 +12,28 @@ const axiosClient = axios.create({
         "Content-Type": 'application/json',
     },
 });
+
+// 针对刷新接口403的拦截器
+axiosClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const { config, response } = error;
+
+    // 判断是否是 /refresh_token 请求
+    if (config.url === '/refresh_token') {
+      if (response && (response.status === 401 || response.status === 403)) {
+        console.warn("刷新 token 失败，refresh token 可能已过期");
+
+        store.dispatch(logout());
+
+        return Promise.reject(new Error('refresh_token 失效'));
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 /**
  * 登录函数，通过邮箱和密码获取访问令牌和刷新令牌

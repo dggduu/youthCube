@@ -54,7 +54,7 @@ export default function setupAuthInterceptors(instance) {
           const { refreshToken, accessToken } = await refreshAccessToken(oldRefreshToken);
 
           await setItemToAsyncStorage("accessToken", accessToken);
-          await setItemToAsyncStorage("refreshToken", refreshToken);
+          // await setItemToAsyncStorage("refreshToken", refreshToken);
 
           originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
           originalRequest._retry = true;
