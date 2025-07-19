@@ -29,7 +29,7 @@ import { refreshAccessToken } from "../../utils/LoginUtil";
 
 import SquareGridBackground from "../misc/SquareGridBackground";
 import PatternSVG from "../../assets/background/pattern.svg";
-
+import { setupSocketIOInterceptor } from "../../utils/SocketIOInterceptor";
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 const api = axios.create();
 setupAuthInterceptors(api);
@@ -113,21 +113,6 @@ const PersonChat = ( {chatId} ) => {
     },
     []
   );
-  // 自动刷新认证密钥
-  const refreshTokenAndUpdateSocket = async () => {
-    try {
-      const oldRefreshToken = await getItemFromAsyncStorage("refreshToken");
-      const { refreshToken, accessToken } = await refreshAccessToken(oldRefreshToken);
-
-      await setItemToAsyncStorage("accessToken", accessToken);
-      await setItemToAsyncStorage("refreshToken", refreshToken);
-
-      return accessToken;
-    } catch (err) {
-      console.error("刷新 Token 失败:", err);
-      throw err;
-    }
-  };
 
   // 处理敏感词错误
   const handleMessageError = useCallback((errorData) => {
@@ -189,7 +174,9 @@ const PersonChat = ( {chatId} ) => {
       transports: ['websocket'],
       reconnectionAttempts: Infinity,
     });
-
+    // 认证失败拦截器
+    setupSocketIOInterceptor(newSocket);
+    
     newSocket.on('connect', () => {
       console.log('Socket 已连接');
     });
@@ -200,25 +187,6 @@ const PersonChat = ( {chatId} ) => {
           newSocket.connect(); // 主动重连
         }
       });
-
-    newSocket.on('connect_error', async (err) => {
-      console.error('Socket 连接错误:', err.message);
-
-      if (err.message.includes('jwt expired') || err.message.includes('invalid token')) {
-        try {
-          const newAccessToken = await refreshTokenAndUpdateSocket();
-          newSocket.auth.token = newAccessToken;
-          newSocket.connect(); // 重新连接
-        } catch (refreshError) {
-          console.error('无法刷新 Token:', refreshError);
-          showToast('登录已过期，请重新登录', 'error');
-        }
-      }
-    });
-
-    newSocket.on('error', (err) => {
-      console.error('Socket 错误:', err.message);
-    });
 
     newSocket.on('receive:message', handleNewMessage);
     newSocket.on('message:error', handleMessageError);
@@ -324,7 +292,7 @@ const PersonChat = ( {chatId} ) => {
   );
 
     return (
-    <View className='flex-1'>
+    <View className='flex-1 bg-gray-900'>
         {isDarkMode ? 
         (
             <>
@@ -349,6 +317,7 @@ const PersonChat = ( {chatId} ) => {
                 isLoadingEarlier={isChatLoading}
                 loadEarlier={hasMoreMessages}
                 infiniteScroll
+
                 bottomOffset={Platform.OS === 'ios' ? 34 : 0}
                 keyboardShouldPersistTaps="handled"
                 textInputProps={{
@@ -360,7 +329,7 @@ const PersonChat = ( {chatId} ) => {
                 maxHeight: 100,
                 minHeight: 40,
                 flex: 1,
-                backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+                backgroundColor:"#12140e",
                 borderRadius: 20,
                 paddingHorizontal: 15,
                 }}
@@ -404,7 +373,7 @@ const PersonChat = ( {chatId} ) => {
                 maxHeight: 100,
                 minHeight: 40,
                 flex: 1,
-                backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+                backgroundColor: "#f9faef",
                 borderRadius: 20,
                 paddingHorizontal: 15,
                 }}
