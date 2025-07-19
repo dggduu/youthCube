@@ -339,7 +339,7 @@ export default function InputProfile({ route }) {
             >
               验证码
             </Text>
-            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-300">
+            <View className="flex-row items-center border rounded-lg overflow-hidden border-gray-300 dark:border-gray-600">
               <TextInput
                 placeholder="请输入验证码"
                 value={code}

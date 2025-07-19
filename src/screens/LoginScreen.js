@@ -19,6 +19,7 @@ import { loginUser, clearAuthError } from "../store/auth/authSlice";
 import { BASE_INFO } from "../constant/base";
 import { useToast } from "../components/tip/ToastHooks";
 import { useNavigation } from "@react-navigation/native";
+
 const LoginPage = ({ navigation }) => {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
@@ -115,7 +116,7 @@ const LoginPage = ({ navigation }) => {
           <Button
             type="primary"
             onPress={handleLogin}
-            className="mt-4 py-3 rounded-lg"
+            className="mt-4 py-3 rounded-lg "
           >
             登录
           </Button>
@@ -127,6 +128,14 @@ const LoginPage = ({ navigation }) => {
           >
             <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
               没有账号？去注册
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('FindPswd')}
+            className="items-center mt-6"
+          >
+            <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
+              忘记密码？
             </Text>
           </TouchableOpacity>
         </ScrollView>
