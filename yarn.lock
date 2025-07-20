@@ -2054,12 +2054,21 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/material-top-tabs@^7.2.14":
-  version "7.3.1"
-  resolved "https://registry.npmmirror.com/@react-navigation/material-top-tabs/-/material-top-tabs-7.3.1.tgz"
-  integrity sha512-Q2zWLF46XdaCdZ8d3Sjo2PSA8RTDd7ud735vS9DnmkgxrgPX+DDhsbOclM8I68ZcAKqjRDfHywUAHN62hehyfA==
+"@react-navigation/elements@^2.5.2":
+  version "2.5.2"
+  resolved "https://registry.npmmirror.com/@react-navigation/elements/-/elements-2.5.2.tgz#e74aed3671f280773b0066c308f679a0e9e679ab"
+  integrity sha512-aGC3ukF5+lXuiF5bK7bJyRuWCE+Tk4MZ3GoQpAb7u7+m0KmsquliDhj4UCWEUU5kUoCeoRAUvv+1lKcYKf+WTQ==
   dependencies:
-    "@react-navigation/elements" "^2.5.1"
+    color "^4.2.3"
+    use-latest-callback "^0.2.4"
+    use-sync-external-store "^1.5.0"
+
+"@react-navigation/material-top-tabs@^7.3.2":
+  version "7.3.2"
+  resolved "https://registry.npmmirror.com/@react-navigation/material-top-tabs/-/material-top-tabs-7.3.2.tgz#e0c4ad3595bf2072e9cbf890ef5b7c9e0dae9b28"
+  integrity sha512-ggZlsWV8ZiKWdVoxBZ1fiq8Af/VxYivsLWAccIvOQKom7yquSUkk0VKOc+rdfnRxXv40JhCmGhqCVLko9fjsRA==
+  dependencies:
+    "@react-navigation/elements" "^2.5.2"
     color "^4.2.3"
     react-native-tab-view "^4.1.2"
 
@@ -2071,9 +2080,9 @@
     "@react-navigation/elements" "^2.5.1"
     warn-once "^0.1.1"
 
-"@react-navigation/native@^7.1.10":
+"@react-navigation/native@^7.1.14":
   version "7.1.14"
-  resolved "https://registry.npmmirror.com/@react-navigation/native/-/native-7.1.14.tgz"
+  resolved "https://registry.npmmirror.com/@react-navigation/native/-/native-7.1.14.tgz#6b5b57bba4c5f45bfc9961da2f921aba5215dfad"
   integrity sha512-X233/CNx41FpshlWe4uEAUN8CNem3ju4t5pnVKcdhDR0cTQT1rK6P0ZwjSylD9zXdnHvJttFjBhKTot6TcvSqA==
   dependencies:
     "@react-navigation/core" "^7.12.1"
@@ -7709,6 +7718,11 @@ react-native-modal-popover@^2.0.1:
     lodash ">4.17.0"
     prop-types "^15.8.1"
 
+react-native-pager-view@^6.8.1:
+  version "6.8.1"
+  resolved "https://registry.npmmirror.com/react-native-pager-view/-/react-native-pager-view-6.8.1.tgz#fa0ec09ea7c44190c7c013d75dd09fdc17b96100"
+  integrity sha512-XIyVEMhwq7sZqM7GobOJZXxFCfdFgVNq/CFB2rZIRNRSVPJqE1k1fsc8xfQKfdzsp6Rpt6I7VOIvhmP7/YHdVg==
+
 react-native-paper@^5.3.0:
   version "5.14.5"
   resolved "https://registry.npmmirror.com/react-native-paper/-/react-native-paper-5.14.5.tgz"
@@ -7809,16 +7823,9 @@ react-native-swipe-gestures@^1.0.5:
   resolved "https://registry.npmmirror.com/react-native-swipe-gestures/-/react-native-swipe-gestures-1.0.5.tgz#a172cb0f3e7478ccd681fd36b8bfbcdd098bde7c"
   integrity sha512-Ns7Bn9H/Tyw278+5SQx9oAblDZ7JixyzeOczcBK8dipQk2pD7Djkcfnf1nB/8RErAmMLL9iXgW0QHqiII8AhKw==
 
-react-native-tab-view@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmmirror.com/react-native-tab-view/-/react-native-tab-view-4.1.1.tgz"
-  integrity sha512-+OSjPCGgmzkgpyyX15M5FkV0XO8ZfWmdfDt11l5f2prWRAUBcj+9fTr5Pd0B3M6F43Kf4wMdohaRBjb8qDfC4w==
-  dependencies:
-    use-latest-callback "^0.2.3"
-
 react-native-tab-view@^4.1.2:
   version "4.1.2"
-  resolved "https://registry.npmmirror.com/react-native-tab-view/-/react-native-tab-view-4.1.2.tgz"
+  resolved "https://registry.npmmirror.com/react-native-tab-view/-/react-native-tab-view-4.1.2.tgz#c4aa05812668f24a048d2e574d53182f47f4fed2"
   integrity sha512-uzC1hxZGNXeQay8rSjCc7egnoYGHRpB/Y1tAwK5/nnZwrziKry7T6+gNscZgoq88+7Aag/JeNOifdWMZyRclOA==
   dependencies:
     use-latest-callback "^0.2.4"

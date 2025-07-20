@@ -7,6 +7,8 @@ import ProgressScreen from "../../screens/ideaScreen/Progress/ProgressScreen";
 import { HeaderBackButton } from "@react-navigation/elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
+import ProgressCreateNavigator from "./ProgressCreateNavigtor";
+
 const Stack = createNativeStackNavigator();
 
 const ProgressNavigator = () => {

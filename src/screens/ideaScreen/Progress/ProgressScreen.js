@@ -107,9 +107,7 @@ const ProgressScreen = () => {
         <TouchableOpacity
           className='absolute bottom-6 right-6 bg-blue-500 dark:bg-blue-700 p-5 rounded-full shadow-lg dark:border-gray-600 border border-gray-300'
           onPress={() => {
-            navigation.navigate("Add", {
-              teamId: teamId
-            });
+            navigation.navigate("Add", { screen: "AddEnd", params: { teamId: teamId } });
           }}
         >
           <MaterialIcons name='add' size={20} color="#fff"/>
