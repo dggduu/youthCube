@@ -8,6 +8,8 @@ import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
 import BackIcon from "../../../../components/backIcon/backIcon";
 import InputBox from "../../../../components/inputBox/inputBox";
+import TagSelectionToast from "../../../../components/TagSelectionToast";
+import FileUploader from "../../../../components/FileUploader";
 
 const VDITOR_CACHE_KEY = 'vditor_draft_content';
 
@@ -16,21 +18,28 @@ const UploaderScreen = () => {
   const [title, setTitle] = useState('');
   const [contentDisplay, setContentDisplay] = useState('');
   const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
-  const [location, setLocation] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [accessToken, setAccessToken] = useState("");
+  const [selectedTags, setSelectedTags] = useState({
+    tagIds: [],
+    tags: []
+  });
   const [coverImage, setCoverImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [availableTags, setAvailableTags] = useState([]);
-  const [isLoadingTags, setIsLoadingTags] = useState(false);
-  const [tagSearch, setTagSearch] = useState('');
   const [authKey, setAuthKey] = useState(null);
   const [error, setError] = useState(null);
   const [showAddTagModal, setShowAddTagModal] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [showVditorModal, setShowVditorModal] = useState(false);
+  const [showTagSelection, setShowTagSelection] = useState(false);
   const lastSubmitTimeRef = useRef(0);
   const webViewRef = useRef(null);
+
+  const handleTagSelection = (tagData) => {
+    setSelectedTags({
+      tagIds: tagData.tagIds || [],
+      tags: tagData.tags || []
+    });
+  };
 
   useEffect(() => {
     const loadDataAndCache = async () => {
@@ -40,16 +49,13 @@ const UploaderScreen = () => {
           getItemFromAsyncStorage('accessToken'),
           getItemFromAsyncStorage(VDITOR_CACHE_KEY),
         ]);
-
+        setAccessToken(token);
         if (!userData || !token) {
           throw new Error('用户未登录');
         }
         setAuthKey(token);
-        await fetchTags(token);
-
         if (cachedVditorContent) {
           setVditorMarkdownContent(cachedVditorContent);
-
           setContentDisplay(cachedVditorContent.substring(0, 200) + (cachedVditorContent.length > 200 ? '...' : ''));
         }
       } catch (e) {
@@ -67,21 +73,6 @@ const UploaderScreen = () => {
       removeItemFromAsyncStorage(VDITOR_CACHE_KEY);
     }
   }, [vditorMarkdownContent]);
-
-  const fetchTags = async (token) => {
-    try {
-      setIsLoadingTags(true);
-      const response = await axios.get(`${BASE_INFO.BASE_URL}api/tags`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAvailableTags(response.data);
-    } catch (error) {
-      console.error('获取标签失败:', error);
-      setError('加载标签失败');
-    } finally {
-      setIsLoadingTags(false);
-    }
-  };
 
   const createNewTag = async () => {
     if (!newTagName.trim()) {
@@ -220,16 +211,6 @@ const UploaderScreen = () => {
     setTagSearch('');
   };
 
-  const filteredTags = availableTags.filter((tag) =>
-    tag.tag_name.toLowerCase().includes(tagSearch.toLowerCase())
-  );
-
-  const toggleTag = (tagId) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
-  };
-
   const cleanMDContent = () => {
     setVditorMarkdownContent('');
     setContentDisplay('');
@@ -251,7 +232,7 @@ const UploaderScreen = () => {
         if (webViewRef.current) {
           webViewRef.current.injectJavaScript(`
             if (vditorInstance) {
-                vditorInstance.insertValue('![](${imageUrl})\\n');
+              vditorInstance.insertValue('![](${imageUrl})\\n');
             }
           `);
         }
@@ -323,11 +304,13 @@ const UploaderScreen = () => {
 
         <TouchableOpacity
           onPress={()=>cleanMDContent()}
-          className="border border-gray-300 dark:border-gray-600 p-4 mb-5 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
+          className="border border-gray-300 dark:border-gray-600 p-4 mb-3 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
         >
           <Text className="text-gray-700 dark:text-gray-300">清空已编辑内容</Text>
         </TouchableOpacity>
-        
+        <FileUploader AccessToken={accessToken}/>
+
+
         {/* Cover Image Upload */}
         <TouchableOpacity
           onPress={selectCoverImage}
@@ -344,75 +327,50 @@ const UploaderScreen = () => {
             className="w-full h-48 mb-5 rounded-lg"
           />
         )}
-
-        {/* Tags Selection */}
-        <View className="flex-row justify-between items-center mb-3 mt-3">
-          <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>
-          <TouchableOpacity
-            onPress={() => setShowAddTagModal(true)}
-            className="px-3 py-1 bg-green-600 rounded-full"
-          >
-            <Text className="text-white text-sm">+ 新建标签</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Tag Search */}
-        <InputBox
-          placeholder="搜索标签..."
-          value={tagSearch}
-          onChangeText={setTagSearch}
-        />
-
-        {isLoadingTags ? (
-          <ActivityIndicator size="small" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
-        ) : (
-          <View className="flex-row flex-wrap mb-4">
-            {filteredTags.map((tag) => (
+        
+        <View className="mb-4">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>
+            <View className="flex-row space-x-2">
               <TouchableOpacity
-                key={tag.tag_id}
-                onPress={() => toggleTag(tag.tag_id)}
-                className={`px-3 py-2 m-1 rounded-full ${
-                  selectedTags.includes(tag.tag_id)
-                    ? 'bg-blue-600'
-                    : 'bg-gray-200 dark:bg-gray-600'
-                }`}
+                onPress={() => setShowTagSelection(true)}
+                className="px-3 py-1 bg-blue-600 rounded-full"
               >
-                <Text
-                  className={`${
-                    selectedTags.includes(tag.tag_id)
-                      ? 'text-white'
-                      : 'text-gray-800 dark:text-gray-200'
-                  }`}
-                >
-                  {tag.tag_name}
-                </Text>
+                <Text className="text-white text-sm">选择标签</Text>
               </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Selected Tags */}
-        {selectedTags.length > 0 && (
-          <View className="mb-4">
-            <Text className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">已选标签:</Text>
-            <View className="flex-row flex-wrap">
-              {selectedTags.map((tagId) => {
-                const tag = availableTags.find((t) => t.tag_id === tagId);
-                return tag ? (
-                  <TouchableOpacity
-                    key={tag.tag_id}
-                    onPress={() => toggleTag(tag.tag_id)}
-                    className="px-3 py-2 m-1 rounded-full bg-blue-600"
-                  >
-                    <Text className="text-white">
-                      {tag.tag_name} ×
-                    </Text>
-                  </TouchableOpacity>
-                ) : null;
-              })}
+              <TouchableOpacity
+                onPress={() => setShowAddTagModal(true)}
+                className="px-3 py-1 ml-2 bg-green-600 rounded-full"
+              >
+                <Text className="text-white text-sm">+ 新建标签</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        )}
+
+          {/* Selected Tags Preview */}
+          <View className="mb-4">
+              <Text className="text-gray-500 text-sm dark:text-gray-300 mb-2">
+                {selectedTags.tagIds.length > 0 ? 
+                  `已选 ${selectedTags.tagIds.length} 个标签` : 
+                  '选择标签'}
+              </Text>
+
+            {selectedTags.tagIds.length > 0 && (
+              <View className="flex-row flex-wrap">
+                {selectedTags.tags.map(tag => (
+                  <View 
+                    key={tag.tag_id}
+                    className="px-2 py-1 m-1 rounded-full bg-blue-600"
+                  >
+                    <Text className="text-white text-xs">
+                      {tag.tag_name}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
 
         {/* Upload Progress */}
         {isUploading && (
@@ -517,9 +475,14 @@ const UploaderScreen = () => {
             />
           </View>
         </Modal>
+        <TagSelectionToast
+          visible={showTagSelection}
+          onClose={() => setShowTagSelection(false)}
+          onConfirm={handleTagSelection}
+          initialSelectedTags={selectedTags.tagIds}
+        />
       </ScrollView>
     </View>
-    
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity,Text } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
 import { BASE_INFO } from "../../../constant/base";
 import axios from "axios";
@@ -10,8 +10,9 @@ import { useColorScheme } from 'nativewind';
 import { useNavigation } from "@react-navigation/native";
 import { GRADES } from "../../../constant/user";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import TagSelectionToast from "../../../components/TagSelectionToast";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -22,47 +23,51 @@ const CreateTeam = () => {
   const [description, setDescription] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('mature');
   const [isPublic, setIsPublic] = useState(true);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [allTags, setAllTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState({
+    tagIds: [],    // 选中的标签ID数组
+    tags: []       // 选中的标签对象数组
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [isAgreed, setIsAgreed] = useState(false);
-  // 初始化时检查用户是否已有队伍
+  const [showTagSelection, setShowTagSelection] = useState(false);
+
   useEffect(() => {
     const checkUserTeam = async () => {
       const userData = await getItemFromAsyncStorage("user");
-      setUser(userData);
-      
       if (userData?.team_id) {
         showToast("您已加入一个队伍，无法创建新队伍", "warning");
         navigation.goBack();
       }
+      setUser(userData);
     };
-    
     checkUserTeam();
   }, []);
 
-  // 获取所有标签
-  const fetchTags = async () => {
-    try {
-      const accessToken = await getItemFromAsyncStorage("accessToken");
-      const response = await api.get(`${BASE_INFO.BASE_URL}api/tags`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        },
-        params: {
-          page: 0,
-          size: 20
-        }
-      });
-      setAllTags(response.data);
-    } catch (error) {
-      showToast("获取标签失败", "error");
-    }
+  if (user?.team_id) {
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
+        <Text className="text-lg text-gray-900 dark:text-white mb-4">
+          您已加入一个队伍，无法创建新队伍
+        </Text>
+        <TouchableOpacity
+          className="bg-blue-500 px-6 py-3 rounded-lg"
+          onPress={() => navigation.goBack()}
+        >
+          <Text className="text-white font-medium">返回</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const handleTagSelection = (tagData) => {
+    setSelectedTags({
+      tagIds: tagData.tagIds || [],
+      tags: tagData.tags || []
+    });
   };
 
-  // 创建队伍
   const handleCreateTeam = async () => {
     if (!isAgreed) {
       showToast("请先同意用户协议", "warning");
@@ -81,7 +86,7 @@ const CreateTeam = () => {
         {
           team_name: teamName,
           description,
-          tagIds: selectedTags.map(tag => tag.tag_id),
+          tagIds: selectedTags.tagIds,
           is_public: isPublic,
           grade: selectedGrade
         },
@@ -93,8 +98,7 @@ const CreateTeam = () => {
       );
       showToast("队伍创建成功", "success");
       navigation.navigate("Invite", {
-        // team_id: response.data.team_id
-        team_id: 19
+        team_id: 19 // 实际使用时替换为 response.data.team_id
       });
     } catch (error) {
       showToast("创建队伍失败", "error");
@@ -104,47 +108,17 @@ const CreateTeam = () => {
     }
   };
 
-  // 标签选择切换
-  const toggleTagSelection = (tag) => {
-    setSelectedTags(prev => {
-      const isSelected = prev.some(t => t.tag_id === tag.tag_id);
-      if (isSelected) {
-        return prev.filter(t => t.tag_id !== tag.tag_id);
-      } else {
-        return [...prev, tag];
-      }
-    });
-  };
-
-  // 如果用户已有队伍，则不显示创建界面
-  if (user?.team_id) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
-        <Text className="text-lg text-gray-900 dark:text-white mb-4">
-          您已加入一个队伍，无法创建新队伍
-        </Text>
-        <TouchableOpacity
-          className="bg-blue-500 px-6 py-3 rounded-lg"
-          onPress={() => navigation.goBack()}
-        >
-          <Text className="text-white font-medium">返回</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1 p-5 bg-white dark:bg-gray-900">
-        {/* 帮助AI */}
-        <TouchableOpacity
-          onPress={()=>{
-            navigation.navigate("AI");
-          }}
-          style={{zIndex:1}}
-          className='h-14 w-14 bg-green-600 rounded-full absolute bottom-6 right-6 items-center justify-center'
-        >
-          <Icon name="help" size={20} color="#fff"/>
-        </TouchableOpacity>
+      {/* 帮助AI */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AI")}
+        style={{ zIndex: 1 }}
+        className='h-14 w-14 bg-green-600 rounded-full absolute bottom-6 right-6 items-center justify-center'
+      >
+        <Icon name="help" size={20} color="#fff" />
+      </TouchableOpacity>
+      
       <ScrollView>
         {/* 队伍名称 */}
         <InputBox
@@ -173,13 +147,13 @@ const CreateTeam = () => {
             <Picker
               selectedValue={selectedGrade}
               onValueChange={(itemValue) => setSelectedGrade(itemValue)}
-                  style={{
-                    color: colorScheme === 'dark' ? 'white' : 'gray',
-                    backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#FFFFFF',
-                    height:55,
-                  }}
-                  dropdownIconColor={colorScheme === 'dark' ? 'white' : 'black'}
-                  mode="dropdown"
+              style={{
+                color: colorScheme === 'dark' ? 'white' : 'gray',
+                backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#FFFFFF',
+                height: 55,
+              }}
+              dropdownIconColor={colorScheme === 'dark' ? 'white' : 'black'}
+              mode="dropdown"
             >
               {GRADES.map((option) => (
                 <Picker.Item 
@@ -214,30 +188,35 @@ const CreateTeam = () => {
         {/* 标签选择 */}
         <View className="mb-5">
           <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">选择标签</Text>
+          
           <TouchableOpacity 
-            onPress={fetchTags} 
-            className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl self-start mb-3 border border-gray-300 dark:border-gray-600"
+            onPress={() => setShowTagSelection(true)}
+            className="px-4 py-3 bg-blue-500 rounded-full mb-2"
           >
-            <Text className="text-blue-500 dark:text-blue-400">加载标签</Text>
+            <Text className="text-white text-sm">
+              {selectedTags.tagIds.length > 0 ? 
+                `已选 ${selectedTags.tagIds.length} 个标签` : 
+                '选择标签'}
+            </Text>
           </TouchableOpacity>
-          <View className="flex-row flex-wrap">
-            {allTags.map(tag => (
-              <TouchableOpacity
-                key={tag.tag_id}
-                className={`px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 mr-2 mb-2 ${selectedTags.some(t => t.tag_id === tag.tag_id) 
-                  ? 'bg-blue-500' 
-                  : 'bg-gray-100 dark:bg-gray-800'}`}
-                onPress={() => toggleTagSelection(tag)}
-              >
-                <Text className={`${selectedTags.some(t => t.tag_id === tag.tag_id) 
-                  ? 'text-white' 
-                  : 'text-gray-900 dark:text-gray-300'}`}>
-                  {tag.tag_name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          
+          {/* 显示已选标签 */}
+          {selectedTags.tagIds.length > 0 && (
+            <View className="flex-row flex-wrap">
+              {selectedTags.tags.map(tag => (
+                <View 
+                  key={tag.tag_id}
+                  className="px-3 py-2 m-1 rounded-full bg-blue-500"
+                >
+                  <Text className="text-white text-sm">
+                    {tag.tag_name}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
+        
         {/* 用户协议确认 */}
         <View className="flex-row items-center mt-4 mb-6">
           <TouchableOpacity
@@ -245,9 +224,7 @@ const CreateTeam = () => {
             className="mr-2 items-center"
           >
             <View className={`w-5 h-5 rounded border items-center justify-center ${isAgreed ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}>
-              {isAgreed && (
-                <Icon name="check" size={12} color="white" />
-              )}
+              {isAgreed && <Icon name="check" size={12} color="white" />}
             </View>
           </TouchableOpacity>
           <Text className="text-gray-600 dark:text-gray-300">
@@ -269,8 +246,15 @@ const CreateTeam = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* 标签选择弹窗 */}
+      <TagSelectionToast
+        visible={showTagSelection}
+        onClose={() => setShowTagSelection(false)}
+        onConfirm={handleTagSelection}
+        initialSelectedTags={selectedTags.tagIds}
+      />
     </View>
-    
   );
 };
 
