@@ -98,7 +98,7 @@ const CreateTeam = () => {
       );
       showToast("队伍创建成功", "success");
       navigation.navigate("Invite", {
-        team_id: 19 // 实际使用时替换为 response.data.team_id
+        team_id: response.data.team_id
       });
     } catch (error) {
       showToast("创建队伍失败", "error");

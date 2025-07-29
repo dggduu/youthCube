@@ -2,16 +2,62 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, Dimensions, ActivityIndicator, useColorScheme } from 'react-native';
 import TeamFeed from "../../components/feedElem/TeamFeed";
 import { useNavigation } from "@react-navigation/native";
-import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
+import { setItemToAsyncStorage, getItemFromAsyncStorage } from "../../utils/LocalStorage";
 import { BASE_INFO } from "../../constant/base";
 import { navigate } from "../../navigation/NavigatorRef";
 import { colors } from 'react-native-keyboard-controller/lib/typescript/components/KeyboardToolbar/colors';
+import { setupAuthInterceptors } from "../../utils/axios/AuthInterceptors";
+import axios from "axios";
 const screenWidth = Dimensions.get('window').width;
 
 export default function IeaMarketScreen() {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme == "dark";
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userString = await getItemFromAsyncStorage("user");
+        if (!userString) {
+          setLoading(false);
+          return;
+        }
+
+        const userObj = userString;
+        const userId = userObj.id;
+
+        const response = await axios.get(
+          `${BASE_INFO.BASE_URL}api/users/${userId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+            }
+          }
+        );
+
+        await setItemToAsyncStorage("user",response.data);
+
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-600">
+        <ActivityIndicator size="large" color={isDark ? "#fff" : "#000"} />
+      </View>
+    );
+  }
   return (
     <SafeAreaView style={{ flex: 1 }} className='bg-white dark:bg-gray-600'>
       <View className='mt-10 px-5 mb-3 '

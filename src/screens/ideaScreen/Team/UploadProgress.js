@@ -445,17 +445,15 @@ const UploadProgress = () => {
             onDelete={handleDeleteProgress}
           />
         )}
-        contentContainerStyle={{ padding: 20 }}
-        ListEmptyComponent={
-          !loadingList && (
-            <Text className="text-center text-gray-600 dark:text-gray-400 mt-10">
-              点击右下角按钮添加一个！
-            </Text>
-          )
+        contentContainerStyle={{
+          padding: 20,
+          flex: progressList.length === 0 && !loadingList ? 1 : undefined
+        }}
+        ListFooterComponent={
+          loadingList && progressList.length > 0 ? (
+            <ActivityIndicator size="large" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} className="my-4" />
+          ) : null
         }
-        ListFooterComponent={loadingList && page > 0 ? (
-          <ActivityIndicator size="large" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} className="my-4" />
-        ) : null}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         refreshing={refreshing}

@@ -334,7 +334,16 @@ const ProgressAdmin = () => {
           contentContainerStyle={{ paddingBottom: 80}}
         />
       )}
-
+      {/* 添加汇报 */}
+      <TouchableOpacity
+        onPress={()=>{
+          navigation.navigate("TeamUploader");
+        }}
+        className="absolute bottom-24 right-6 bg-blue-500 p-4 rounded-full shadow-lg"
+      >
+        <MaterialIcons name="task" size={24} color="white" />
+      </TouchableOpacity>
+      {/* 添加进度 */}
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
         className="absolute bottom-6 right-6 bg-blue-500 p-4 rounded-full shadow-lg"

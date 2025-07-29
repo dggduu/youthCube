@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator, Image, ScrollView, Modal, Platform } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { getItemFromAsyncStorage, setItemToAsyncStorage, removeItemFromAsyncStorage } from '../../../../utils/LocalStorage';
+import { getItemFromAsyncStorage, setItemToAsyncStorage, removeItemFromAsyncStorage } from '../../../utils/LocalStorage';
 import axios from 'axios';
-import { BASE_INFO } from '../../../../constant/base';
+import { BASE_INFO } from '../../../constant/base';
 import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
-import BackIcon from "../../../../components/backIcon/backIcon";
-import InputBox from "../../../../components/inputBox/inputBox";
-import TagSelectionToast from "../../../../components/TagSelectionToast";
-import FileUploader from "../../../../components/FileUploader";
-import setupAuthInterceptors from "../../../../utils/axios/AuthInterceptors";
+import BackIcon from "../../../components/backIcon/backIcon";
+import InputBox from "../../../components/inputBox/inputBox";
+import TagSelectionToast from "../../../components/TagSelectionToast";
+import FileUploader from "../../../components/FileUploader";
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 const VDITOR_CACHE_KEY = 'vditor_draft_content';
 
 const api = axios.create();
@@ -29,6 +29,7 @@ const UploaderScreen = () => {
   const [coverImage, setCoverImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [authKey, setAuthKey] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const [showAddTagModal, setShowAddTagModal] = useState(false);
   const [newTagName, setNewTagName] = useState('');
@@ -50,17 +51,18 @@ const UploaderScreen = () => {
   useEffect(() => {
     const loadDataAndCache = async () => {
       try {
-        const [userData, token, cachedVditorContent] = await Promise.all([
+        const [user, token, cachedVditorContent] = await Promise.all([
           getItemFromAsyncStorage('user'),
           getItemFromAsyncStorage('accessToken'),
           getItemFromAsyncStorage(VDITOR_CACHE_KEY),
         ]);
         setAccessToken(token);
-        console.log(userData);
-        if (!userData || !token) {
+        if (!user || !token) {
           throw new Error('用户未登录');
         }
         setAuthKey(token);
+        setUserData(user);
+        console.log(userData);
         if (cachedVditorContent) {
           setVditorMarkdownContent(cachedVditorContent);
           setContentDisplay(cachedVditorContent.substring(0, 200) + (cachedVditorContent.length > 200 ? '...' : ''));
@@ -94,7 +96,8 @@ const UploaderScreen = () => {
         { tag_name: newTagName },
         { headers: { Authorization: `Bearer ${authKey}` } }
       );
-    
+
+      
       setNewTagName('');
       setShowAddTagModal(false);
       Alert.alert('成功', '标签创建成功');
@@ -181,11 +184,18 @@ const UploaderScreen = () => {
         const objectName = await uploadImage(coverImage);
         coverImageUrl = `${BASE_INFO.BASE_URL}dl/posts/${objectName}`;
       }
-
+      console.log("team:",        {
+          title,
+          type: "article",
+          content: vditorMarkdownContent,
+          cover_image_url: coverImageUrl,
+          tagIds: selectedTags.tagIds,
+        });
       const response = await api.post(
-        `${BASE_INFO.BASE_URL}api/posts`,
+        `${BASE_INFO.BASE_URL}api/posts/${userData.team_id}/team`,
         {
           title,
+          type: "article",
           content: vditorMarkdownContent,
           cover_image_url: coverImageUrl,
           tagIds: selectedTags.tagIds,
@@ -285,10 +295,7 @@ const UploaderScreen = () => {
 
   return (
     <View className='flex-1 dark:bg-gray-900'>
-      <BackIcon/>
       <ScrollView className="flex-1 p-5">
-        <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建新帖子</Text>
-
         {/* Title Input */}
         <InputBox
           placeholder="标题 *"
@@ -462,7 +469,7 @@ const UploaderScreen = () => {
               source={
                 Platform.OS === 'android'
                   ? { uri: 'file:///android_asset/web/vditor.html' }
-                  : require('../../../../assets/web/vditor.html')
+                  : require('../../../assets/web/vditor.html')
               }
               style={{ flex: 1 }}
               originWhitelist={['*']}

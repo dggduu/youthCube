@@ -6,7 +6,7 @@ import ProgressAdmin from "../../screens/ideaScreen/Progress/ProgressAdmin";
 import ProgressScreen from "../../screens/ideaScreen/Progress/ProgressScreen";
 import { HeaderBackButton } from "@react-navigation/elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-
+import TeamPostUploader from "../../screens/ideaScreen/Progress/TeamPostUploader";
 import ProgressCreateNavigator from "./ProgressCreateNavigtor";
 
 const Stack = createNativeStackNavigator();
@@ -42,6 +42,15 @@ const ProgressNavigator = () => {
         options={{
           headerShown: true,
           title: '添加进度',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen 
+        name="TeamUploader" 
+        component={TeamPostUploader}
+        options={{
+          headerShown: true,
+          title: '添加汇报文章',
           headerBackTitle: '返回'
         }}
       />

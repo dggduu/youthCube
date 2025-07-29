@@ -212,7 +212,7 @@ const ChatGroupSetting = () => {
     );
   };
 
-  const handleLeaveGroup = async () => {
+  const handleLeaveGroup = async (userId) => {
     const userIsOwner = currentUserRole === 'owner';
     const numMembers = teamData.chatRoom.members.length;
 
@@ -230,13 +230,68 @@ const ChatGroupSetting = () => {
           text: "确认",
           onPress: async () => {
             if (userIsOwner && numMembers > 1) {
-              return; 
+              showToast("请先转让队长权限", "warning");
+              return;
             }
+            
             try {
-              showToast("你已离开队伍","success");
+              await api.delete(
+                `${BASE_INFO.BASE_URL}api/team/${teamData.chatRoom.room_id}/members/${userId}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                  }
+                }
+              );
+              
+              navigation.popToTop();
+              showToast("你已成功离开队伍", "success");
             } catch (error) {
               console.error('离开群组出错:', error);
-              showToast("离开队伍失败","error");
+              showToast("离开队伍失败", "error");
+            }
+          }
+        }
+      ]
+    );
+  };
+  const handleDelTeam = async () => {
+    const userIsOwner = currentUserRole === 'owner';
+    const numMembers = teamData.chatRoom.members.length;
+
+    Alert.alert(
+      "删除队伍",
+      userIsOwner
+        ? "您确定要永久删除这个队伍吗？此操作不可撤销！"
+        : "只有队长可以删除队伍",
+      [
+        {
+          text: "取消",
+          style: "cancel"
+        },
+        {
+          text: "确认删除",
+          onPress: async () => {
+            if (!userIsOwner) {
+              showToast("只有队长可以删除队伍", "warning");
+              return;
+            }
+            
+            try {
+              await api.delete(
+                `${BASE_INFO.BASE_URL}api/teams/${teamData.team_id}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                  }
+                }
+              );
+              
+              navigation.popToTop();
+              showToast("队伍已成功删除", "success");
+            } catch (error) {
+              console.error('删除队伍出错:', error);
+              showToast("删除队伍失败", "error");
             }
           }
         }
@@ -407,6 +462,14 @@ const ChatGroupSetting = () => {
         >
           <Text className="text-black text-center">查看入群申请</Text>
         </TouchableOpacity>
+        <TouchableOpacity 
+          className="bg-red-500 border-gray-300 p-3 rounded-lg mt-2"
+          onPress={()=>{
+            handleDelTeam()
+          }}
+        >
+          <Text className="text-white font-medium text-center">删除队伍</Text>
+        </TouchableOpacity>
         </View>
       )}
 
@@ -415,7 +478,9 @@ const ChatGroupSetting = () => {
         <Text className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">常规操作</Text>
         <TouchableOpacity 
           className="bg-red-500 p-3 rounded-lg"
-          onPress={handleLeaveGroup}
+          onPress={()=>{
+            handleLeaveGroup(currentUser.id)
+          }}
         >
           <Text className="text-white font-bold text-center">退出群组</Text>
         </TouchableOpacity>
