@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
-import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
+import { View, ScrollView, TouchableOpacity, Text, Modal,TextInput } from 'react-native';
+import { getItemFromAsyncStorage,setItemToAsyncStorage } from "../../../utils/LocalStorage";
 import { BASE_INFO } from "../../../constant/base";
 import axios from "axios";
 import InputBox from "../../../components/inputBox/inputBox";
@@ -32,7 +32,8 @@ const CreateTeam = () => {
   const navigation = useNavigation();
   const [isAgreed, setIsAgreed] = useState(false);
   const [showTagSelection, setShowTagSelection] = useState(false);
-
+  const [showCreateTagModal, setShowCreateTagModal] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
   useEffect(() => {
     const checkUserTeam = async () => {
       const userData = await getItemFromAsyncStorage("user");
@@ -43,6 +44,71 @@ const CreateTeam = () => {
       setUser(userData);
     };
     checkUserTeam();
+  }, []);
+
+  const handleCreateTag = async () => {
+    if (!newTagName.trim()) {
+      showToast("请输入标签名称", "warning");
+      return;
+    }
+
+    try {
+      const accessToken = await getItemFromAsyncStorage("accessToken");
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/tags`,
+        { tag_name: newTagName },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      showToast("标签创建成功", "success");
+      setShowCreateTagModal(false);
+      setNewTagName('');
+
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      showToast("标签创建失败", "error");
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userString = await getItemFromAsyncStorage("user");
+        if (!userString) {
+          setIsLoading(false);
+          return;
+        }
+
+        const userObj = userString;
+        const userId = userObj.id;
+
+        const response = await api.get(
+          `${BASE_INFO.BASE_URL}api/users/${userId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+            }
+          }
+        );
+
+        await setItemToAsyncStorage("user",response.data);
+        if (response.data.team_id) {
+          showToast("您已加入一个队伍，无法创建新队伍", "warning");
+          navigation.goBack();
+        }
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   if (user?.team_id) {
@@ -188,17 +254,25 @@ const CreateTeam = () => {
         {/* 标签选择 */}
         <View className="mb-5">
           <Text className="text-base font-medium mb-2 text-gray-900 dark:text-white">选择标签</Text>
-          
-          <TouchableOpacity 
-            onPress={() => setShowTagSelection(true)}
-            className="px-4 py-3 bg-blue-500 rounded-full mb-2"
-          >
-            <Text className="text-white text-sm">
-              {selectedTags.tagIds.length > 0 ? 
-                `已选 ${selectedTags.tagIds.length} 个标签` : 
-                '选择标签'}
-            </Text>
-          </TouchableOpacity>
+          <View className='flex-row'>
+            <TouchableOpacity 
+              onPress={() => setShowTagSelection(true)}
+              className="px-3 py-2 bg-blue-500 rounded-full mb-2 mr-3"
+            >
+              <Text className="text-white text-sm">
+                {selectedTags.tagIds.length > 0 ? 
+                  `已选 ${selectedTags.tagIds.length} 个标签` : 
+                  '选择标签'}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => setShowCreateTagModal(true)}
+              className="px-3 py-2 bg-green-500 rounded-full mb-2"
+            >
+              <Text className="text-white text-sm">新建标签</Text>
+            </TouchableOpacity>
+          </View>
           
           {/* 显示已选标签 */}
           {selectedTags.tagIds.length > 0 && (
@@ -246,7 +320,44 @@ const CreateTeam = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-
+      {/* 创建标签模态框 */}
+      <Modal
+        visible={showCreateTagModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCreateTagModal(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="w-4/5 bg-white dark:bg-gray-800 rounded-lg p-6">
+            <Text className="text-lg font-bold dark:text-white mb-4">创建新标签</Text>
+            
+            <TextInput
+              className="border border-gray-300 dark:border-gray-600 rounded p-3 mb-4 dark:text-white dark:bg-gray-700"
+              placeholder="输入标签名称"
+              placeholderTextColor="#9CA3AF"
+              value={newTagName}
+              onChangeText={setNewTagName}
+              style={{height:50}}
+              autoFocus
+            />
+            
+            <View className="flex-row justify-end">
+              <TouchableOpacity
+                className="px-4 py-2 mr-2"
+                onPress={() => setShowCreateTagModal(false)}
+              >
+                <Text className="dark:text-white">取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="px-4 py-2 bg-blue-500 rounded"
+                onPress={handleCreateTag}
+              >
+                <Text className="text-white">创建</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {/* 标签选择弹窗 */}
       <TagSelectionToast
         visible={showTagSelection}

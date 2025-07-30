@@ -134,13 +134,13 @@ const UserInfoChange = () => {
     setFormError('');
     setIsSubmitting(true);
 
-    if (!name.trim() || !gender.trim() || !learnStage.trim() || !email.trim() || !bio.trim()) {
-      setFormError('请填写完整信息（除密码外所有必填）。');
+    if (!name.trim() || !gender.trim() || !learnStage.trim() || !email.trim()) {
+      showToast(`请填写完整信息\n除密码外所有必填`,"error");
       setIsSubmitting(false);
       return;
     }
     if (!isValidEmail(email)) {
-      setFormError('邮箱格式不正确。');
+      showToast('邮箱格式不正确',"error");
       setIsSubmitting(false);
       return;
     }
@@ -148,13 +148,13 @@ const UserInfoChange = () => {
     let passwordPayload = {};
     if (newPassword) {
       if (newPassword !== confirmNewPassword) {
-        setFormError('两次输入的新密码不一致。');
+        showToast('两次输入的新密码不一致',"error");
         setIsSubmitting(false);
         return;
       }
       const passwordCheck = isValidPassword(newPassword);
       if (!passwordCheck.valid) {
-        setFormError('新密码不符合要求。');
+        showToast('新密码不符合要求',"error");
         setIsSubmitting(false);
         return;
       }
@@ -196,12 +196,11 @@ const UserInfoChange = () => {
         showToast('个人信息更新成功！', 'success');
         navigation.goBack();
       } else if (updateProfile.rejected.match(resultAction)) {
-        setFormError(resultAction.payload || '更新失败，请重试。');
-        showToast(resultAction.payload || '个人信息更新失败。', 'error');
+        showToast('个人信息更新失败。', 'error');
       }
     } catch (error) {
       console.error('更新个人信息时发生错误:', error);
-      setFormError('网络或服务器错误，请稍后再试。');
+      showToast('网络或服务器错误，请稍后再试',"error");
       showToast('网络或服务器错误。', 'error');
     } finally {
       setIsSubmitting(false);

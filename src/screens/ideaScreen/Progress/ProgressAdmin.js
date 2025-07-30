@@ -373,6 +373,7 @@ const ProgressAdmin = () => {
               placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
               value={title}
               onChangeText={setTitle}
+              style={{height:50}}
               className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
 

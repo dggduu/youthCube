@@ -94,7 +94,7 @@ const TeamDetailScreen = () => {
   const fetchAssociatedArticles = async (projectResults) => {
     setArticlesLoading(true);
     try {
-      const articleResults = projectResults.filter(pr => pr.type === 'article' && pr.post_id && pr.is_completed);
+      const articleResults = projectResults.filter(pr => pr.type === 'article' && pr.post_id);
       const articles = await Promise.all(
         articleResults.map(async (result) => {
           const response = await api.get(`${BASE_INFO.BASE_URL}api/posts/${result.post_id}`);
@@ -217,14 +217,21 @@ const handleApplyToJoin = async () => {
     <ScrollView className="flex-1 p-4 bg-gray-100 dark:bg-gray-900">
       {/* 团队名称 */}
       <View className='mb-4 bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-xl justify-between'>
-        <View className="flex-row justify-between items-center mb-4">
-          <View className='ml-1'>
-            <Text className="text-2xl dark:text-white mb-2" style={{fontFamily:"NotoSerifSC"}}>{teamData.team_name}</Text>
+        <View className="flex-row justify-between items-start mb-4">
+          <View className='ml-1 flex-1 mr-2'>
+            <Text 
+              className="text-2xl dark:text-white mb-2" 
+              style={{fontFamily:"NotoSerifSC"}}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {teamData.team_name}
+            </Text>
             <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               创建于 {new Date(teamData.create_at).toLocaleDateString()}
             </Text>
           </View>
-          {/* 等级与公开状态 */}
+          {/* 等级与公开状态*/}
           <View className="">
             <View className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-t-lg">
               <Text className="text-blue-700 dark:text-gray-200 text-sm">推荐加入等级: {gradeLabel}</Text>
@@ -236,7 +243,7 @@ const handleApplyToJoin = async () => {
             </View>
           </View>
         </View>
-        {/* 申请加入按钮 */}
+        {/* 申请加入按钮*/}
         <TouchableOpacity
           className={`${
             teamData.chatRoom.members?.some(member => member.user_id === userId)

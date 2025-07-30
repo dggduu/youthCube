@@ -140,7 +140,7 @@ const PersonalProfile = () => {
       });
 
       const userData = response.data;
-
+      console.log(userData);
       setCurrentUser(userData);
       setPosts(Array.isArray(userData.posts) ? userData.posts : []);
       setIsFriendRequestSent(userData.friend_status === 'pending' || userData.friend_status === 'accepted');

@@ -529,15 +529,16 @@ const ChatGroupSetting = () => {
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white dark:bg-gray-800 rounded-xl p-5 w-4/5">
             <Text className="text-lg font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
-              编辑 {editField.replace('_', ' ')}
+              编辑
             </Text>
             <TextInput
               className="border border-gray-300 dark:border-gray-600 rounded p-3 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700"
               value={editValue}
               onChangeText={setEditValue}
               multiline={editField === 'description'}
-              placeholder={`输入新的${editField.replace('_', ' ')}`}
+              placeholder={`输入新的值`}
               placeholderTextColor={isDarkMode ? '#A0AEC0' : '#718096'}
+              style={{height:50}}
             />
             <View className="flex-row justify-between">
               <TouchableOpacity 
@@ -666,7 +667,7 @@ const ChatGroupSetting = () => {
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white dark:bg-gray-800 rounded-xl p-5 w-4/5">
             <Text className="text-lg font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
-              编辑 {editField === 'is_public' ? '可见性' : editField.replace('_', ' ')}
+              编辑
             </Text>
             
             {editField === 'is_public' ? (
@@ -719,7 +720,7 @@ const ChatGroupSetting = () => {
                 value={editValue}
                 onChangeText={setEditValue}
                 multiline={editField === 'description'}
-                placeholder={`输入新的${editField.replace('_', ' ')}`}
+                placeholder={`输入新的值`}
                 placeholderTextColor={isDarkMode ? '#A0AEC0' : '#718096'}
               />
             )}

@@ -7,7 +7,7 @@ const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="m-1"
+      className="m-1 px-1"
     >
       <View className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
         {/* 图片区域 */}

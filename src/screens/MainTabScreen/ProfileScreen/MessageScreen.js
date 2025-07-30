@@ -16,6 +16,13 @@ import { BASE_INFO } from "../../../constant/base";
 import WaterfallFlow from 'react-native-waterfall-flow';
 import FeedElem from "../../../components/feedElem/feedElem";
 import BackIcon from "../../../components/backIcon/backIcon";
+import axios from 'axios';
+import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+import { WhiteSpace } from '@ant-design/react-native';
+
+const api = axios.create();
+setupAuthInterceptors(api);
+
 const MessageScreen = ({ navigation }) => {
   // 状态管理
   const [currentUser, setCurrentUser] = useState(null);
@@ -61,11 +68,11 @@ const MessageScreen = ({ navigation }) => {
     loadData();
   }, []);
 
-  // 获取团队信息
+  // 获取团队信息 (使用axios)
   const fetchTeamInfo = async (teamId, token) => {
     try {
-      const response = await fetch(
-        BASE_INFO.BASE_URL + `api/teams/${teamId}`,
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/teams/${teamId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -74,21 +81,18 @@ const MessageScreen = ({ navigation }) => {
         }
       );
 
-      if (!response.ok) throw new Error(`获取团队信息失败: ${response.status}`);
-
-      const result = await response.json();
-      setTeamInfo(result);
+      setTeamInfo(response.data);
     } catch (error) {
       console.error("获取团队信息失败:", error);
       throw error;
     }
   };
 
-  // 获取文章数据
+  // 获取文章数据 (使用axios)
   const fetchPosts = async (pageNum, token) => {
     try {
-      const response = await fetch(
-        BASE_INFO.BASE_URL + `api/myposts?page=${pageNum}&size=10`,
+      const response = await api.get(
+        `${BASE_INFO.BASE_URL}api/myposts?page=${pageNum}&size=10`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -97,10 +101,7 @@ const MessageScreen = ({ navigation }) => {
         }
       );
 
-      if (!response.ok) throw new Error(`请求失败: ${response.status}`);
-
-      const result = await response.json();
-
+      const result = response.data;
       setPosts(prev => pageNum === 0 ? result.items : [...prev, ...result.items]);
       setTotalPages(result.totalPages);
       setPage(result.currentPage);
@@ -200,10 +201,18 @@ const MessageScreen = ({ navigation }) => {
                   source={require("../../../assets/logo/ava.png")}
                   className="w-24 h-24 rounded-full border-2 border-blue-200 dark:border-gray-600"
                 />
-                <Text className="text-xl font-bold text-gray-800 dark:text-white mt-3">
+                <Text 
+                  className="text-xl font-bold text-gray-800 dark:text-white mt-3"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {currentUser.name}
                 </Text>
-                <Text className="text-blue-500 dark:text-blue-400 text-sm mt-1">
+                <Text 
+                  className="text-blue-500 dark:text-blue-400 text-sm mt-1"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {currentUser.is_member ? '高级会员' : '普通用户'}
                 </Text>
               </View>
@@ -211,30 +220,56 @@ const MessageScreen = ({ navigation }) => {
               <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <View className="flex-row justify-between mb-3">
                   <Text className="text-gray-500 dark:text-gray-400">用户ID</Text>
-                  <Text className="text-gray-800 dark:text-gray-200">{currentUser.id}</Text>
+                  <Text 
+                    className="text-gray-800 dark:text-gray-200"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {currentUser.id}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between mb-3">
                   <Text className="text-gray-500 dark:text-gray-400">邮箱</Text>
-                  <Text className="text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
+                  <Text 
+                    className="text-gray-800 dark:text-gray-200 flex-1 text-right ml-2"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {currentUser.email || '未设置'}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between mb-3">
                   <Text className="text-gray-500 dark:text-gray-400">学习阶段</Text>
-                  <Text className="text-gray-800 dark:text-gray-200">
+                  <Text 
+                    className="text-gray-800 dark:text-gray-200"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {getLearnStageLabel(currentUser.learn_stage)}
                   </Text>
                 </View>
                 {currentUser.bio && (
                   <View className="mt-3">
                     <Text className="text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
-                    <Text className="text-gray-800 dark:text-gray-200">{currentUser.bio}</Text>
+                    <Text 
+                      className="text-gray-800 dark:text-gray-200"
+                      numberOfLines={3}
+                      ellipsizeMode="tail"
+                    >
+                      {currentUser.bio}
+                    </Text>
                   </View>
                 )}
                 {/* 团队信息 */}
                 {currentUser.team_id && (
                   <View className="flex-row justify-between mb-3">
                     <Text className="text-gray-500 dark:text-gray-400">所属团队</Text>
-                    <View className="items-end">
-                      <Text className="text-gray-800 dark:text-gray-200">
+                    <View className="flex-1 ml-2">
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        className="text-gray-800 dark:text-gray-200 text-right"
+                      >
                         {teamInfo?.team_name || '加载中...'}
                       </Text>
                     </View>
@@ -243,8 +278,6 @@ const MessageScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
-
-          
         }
         ListEmptyComponent={
           <View className="py-8 items-center">

@@ -47,8 +47,6 @@ const ChatSection = () => {
             );
 
             await setItemToAsyncStorage("user",response.data);
-
-            setUser(response.data);
         } catch (error) {
             console.error('Error fetching user data:', error);
         } finally {
@@ -179,7 +177,12 @@ const ChatSection = () => {
                 color={item.other_user.is_following ? '#4B77D1' : '#666'}
             />
             <View className="flex-1 ml-2">
-                <Text className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black dark:text-gray-300'}`}>
+                <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ flexShrink: 1 }}
+                    className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black dark:text-gray-300'}`}>
+                    
                     {item.other_user.name}
                 </Text>
                 <Text className="text-gray-500 text-xs dark:text-gray-300">
@@ -225,7 +228,11 @@ const ChatSection = () => {
                     >
                         <MaterialIcons name="groups" size={24} color="#1976d2" />
                         <View className="flex-1 ml-2">
-                            <Text className="text-base font-bold dark:text-gray-300">{teamChat.name}</Text>
+                            <Text
+                                className="text-base font-bold dark:text-gray-300"
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                                style={{ flexShrink: 1 }}>{teamChat.name}</Text>
                             <Text className="text-gray-500 text-xs dark:text-gray-300">团队 ID: {teamChat.teamId}</Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={24} color="#666" />

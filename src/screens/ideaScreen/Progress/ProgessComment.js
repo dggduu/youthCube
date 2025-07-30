@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, FlatList, RefreshControl, ScrollView,useColorScheme } from 'react-native'
+import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, FlatList, RefreshControl, ScrollView,useColorScheme,KeyboardAvoidingView } from 'react-native'
 import React, { useState, useCallback, useEffect } from 'react'
 import { useRoute } from "@react-navigation/native";
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
@@ -118,122 +118,125 @@ const CommentItem = ({ comment, authToken, progressId }) => {
   }, [repliesCurrentPage, repliesTotalPages, fetchReplies]);
 
   return (
-    <View className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-3">
-      <View className="flex-row items-center mb-2">
-        <Image
-          source={comment.author?.avatar_key ? { uri: comment.author.avatar_key } : require("../../../assets/logo/ava.png")}
-          className="w-8 h-8 rounded-full mr-2"
-        />
-        <Text className="font-medium text-gray-900 dark:text-white mr-2">
-          {comment.author?.name || '匿名用户'}
-        </Text>
-        <Text className="text-xs text-gray-500 dark:text-gray-400">
-          {new Date(comment.created_at).toLocaleDateString()}
-        </Text>
-      </View>
+    <KeyboardAvoidingView>
+      <View className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-3">
+        <View className="flex-row items-center mb-2">
+          <Image
+            source={comment.author?.avatar_key ? { uri: comment.author.avatar_key } : require("../../../assets/logo/ava.png")}
+            className="w-8 h-8 rounded-full mr-2"
+          />
+          <Text className="font-medium text-gray-900 dark:text-white mr-2">
+            {comment.author?.name || '匿名用户'}
+          </Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-400">
+            {new Date(comment.created_at).toLocaleDateString()}
+          </Text>
+        </View>
 
-      <Text className="text-gray-800 dark:text-gray-200 mb-3">
-        {comment.content}
-      </Text>
+        <Text className="text-gray-800 dark:text-gray-200 mb-3">
+          {comment.content}
+        </Text>
 
-      <View className="flex-row items-center">
-        {replies.length > 0 && (
+        <View className="flex-row items-center">
+          {replies.length > 0 && (
+            <TouchableOpacity
+              className="flex-row items-center mr-4"
+              onPress={toggleReplies}
+            >
+              <Icon
+                name={showReplies ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                size={20}
+                color="#6b7280"
+              />
+              <Text className="ml-1 text-gray-600 dark:text-gray-300 text-sm">
+                {replies.length} 条回复
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
-            className="flex-row items-center mr-4"
-            onPress={toggleReplies}
+            className="flex-row items-center"
+            onPress={handleReplyButtonPress}
           >
             <Icon
-              name={showReplies ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-              size={20}
-              color="#6b7280"
+              name="reply"
+              size={18}
+              color={showReplyInput ? "#3b82f6" : "#6b7280"}
             />
-            <Text className="ml-1 text-gray-600 dark:text-gray-300 text-sm">
-              {replies.length} 条回复
+            <Text className={`ml-1 ${showReplyInput ? "text-blue-500" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
+              回复
             </Text>
           </TouchableOpacity>
+        </View>
+
+        {showReplyInput && (
+          <View className="mt-3">
+            <View className="flex-row items-center">
+              <TextInput
+                className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
+                placeholder={`回复 ${comment.author?.name || '这个评论'}...`}
+                placeholderTextColor="#9ca3af"
+                value={replyText}
+                onChangeText={setReplyText}
+                style={{height:40}}
+                multiline
+              />
+              <TouchableOpacity
+                className="ml-2 bg-blue-500 rounded-full p-2"
+                onPress={submitReply}
+              >
+                <Icon name="send" size={15} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
         )}
 
-        <TouchableOpacity
-          className="flex-row items-center"
-          onPress={handleReplyButtonPress}
-        >
-          <Icon
-            name="reply"
-            size={18}
-            color={showReplyInput ? "#3b82f6" : "#6b7280"}
-          />
-          <Text className={`ml-1 ${showReplyInput ? "text-blue-500" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
-            回复
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {showReplyInput && (
-        <View className="mt-3">
-          <View className="flex-row items-center">
-            <TextInput
-              className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
-              placeholder={`回复 ${comment.author?.name || '这个评论'}...`}
-              placeholderTextColor="#9ca3af"
-              value={replyText}
-              onChangeText={setReplyText}
-              style={{height:40}}
-              multiline
-            />
-            <TouchableOpacity
-              className="ml-2 bg-blue-500 rounded-full p-2"
-              onPress={submitReply}
-            >
-              <Icon name="send" size={15} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {showReplies && (
-        <View className="mt-3 ml-4 border-l border-gray-200 dark:border-gray-700 pl-3">
-          {loadingReplies && replies.length === 0 ? (
-            <ActivityIndicator size="small" />
-          ) : (
-            <>
-              {replies.map(reply => (
-                <View key={reply.comment_id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 mb-2">
-                  <View className="flex-row items-center mb-1">
-                    <Image
-                      source={reply.author?.avatar_key ? { uri: reply.author.avatar_key } : require("../../../assets/logo/ava.png")}
-                      className="w-6 h-6 rounded-full mr-2"
-                    />
-                    <Text className="font-medium text-gray-900 dark:text-white text-sm mr-2">
-                      {reply.author?.name || '匿名用户'}
-                    </Text>
-                    <Text className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(reply.created_at).toLocaleDateString()}
+        {showReplies && (
+          <View className="mt-3 ml-4 border-l border-gray-200 dark:border-gray-700 pl-3">
+            {loadingReplies && replies.length === 0 ? (
+              <ActivityIndicator size="small" />
+            ) : (
+              <>
+                {replies.map(reply => (
+                  <View key={reply.comment_id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 mb-2">
+                    <View className="flex-row items-center mb-1">
+                      <Image
+                        source={reply.author?.avatar_key ? { uri: reply.author.avatar_key } : require("../../../assets/logo/ava.png")}
+                        className="w-6 h-6 rounded-full mr-2"
+                      />
+                      <Text className="font-medium text-gray-900 dark:text-white text-sm mr-2">
+                        {reply.author?.name || '匿名用户'}
+                      </Text>
+                      <Text className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(reply.created_at).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <Text className="text-gray-800 dark:text-gray-200 text-sm">
+                      {reply.content}
                     </Text>
                   </View>
-                  <Text className="text-gray-800 dark:text-gray-200 text-sm">
-                    {reply.content}
-                  </Text>
-                </View>
-              ))}
+                ))}
 
-              {replies.length > 0 && repliesCurrentPage < repliesTotalPages - 1 && (
-                <TouchableOpacity
-                  className="py-2 rounded-lg flex-row justify-center items-center bg-gray-200 dark:bg-gray-600 mt-2"
-                  onPress={loadMoreReplies}
-                  disabled={loadingReplies}
-                >
-                  {loadingReplies ? (
-                    <ActivityIndicator size="small" />
-                  ) : (
-                    <Text className="text-gray-700 dark:text-gray-300">加载更多回复</Text>
-                  )}
-                </TouchableOpacity>
-              )}
-            </>
-          )}
-        </View>
-      )}
-    </View>
+                {replies.length > 0 && repliesCurrentPage < repliesTotalPages - 1 && (
+                  <TouchableOpacity
+                    className="py-2 rounded-lg flex-row justify-center items-center bg-gray-200 dark:bg-gray-600 mt-2"
+                    onPress={loadMoreReplies}
+                    disabled={loadingReplies}
+                  >
+                    {loadingReplies ? (
+                      <ActivityIndicator size="small" />
+                    ) : (
+                      <Text className="text-gray-700 dark:text-gray-300">加载更多回复</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+          </View>
+        )}
+      </View>
+    </KeyboardAvoidingView>
+
   );
 };
 
@@ -503,6 +506,7 @@ const ProgressComment = () => {
   };
 
   return (
+    <KeyboardAvoidingView className='flex-1'>
     <ScrollView
       className='flex-1 bg-gray-100 dark:bg-gray-900 px-3'
       refreshControl={
@@ -521,7 +525,10 @@ const ProgressComment = () => {
       )}
 
       {renderFooter()}
+
     </ScrollView>
+    </KeyboardAvoidingView>
+
   );
 };
 
