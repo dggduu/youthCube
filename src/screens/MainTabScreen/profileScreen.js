@@ -78,7 +78,7 @@ export default function ProfileScreen() {
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center mr-24">
                 <Image
-                  source={{ uri: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png' }}
+                  source={require("../../assets/logo/ava.png")}
                   className="w-16 h-16 rounded-full"
                 />
                 <View className="ml-4">

@@ -95,7 +95,7 @@ export default function IeaMarketScreen() {
               borderRadius: 8,
               width: screenWidth / 2 - 35,
             }}>
-              <Text className='text-dark dark:text-gray-300'>创建项目</Text>
+              <Text className='text-dark dark:text-gray-300'>创建团队</Text>
             </View>
           </TouchableOpacity>
         </View>

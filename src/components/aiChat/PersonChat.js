@@ -13,6 +13,7 @@ import {
   GiftedChat,
   Bubble,
   Send,
+  InputToolbar
 } from 'react-native-gifted-chat';
 import { LinearGradient } from 'react-native-linear-gradient';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -220,6 +221,19 @@ const PersonChat = ( {chatId} ) => {
     init();
   }, []);
 
+  const renderInputToolbar = props => {
+    return (
+      <InputToolbar
+        {...props}
+        containerStyle={{
+          backgroundColor: isDarkMode ? "#12140e" : "#f9faef",
+          paddingTop: 4,
+          paddingBottom: 2,
+        }}
+      />
+    );
+  };
+
   // 页面进入时加载消息
   useEffect(() => {
     if (user && accessToken && chatId) {
@@ -317,19 +331,19 @@ const PersonChat = ( {chatId} ) => {
                 isLoadingEarlier={isChatLoading}
                 loadEarlier={hasMoreMessages}
                 infiniteScroll
-
+                renderInputToolbar={renderInputToolbar}
                 bottomOffset={Platform.OS === 'ios' ? 34 : 0}
                 keyboardShouldPersistTaps="handled"
                 textInputProps={{
                 maxLength: 200,
                 }}
                 textInputStyle={{
-                color: '#000',
+                color: '#fff',
                 fontSize: 16,
                 maxHeight: 100,
                 minHeight: 40,
                 flex: 1,
-                backgroundColor:"#12140e",
+                backgroundColor:"#2b2b32",
                 borderRadius: 20,
                 paddingHorizontal: 15,
                 }}

@@ -11,6 +11,7 @@ import InputBox from "../../../../components/inputBox/inputBox";
 import TagSelectionToast from "../../../../components/TagSelectionToast";
 import FileUploader from "../../../../components/FileUploader";
 import setupAuthInterceptors from "../../../../utils/axios/AuthInterceptors";
+import { useToast } from "../../../../components/tip/ToastHooks";
 const VDITOR_CACHE_KEY = 'vditor_draft_content';
 
 const api = axios.create();
@@ -39,7 +40,7 @@ const UploaderScreen = () => {
   const [tagSearch, setTagSearch] = useState('');
   const lastSubmitTimeRef = useRef(0);
   const webViewRef = useRef(null);
-
+  const { showToast } = useToast();
   const handleTagSelection = (tagData) => {
     setSelectedTags({
       tagIds: tagData.tagIds || [],
@@ -83,7 +84,7 @@ const UploaderScreen = () => {
 
   const createNewTag = async () => {
     if (!newTagName.trim()) {
-      Alert.alert('错误', '标签名称不能为空');
+      showToast('标签名称不能为空', "warning");
       return;
     }
 
@@ -97,10 +98,10 @@ const UploaderScreen = () => {
     
       setNewTagName('');
       setShowAddTagModal(false);
-      Alert.alert('成功', '标签创建成功');
+      showToast("标签创建成功","success");
     } catch (error) {
       console.error('创建标签失败:', error);
-      Alert.alert('错误', error.response?.data?.message || '创建标签失败');
+      showToast('创建标签失败', "error");
     } finally {
       setIsUploading(false);
     }
@@ -117,8 +118,7 @@ const UploaderScreen = () => {
         setCoverImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('选择图片失败:', error);
-      Alert.alert('错误', '选择图片失败');
+      showToast('选择图片失败', "error");
     }
   };
 
@@ -159,17 +159,17 @@ const UploaderScreen = () => {
   const createPost = async () => {
     const now = Date.now();
     if (now - lastSubmitTimeRef.current < 5000) {
-      Alert.alert('提示', `请等待 ${Math.ceil((5000 - (now - lastSubmitTimeRef.current)) / 1000)} 秒后再提交`);
+      showToast(`请等待 ${Math.ceil((5000 - (now - lastSubmitTimeRef.current)) / 1000)} 秒后再提交`,"warning");
       return;
     }
 
     if (!authKey) {
-      Alert.alert('错误', '请先登录');
+      showToast("请先登录","error");
       return;
     }
 
     if (!title || !vditorMarkdownContent) {
-      Alert.alert('错误', '标题和内容是必填项');
+      showToast('标题和内容是必填项', "error");
       return;
     }
 
@@ -195,12 +195,12 @@ const UploaderScreen = () => {
         }
       );
 
-      Alert.alert('成功', '帖子创建成功');
+      showToast("帖子创建成功","success");
       resetForm();
       lastSubmitTimeRef.current = now;
     } catch (error) {
       console.error('创建帖子失败:', error);
-      Alert.alert('错误', error.response?.data?.message || '创建帖子失败');
+      showToast("创建帖子失败","error");
     } finally {
       setIsUploading(false);
     }
@@ -234,7 +234,7 @@ const UploaderScreen = () => {
       setShowVditorModal(false);
     } else if (message.type === 'UPLOAD_IMAGE') {
       try {
-        Alert.alert('提示', '图片上传功能需要配置文件保存逻辑，当前只接收数据。');
+        showToast('图片上传功能需要配置文件保存逻辑，当前只接收数据。', "warning");
         const objectName = 'PLACEHOLDER_OBJECT_NAME.jpg';
         const imageUrl = `${BASE_INFO.BASE_URL}sdl/posts/${objectName}`;
 
@@ -247,7 +247,8 @@ const UploaderScreen = () => {
         }
       } catch (uploadError) {
         console.error('Vditor图片上传失败:', uploadError);
-        Alert.alert('错误', 'Vditor图片上传失败');
+        showToast('Vditor图片上传失败',"error");
+        
       }
     } else if (message.type === 'VDITOR_READY') {
       if (webViewRef.current && vditorMarkdownContent) {

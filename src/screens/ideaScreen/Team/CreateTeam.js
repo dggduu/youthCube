@@ -231,7 +231,7 @@ const CreateTeam = () => {
             我已阅读并同意
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Safe')}>
-            <Text className="text-blue-500">《户外活动安全声明》</Text>
+            <Text className="text-blue-500 font-bold">《户外活动安全声明》</Text>
           </TouchableOpacity>
         </View>
 

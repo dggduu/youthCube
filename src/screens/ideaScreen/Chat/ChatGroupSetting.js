@@ -324,41 +324,74 @@ const ChatGroupSetting = () => {
       <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-sm shadow-black/5 dark:shadow-white/5">
         <Text className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">群组信息</Text>
         
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">团队名称:</Text>
-          <View className="flex-row items-center flex-[2] justify-between">
-            <Text className="text-base text-gray-900 dark:text-gray-100">{teamData.team_name}</Text>
-            {['owner', 'co_owner'].includes(currentUserRole) && (
-              <TouchableOpacity onPress={() => handleEditField('team_name', teamData.team_name)}>
-                <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
-              </TouchableOpacity>
-            )}
-          </View>
+      {/* 团队名称 */}
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">团队名称:</Text>
+        <View className="flex-row items-center flex-[2] justify-between">
+          <Text 
+            className="text-base text-gray-900 dark:text-gray-100"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flexShrink: 1 }}
+          >
+            {teamData.team_name}
+          </Text>
+          {['owner', 'co_owner'].includes(currentUserRole) && (
+            <TouchableOpacity 
+              onPress={() => handleEditField('team_name', teamData.team_name)}
+              className="ml-2"
+            >
+              <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
+            </TouchableOpacity>
+          )}
         </View>
-        
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">描述:</Text>
-          <View className="flex-row items-center flex-[2] justify-between">
-            <Text className="text-base text-gray-900 dark:text-gray-100">{teamData.description}</Text>
-            {['owner', 'co_owner'].includes(currentUserRole) && (
-              <TouchableOpacity onPress={() => handleEditField('description', teamData.description)}>
-                <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
-              </TouchableOpacity>
-            )}
-          </View>
+      </View>
+
+      {/* 描述 */}
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">描述:</Text>
+        <View className="flex-row items-center flex-[2] justify-between">
+          <Text 
+            className="text-base text-gray-900 dark:text-gray-100"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flexShrink: 1 }}
+          >
+            {teamData.description}
+          </Text>
+          {['owner', 'co_owner'].includes(currentUserRole) && (
+            <TouchableOpacity 
+              onPress={() => handleEditField('description', teamData.description)}
+              className="ml-2"
+            >
+              <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
+            </TouchableOpacity>
+          )}
         </View>
-        
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">聊天室名称:</Text>
-          <View className="flex-row items-center flex-[2] justify-between">
-            <Text className="text-base text-gray-900 dark:text-gray-100">{teamData.chatRoom.name || '未命名聊天'}</Text>
-            {['owner', 'co_owner'].includes(currentUserRole) && (
-              <TouchableOpacity onPress={() => handleEditField('chatroom_name', teamData.chatRoom.name)}>
-                <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
-              </TouchableOpacity>
-            )}
-          </View>
+      </View>
+
+      {/* 聊天室名称 */}
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">聊天室名称:</Text>
+        <View className="flex-row items-center flex-[2] justify-between">
+          <Text 
+            className="text-base text-gray-900 dark:text-gray-100"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flexShrink: 1 }}
+          >
+            {teamData.chatRoom?.name || '未命名聊天'}
+          </Text>
+          {['owner', 'co_owner'].includes(currentUserRole) && (
+            <TouchableOpacity 
+              onPress={() => handleEditField('chatroom_name', teamData.chatRoom?.name)}
+              className="ml-2"
+            >
+              <Icon name="edit" size={20} color={isDarkMode ? '#eee' : '#555'} />
+            </TouchableOpacity>
+          )}
         </View>
+      </View>
 
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-base text-gray-600 dark:text-gray-300 flex-1">推荐参加年龄</Text>

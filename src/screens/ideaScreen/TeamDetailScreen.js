@@ -108,63 +108,91 @@ const TeamDetailScreen = () => {
     }
   };
 
-  const handleApplyToJoin = async () => {
-    const now = Date.now();
-    if (lastApplicationTime && (now - lastApplicationTime) < 5 * 60 * 1000) {
-      const remainingMinutes = Math.ceil((5 * 60 * 1000 - (now - lastApplicationTime)) / (60 * 1000));
-      ToastAndroid.show(`请等待 ${remainingMinutes} 分钟后再提交申请`, ToastAndroid.SHORT);
-      return;
-    }
+const handleApplyToJoin = async () => {
+  const now = Date.now();
+  
+  // 检查5分钟冷却时间
+  if (lastApplicationTime && (now - lastApplicationTime) < 5 * 60 * 1000) {
+    const remainingMinutes = Math.ceil((5 * 60 * 1000 - (now - lastApplicationTime)) / (60 * 1000));
+    showToast(`请等待 ${remainingMinutes} 分钟后再提交申请`, "warning");
+    return;
+  }
 
-    if (!applicationData.email) {
-      ToastAndroid.show('请输入邮箱', ToastAndroid.SHORT);
-      return;
-    }
-    if (!applicationData.description) {
-      ToastAndroid.show('请输入申请描述', ToastAndroid.SHORT);
-      return;
-    }
+  // 验证输入
+  if (!applicationData.email.trim()) {
+    showToast('请输入邮箱', "warning");
+    return;
+  }
+  if (!applicationData.description.trim()) {
+    showToast('请输入申请描述', "warning");
+    return;
+  }
 
-    setIsApplying(true);
-    try {
-      const accessToken = await getItemFromAsyncStorage("accessToken");
+  setIsApplying(true);
+  
+  try {
+    const accessToken = await getItemFromAsyncStorage("accessToken");
 
-      const response = await api.post(
-        `${BASE_INFO.BASE_URL}api/invite/team`,
-        {
-          team_id: teamId,
-          email: applicationData.email,
-          description: applicationData.description
+    const response = await api.post(
+      `${BASE_INFO.BASE_URL}api/invite/team`,
+      {
+        team_id: teamId,
+        email: applicationData.email,
+        description: applicationData.description
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }
-      );
-      setShowApplyModal(false);
-      setApplicationData({ email: '', description: '' });
-      showToast("申请发送成功","success");
-      const now = Date.now();
-      setLastApplicationTime(now);
-      await setItemInAsyncStorage(`lastApply_${teamId}`, now.toString());
-
-    } catch (err) {
-      let errorMessage = '申请发送失败';
-      showToast("申请发送失败","error");
-      if (err.response && err.response.data) {
-        errorMessage = err.response.data.message || errorMessage;
-      } else if (err.request) {
-        errorMessage = '网络错误，请检查您的连接';
-      } else {
-        errorMessage = err.message;
+        validateStatus: (status) => status >= 200 && status < 300 || status === 201
       }
+    );
 
-    } finally {
-      setIsApplying(false);
+    // 申请成功处理
+    const successTime = Date.now();
+    
+    // 更新状态
+    setShowApplyModal(false);
+    setApplicationData({ email: '', description: '' });
+    setLastApplicationTime(successTime);
+    
+    // 存储申请时间
+    try {
+      await setItemInAsyncStorage(`lastApply_${teamId}`, successTime.toString());
+    } catch (storageError) {
+      console.error('存储申请时间失败:', storageError);
     }
-  };
+    
+    // 显示成功提示
+    showToast("申请发送成功", "success");
+    
+    // 设置5分钟冷却定时器
+    const timer = setTimeout(() => {
+      setLastApplicationTime(null);
+      setItemInAsyncStorage(`lastApply_${teamId}`, '');
+    }, 5 * 60 * 1000);
+
+    // 清理定时器
+    return () => clearTimeout(timer);
+
+  } catch (err) {
+    console.error('申请请求失败:', err);
+    
+    let errorMessage = '申请发送失败';
+    if (err.response) {
+      errorMessage = err.response.data?.message || `服务器错误: ${err.response.status}`;
+    } else if (err.request) {
+      errorMessage = '网络错误，请检查连接';
+    } else {
+      errorMessage = err.message || '未知错误';
+    }
+    
+    showToast(errorMessage, "error");
+  } finally {
+    setIsApplying(false);
+  }
+};
 
   if (loading) {
     return (

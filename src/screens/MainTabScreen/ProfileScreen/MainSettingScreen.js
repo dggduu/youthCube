@@ -68,11 +68,6 @@ const MainSetting = ( {navigation} ) => {
         onPress={() => navigation.navigate('SettingDetail', { screen: 'UserInfoChange' })}
       />
       <SettingItem
-        description="通知设置"
-        iconName="notifications"
-        onPress={handlePressNotifications}
-      />
-      <SettingItem
         description="隐私政策"
         iconName="privacy-tip"
         onPress={() => navigation.navigate('SettingDetail', { screen: 'PolicyInfo' })}

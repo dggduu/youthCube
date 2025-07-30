@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
-import { getItemFromAsyncStorage } from '../../../utils';
+import { getItemFromAsyncStorage, setItemToAsyncStorage } from '../../../utils';
 import { BASE_INFO } from '../../../constant/base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useToast } from '../../../components/tip/ToastHooks';
@@ -25,6 +25,39 @@ const ChatSection = () => {
     const navigation = useNavigation();
     const showToast = useToast();
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+        try {
+            const userString = await getItemFromAsyncStorage("user");
+            if (!userString) {
+            setLoading(false);
+            return;
+            }
+
+            const userObj = userString;
+            const userId = userObj.id;
+
+            const response = await axios.get(
+            `${BASE_INFO.BASE_URL}api/users/${userId}`,
+            {
+                headers: {
+                'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+                }
+            }
+            );
+
+            await setItemToAsyncStorage("user",response.data);
+
+            setUser(response.data);
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        } finally {
+            setLoading(false);
+        }
+        };
+
+        fetchUserData();
+    }, []);
     const fetchTeamChat = async (teamId) => {
         try {
             const accessToken = await getItemFromAsyncStorage('accessToken');
@@ -48,7 +81,7 @@ const ChatSection = () => {
         }
     };
 
-    const fetchPrivateChats = async (pageNum = 0) => {
+   const fetchPrivateChats = async (pageNum = 0) => {
         if (!hasMore && pageNum !== 0) return;
 
         try {
@@ -75,17 +108,13 @@ const ChatSection = () => {
             const newChats = Array.isArray(data.items) ? data.items : [];
 
             if (newChats.length === 0 && pageNum === 0) {
-                const errorMsg = filterFollowing
-                    ? '暂无关注的私聊记录'
-                    : '暂无私聊记录';
-                setPrivateChatError(errorMsg);
-                showToast('info', errorMsg);
+                // 这里修改为只设置状态，不显示toast
+                setPrivateChatError(filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录');
             } else if (newChats.length === 0 && pageNum > 0) {
                 setHasMore(false);
             }
 
             setAllPrivateChats(prev => pageNum === 0 ? [...newChats] : [...prev, ...newChats]);
-            console.log(privateChats);
             const filteredChats = filterFollowing
                 ? newChats.filter(chat => chat.is_following)
                 : newChats;
@@ -97,10 +126,22 @@ const ChatSection = () => {
 
         } catch (error) {
             console.error('Error fetching private chats:', error);
-            const errorMsg = '加载私聊列表失败，请稍后再试';
-            setPrivateChatError(errorMsg);
-            showToast('error', errorMsg);
             if (pageNum === 0) {
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        setPrivateChatError(filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录');
+                    } else {
+                        setPrivateChatError('加载私聊列表失败，请稍后再试');
+                        showToast('error', '加载私聊列表失败，请稍后再试');
+                    }
+                } else if (error.request) {
+                    setPrivateChatError('网络连接失败，请检查网络');
+                    showToast('error', '网络连接失败，请检查网络');
+                } else {
+                    setPrivateChatError('加载私聊列表失败');
+                    showToast('error', '加载私聊列表失败');
+                }
+                
                 setPrivateChats([]);
                 setAllPrivateChats([]);
             }
@@ -224,13 +265,24 @@ const ChatSection = () => {
                             loading && page > 0 ? <ActivityIndicator size="small" /> : null
                         }
                         ListEmptyComponent={() => (
-                            privateChatError ? (
-                                <Text className="text-center mt-5 text-red-500">{privateChatError}</Text>
-                            ) : (
-                                <Text className="text-center mt-5 text-gray-500">
-                                    {filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录'}
+                            <View className="py-4 items-center">
+                                <MaterialIcons 
+                                    name={privateChatError?.includes('失败') ? 'error-outline' : 'chat'} 
+                                    size={24} 
+                                    color={privateChatError?.includes('失败') ? '#ef4444' : '#9ca3af'} 
+                                />
+                                <Text className={`mt-2 ${privateChatError?.includes('失败') ? 'text-red-500' : 'text-gray-500'}`}>
+                                    {privateChatError || (filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录')}
                                 </Text>
-                            )
+                                {privateChatError?.includes('失败') && (
+                                    <TouchableOpacity 
+                                        onPress={() => fetchPrivateChats(0)}
+                                        className="mt-2 px-4 py-2 bg-blue-500 rounded-lg"
+                                    >
+                                        <Text className="text-white">重新加载</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         )}
                         className="flex-1"
                     />

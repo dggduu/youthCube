@@ -21,12 +21,22 @@ const CommentItem = ({ comment, authToken, progressId }) => {
   const [replyText, setReplyText] = useState('');
   const [showReplyInput, setShowReplyInput] = useState(false);
   const { showToast } = useToast();
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
+  useEffect(() => {
+    if (comment.reply_count > 0 && !initialLoadDone) {
+      fetchReplies(0);
+      setInitialLoadDone(true);
+    }
+  }, [comment.reply_count, initialLoadDone]);
+
   const fetchReplies = useCallback(async (page = 0) => {
     try {
       setLoadingReplies(true);
       const response = await api.get(
-        `${BASE_INFO.BASE_URL}api/progress/comments/${comment.comment_id}/replies`,{
-          params:{
+        `${BASE_INFO.BASE_URL}api/progress/comments/${comment.comment_id}/replies`,
+        {
+          params: {
             page,
             size: 5
           }
@@ -65,14 +75,15 @@ const CommentItem = ({ comment, authToken, progressId }) => {
         }
       );
 
+      // 直接添加到本地状态，避免重新获取
+      const newReply = response.data;
+      setReplies(prev => [newReply, ...prev]);
       setReplyText('');
       setShowReplyInput(false);
       showToast("回复成功", "success");
-      fetchReplies(0);
 
     } catch (err) {
       let errorMessage = '回复失败';
-
       if (err.response && err.response.data) {
         errorMessage = err.response.data.message || errorMessage;
       } else if (err.request) {
@@ -80,26 +91,25 @@ const CommentItem = ({ comment, authToken, progressId }) => {
       } else {
         errorMessage = err.message;
       }
-
       showToast(`回复失败: ${errorMessage}`, "error");
     }
-  }, [progressId, authToken, replyText, comment.comment_id, showToast, fetchReplies]);
+  }, [progressId, authToken, replyText, comment.comment_id, showToast]);
 
   const toggleReplies = useCallback(() => {
-    if (!showReplies && replies.length === 0) {
+    if (!showReplies && replies.length === 0 && !loadingReplies) {
       fetchReplies(0);
     }
     setShowReplies(prev => !prev);
     setShowReplyInput(false);
-  }, [showReplies, fetchReplies, replies.length]);
+  }, [showReplies, fetchReplies, replies.length, loadingReplies]);
 
   const handleReplyButtonPress = useCallback(() => {
     setShowReplyInput(prev => !prev);
     setReplyText('');
-    if (!showReplies) {
+    if (!showReplies && comment.reply_count > 0) {
       setShowReplies(true);
     }
-  }, [showReplies]);
+  }, [showReplies, comment.reply_count]);
 
   const loadMoreReplies = useCallback(() => {
     if (repliesCurrentPage < repliesTotalPages - 1) {

@@ -23,7 +23,7 @@ const AddProgress = () => {
   const route = useRoute();
   const { showToast } = useToast();
   const { colorScheme } = useColorScheme();
-  const { teamId } = route.params;
+  const [ teamId, setTeamId ] = useState(0);
 
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
@@ -40,9 +40,11 @@ const AddProgress = () => {
   useEffect(() => {
     const loadAuthToken = async () => {
       try {
+        const userData = await getItemFromAsyncStorage("user");
         const token = await getItemFromAsyncStorage("accessToken");
-        if (!token) throw new Error('用户未登录');
+        if (!token || ! userData) throw new Error('用户未登录');
         setAuthToken(token);
+        setTeamId(userData.team_id);
       } catch (err) {
         setError(err.message);
       }

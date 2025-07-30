@@ -4,7 +4,9 @@ import axios from 'axios';
 import { BASE_INFO } from '../constant/base';
 import { useColorScheme } from 'nativewind';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import setupAuthInterceptors from "../utils/axios/AuthInterceptors";
+const api = axios.create();
+setupAuthInterceptors(api);
 const TagSelectionToast = ({
   visible,
   onClose,
@@ -32,7 +34,7 @@ const TagSelectionToast = ({
   const fetchTags = async (pageNum) => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${BASE_INFO.BASE_URL}api/tags`, {
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/tags`, {
         params: {
           page: pageNum,
           size: pageSize,
@@ -204,7 +206,7 @@ const TagSelectionToast = ({
               onPress={handleConfirm}
               className="flex-1 py-3 rounded-lg bg-blue-600 mx-2"
             >
-              <Text className="text-center font-semibold text-white">确定 ({selectedTags.length})</Text>
+              <Text className="text-center font-semibold text-white">确定</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -14,6 +14,7 @@ import { BASE_INFO } from '../../constant/base';
 
 import axios from 'axios'
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+import { WhiteSpace } from '@ant-design/react-native';
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -276,7 +277,11 @@ const MosciaChart = ({ team_id }) => {
       </View>
     );
   }
-
+  if(!team_id){
+    return (
+      <WhiteSpace/>
+    )
+  }
   return (
     <View className='justify-center bg-white dark:bg-gray-700 py-5 px-3 mx-3 rounded-xl items-center border border-gray-300 dark:border-gray-600'>
       {/* <Text className='font-semibold self-start text-lg mb-3 ml-2'>过去一年的时间线：</Text> */}

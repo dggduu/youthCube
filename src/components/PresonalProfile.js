@@ -20,6 +20,10 @@ import WaterfallFlow from 'react-native-waterfall-flow';
 import FeedElem from "../components/feedElem/feedElem";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from 'axios';
+import setupAuthInterceptors from "../utils/axios/AuthInterceptors";
+
+const api = axios.create();
+setupAuthInterceptors(api);
 
 const PersonalProfile = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -50,7 +54,7 @@ const PersonalProfile = () => {
   const sendFriendRequest = async () => {
     try {
       const token = await getItemFromAsyncStorage('accessToken');
-      const response = await axios.post(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/invite/friend`,
         {
           user_id: user_id,
@@ -64,20 +68,25 @@ const PersonalProfile = () => {
         }
       );
 
-      if (response.status === 200) {
-        showToast('好友申请已发送', 'success');
+      if (response.status === 201) {
         setIsFriendRequestSent(true);
         setShowFriendModal(false);
         setDescription('');
         setCanSendRequest(false);
         
         setTimeout(() => {
+          showToast('好友申请已发送', 'success');
+        }, 100);
+        
+        const timer = setTimeout(() => {
           setCanSendRequest(true);
         }, 5 * 60 * 1000);
+        
+        return () => clearTimeout(timer);
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
-      showToast('发送好友申请失败', 'error');
+      showToast('发送好友申请失败: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -124,18 +133,16 @@ const PersonalProfile = () => {
       const user = await getItemFromAsyncStorage("user");
       setLocalId(user);
       
-      const response = await fetch(`${BASE_INFO.BASE_URL}api/users/${user_id}`, {
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/users/${user_id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) throw new Error('获取用户数据失败');
-
-      const userData = await response.json();
+      const userData = response.data;
 
       setCurrentUser(userData);
-      setPosts(userData.posts || []);
+      setPosts(Array.isArray(userData.posts) ? userData.posts : []);
       setIsFriendRequestSent(userData.friend_status === 'pending' || userData.friend_status === 'accepted');
     } catch (e) {
       setError(e.message);
