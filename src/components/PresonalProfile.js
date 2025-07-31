@@ -59,7 +59,7 @@ const PersonalProfile = () => {
         {
           user_id: user_id,
           email: localId?.email || '',
-          description: description || '我想添加您为好友'
+          desciption: description || '我想添加您为好友'
         },
         {
           headers: {
@@ -84,9 +84,16 @@ const PersonalProfile = () => {
         
         return () => clearTimeout(timer);
       }
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      showToast('发送好友申请失败: ' + (error.response?.data?.message || error.message), 'error');
+    } catch (err) {
+      let errorMessage = '发送失败';
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+      showToast(`${errorMessage}`, "error");
     }
   };
 

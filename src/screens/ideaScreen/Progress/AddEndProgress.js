@@ -88,7 +88,15 @@ const AddProgress = () => {
       setTitle('');
       setEventTime(new Date().toISOString().slice(0, 16));
     } catch (err) {
-      showToast(`提交失败: ${err.message}`, "error");
+      let errorMessage = '回复失败';
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
+      }
+      showToast(`回复失败: ${errorMessage}`, "error");
     } finally {
       setIsSubmitting(false);
     }

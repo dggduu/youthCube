@@ -196,12 +196,12 @@ const UserInfoChange = () => {
         showToast('个人信息更新成功！', 'success');
         navigation.goBack();
       } else if (updateProfile.rejected.match(resultAction)) {
-        showToast('个人信息更新失败。', 'error');
+        showToast('个人信息更新失败', 'error');
       }
     } catch (error) {
       console.error('更新个人信息时发生错误:', error);
       showToast('网络或服务器错误，请稍后再试',"error");
-      showToast('网络或服务器错误。', 'error');
+      showToast('网络或服务器错误', 'error');
     } finally {
       setIsSubmitting(false);
     }

@@ -480,33 +480,42 @@ const CommentSection = ({ postId, authToken }) => {
     }
 
     try {
-      const response = await fetch(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/posts/${postId}/comments`,
         {
-          method: 'POST',
+          content: commentText,
+          parent_comment_id: null
+        },
+        {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: commentText,
-            parent_comment_id: null
-          })
+          }
         }
       );
 
-      if (response.ok) {
-        setCommentText('');
-        showToast("评论成功", "success");
-        fetchComments(0);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit comment');
-      }
+      setCommentText('');
+      showToast("评论成功", "success");
+      fetchComments(0);
+
     } catch (err) {
-      console.log(`Comment failed: ${err.message}`, "error");
+      let errorMessage = '提交失败，请稍后重试';
+
+      if (err.response) {
+        try {
+          errorMessage = err.response.data.message || err.response.data.error || errorMessage;
+        } catch (e) {
+          errorMessage = err.response.statusText || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = "网络连接失败，请检查网络";
+      } else {
+        errorMessage = "请求异常";
+      }
+
+      showToast(errorMessage, "error");
     }
-  }, [postId, authToken, commentText, showToast, navigation, fetchComments]);
+  }, [postId, authToken, commentText, showToast, fetchComments]);
 
   useEffect(() => { fetchComments(0); }, [fetchComments]);
 
@@ -589,34 +598,50 @@ const CommentItem = ({ comment, authToken, postId }) => {
     }
 
     try {
-      const response = await fetch(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/posts/${postId}/comments`,
         {
-          method: 'POST',
+          content: replyText,
+          parent_comment_id: comment.comment_id
+        },
+        {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: replyText,
-            parent_comment_id: comment.comment_id
-          })
+          }
         }
       );
 
-      if (response.ok) {
-        setReplyText('');
-        setShowReplyInput(false);
-        showToast("回复成功", "success");
-        fetchReplies(0);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit reply');
-      }
+      setReplyText('');
+      setShowReplyInput(false);
+      showToast("回复成功", "success");
+      fetchReplies(0);
+
     } catch (err) {
-      showToast(`回复时遇到错误`, "error");
+      let errorMessage = '提交失败，请稍后重试';
+
+      if (err.response) {
+        try {
+          errorMessage = err.response.data.message || err.response.data.error || errorMessage;
+        } catch (e) {
+          errorMessage = err.response.statusText || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = "网络连接失败，请检查网络";
+      } else {
+        errorMessage = "请求异常";
+      }
+
+      showToast(errorMessage, "error");
     }
-  }, [postId, authToken, replyText, comment.comment_id, showToast, navigation, fetchReplies]);
+  }, [
+    postId,
+    authToken,
+    replyText,
+    comment.comment_id, // 确保 comment.comment_id 是稳定值或依赖正确
+    showToast,
+    fetchReplies
+  ]);
 
   const toggleReplies = useCallback(() => {
     if (!showReplies && comment.SubReplyCount > 0) {

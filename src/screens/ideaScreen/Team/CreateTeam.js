@@ -69,8 +69,22 @@ const CreateTeam = () => {
       setNewTagName('');
 
     } catch (error) {
-      console.error('Error creating tag:', error);
-      showToast("标签创建失败", "error");
+      console.error('创建标签失败:', error);
+
+      const status = error.response?.status;
+      const message = error.response?.data?.message || '创建标签失败';
+
+      if (status === 400) {
+        showToast('请求参数错误，请检查输入', "error");
+      } else if (status === 401) {
+        showToast('登录已过期，请重新登录', "error");
+      } else if (status === 422) {
+        showToast(message, "error");
+      } else if (status === 500) {
+        showToast('服务器内部错误，请稍后再试', "error");
+      } else {
+        showToast('网络错误或服务器无响应', "error");
+      }
     }
   };
 
@@ -167,8 +181,22 @@ const CreateTeam = () => {
         team_id: response.data.team_id
       });
     } catch (error) {
-      showToast("创建队伍失败", "error");
-      console.error(error);
+      console.error('创建队伍失败:', error);
+
+      const status = error.response?.status;
+      const message = error.response?.data?.message || '创建队伍失败';
+
+      if (status === 400) {
+        showToast('请求参数错误，请检查输入', "error");
+      } else if (status === 401) {
+        showToast('登录已过期，请重新登录', "error");
+      } else if (status === 422) {
+        showToast(message, "error");
+      } else if (status === 500) {
+        showToast('服务器内部错误，请稍后再试', "error");
+      } else {
+        showToast('网络错误或服务器无响应', "error");
+      }
     } finally {
       setIsLoading(false);
     }

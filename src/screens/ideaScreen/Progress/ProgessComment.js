@@ -367,42 +367,41 @@ const ProgressComment = () => {
     await fetchComments(0);
   }, [fetchComments]);
 
-  const submitComment = useCallback(async () => {
-    if (!commentText.trim()) {
-      showToast("评论内容不能为空", "warning");
-      return;
-    }
+const submitComment = useCallback(async () => {
+  if (!commentText.trim()) {
+    showToast("评论内容不能为空", "warning");
+    return;
+  }
 
-    try {
-      const response = await api.post(
-        `${BASE_INFO.BASE_URL}api/progress/${progress_id}/comments`,
-        {
-          content: commentText,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          }
+  try {
+    const response = await api.post(
+      `${BASE_INFO.BASE_URL}api/progress/${progress_id}/comments`,
+      {
+        content: commentText,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
         }
-      );
-
-      showToast("评论成功","success");
-
-    } catch (err) {
-      let errorMessage = '评论失败';
-
-      if (err.response && err.response.data) {
-        errorMessage = err.response.data.message || errorMessage;
-      } else if (err.request) {
-        errorMessage = '网络错误，请检查您的连接';
-      } else {
-        errorMessage = err.message;
       }
+    );
+    setCommentText('');
+    showToast("评论成功", "success"); 
 
-      throw new Error(errorMessage);
+  } catch (err) {
+    let errorMessage = '评论失败';
+
+    if (err.response) {
+      errorMessage = err.response.data?.message || err.response.data?.error || err.response.statusText || errorMessage;
+    } else if (err.request) {
+      errorMessage = '网络错误，请检查您的连接';
+    } else {
+      errorMessage = err.message || errorMessage;
     }
-  }, [progress_id, authToken, commentText, showToast, fetchComments]);
+    showToast(errorMessage, "error");
+  }
+}, [progress_id, authToken, commentText, showToast, fetchComments]);
 
   const loadMoreComments = useCallback(() => {
     if (!loading && currentPage < totalPages - 1) {

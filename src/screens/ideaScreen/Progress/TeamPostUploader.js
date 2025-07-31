@@ -104,7 +104,21 @@ const UploaderScreen = () => {
       showToast('标签创建成功',"success");
     } catch (error) {
       console.error('创建标签失败:', error);
-      showToast('创建标签失败',"error");
+
+      const status = error.response?.status;
+      const message = error.response?.data?.message || '创建标签失败';
+
+      if (status === 400) {
+        showToast('请求参数错误，请检查输入', "error");
+      } else if (status === 401) {
+        showToast('登录已过期，请重新登录', "error");
+      } else if (status === 422) {
+        showToast(message, "error");
+      } else if (status === 500) {
+        showToast('服务器内部错误，请稍后再试', "error");
+      } else {
+        showToast('网络错误或服务器无响应', "error");
+      }
     } finally {
       setIsUploading(false);
     }
@@ -163,17 +177,17 @@ const UploaderScreen = () => {
   const createPost = async () => {
     const now = Date.now();
     if (now - lastSubmitTimeRef.current < 5000) {
-      showToast(`请等待 ${Math.ceil((5000 - (now - lastSubmitTimeRef.current)) / 1000)} 秒后再提交`,"warning");
+      showToast(`请等待 ${Math.ceil((5000 - (now - lastSubmitTimeRef.current)) / 1000)} 秒后再提交`, "warning");
       return;
     }
 
     if (!authKey) {
-      showToast('请先登录',"error");
+      showToast('请先登录', "error");
       return;
     }
 
     if (!title || !vditorMarkdownContent) {
-      showToast('标题和内容是必填项',"error");
+      showToast('标题和内容是必填项', "error");
       return;
     }
 
@@ -185,13 +199,15 @@ const UploaderScreen = () => {
         const objectName = await uploadImage(coverImage);
         coverImageUrl = `${BASE_INFO.BASE_URL}dl/posts/${objectName}`;
       }
-      console.log("team:",        {
-          title,
-          type: "article",
-          content: vditorMarkdownContent,
-          cover_image_url: coverImageUrl,
-          tagIds: selectedTags.tagIds,
-        });
+
+      console.log("提交帖子:", {
+        title,
+        type: "article",
+        content: vditorMarkdownContent,
+        cover_image_url: coverImageUrl,
+        tagIds: selectedTags.tagIds,
+      });
+
       const response = await api.post(
         `${BASE_INFO.BASE_URL}api/posts/${userData.team_id}/team`,
         {
@@ -206,12 +222,27 @@ const UploaderScreen = () => {
         }
       );
 
-      showToast('帖子创建成功',"success");
+      showToast('帖子创建成功', "success");
       resetForm();
       lastSubmitTimeRef.current = now;
+
     } catch (error) {
       console.error('创建帖子失败:', error);
-      showToast('创建帖子失败',"error");
+
+      const status = error.response?.status;
+      const message = error.response?.data?.message || '创建帖子失败';
+
+      if (status === 400) {
+        showToast('请求参数错误，请检查输入', "error");
+      } else if (status === 401) {
+        showToast('登录已过期，请重新登录', "error");
+      } else if (status === 422) {
+        showToast(message, "error");
+      } else if (status === 500) {
+        showToast('服务器内部错误，请稍后再试', "error");
+      } else {
+        showToast('网络错误或服务器无响应', "error");
+      }
     } finally {
       setIsUploading(false);
     }
