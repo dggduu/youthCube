@@ -19,9 +19,10 @@ import { useToast } from '../../../components/tip/ToastHooks';
 import { WebView } from 'react-native-webview';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Markdown from "react-native-markdown-display";
+import Markdown from "react-native-marked";
 import InputBox from "../../../components/inputBox/inputBox";
 import { useNavigation } from "@react-navigation/native";
+import MarkdownInput from "../../../components/MarkdownInput";
 import axios from 'axios'
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 const api = axios.create();
@@ -103,8 +104,12 @@ const ProgressCard = ({ progress, onEdit, onDelete}) => {
       }</Text>
       <Text className={`text-sm mb-2 ${subTextColor}`}>事件时间: {formattedEventTime}</Text>
       <Text className={`text-sm mb-4 ${subTextColor}`}>提交人: {progress.submitter?.name || '未知'}</Text>
-      <Markdown style={mdStyle}>{progress.content}</Markdown>
-
+          <Markdown
+            value={progress.content}
+            flatListProps={{
+              initialNumToRender: 8,
+            }}
+          />
       <View className="flex-row justify-end mt-4">
         <TouchableOpacity
           className="bg-blue-500 py-2 px-3 rounded-md mr-2"
@@ -204,7 +209,7 @@ const UploadProgress = () => {
       setLoadingList(false);
       setRefreshing(false);
     }
-  }, [authToken, teamId, page, totalPages, showToast]);
+  }, [authToken, teamId, showToast]);
 
   useEffect(() => {
     if (authToken && isFocused) {
@@ -477,11 +482,24 @@ const UploadProgress = () => {
         </TouchableOpacity>
       </View>
 
-      <Modal
-        visible={showProgressModal}
-        animationType="slide"
-        onRequestClose={closeProgressModal}
-      >
+      {showProgressModal && 
+        <View
+          className='bg-gray-50 dark:bg-gray-900'
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+          }}
+          // 点击遮罩关闭
+          onTouchEnd={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowAddModal(false);
+            }
+          }}
+        >
         <ScrollView className="flex-1 p-5 dark:bg-gray-900">
           <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">
             {currentProgressId ? '编辑进度报告' : '创建进度报告'}
@@ -533,7 +551,7 @@ const UploadProgress = () => {
             )}
           </View>
 
-          <TextInput
+          {/* <TextInput
             placeholder="进度内容 *"
             placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
             value={description}
@@ -551,8 +569,13 @@ const UploadProgress = () => {
           >
             <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
           </TouchableOpacity>
-          <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text>
-
+          <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text> */}
+          <MarkdownInput
+            value={description}
+            onChange={setDescription}
+            placeholder="请输入进度内容..."
+          />
+          
           <TouchableOpacity
             onPress={handleSubmitProgress}
             disabled={isSubmitting || !description.trim() || !title.trim()}
@@ -577,29 +600,9 @@ const UploadProgress = () => {
             <Text className="text-white font-bold">取消</Text>
           </TouchableOpacity>
         </ScrollView>
-      </Modal>
-
-      {/* VDITOR Modal */}
-      <Modal
-        visible={showVditorModal}
-        animationType="slide"
-        onRequestClose={() => setShowVditorModal(false)}
-      >
-        <View style={{ flex: 1 }}>
-          <WebView
-            ref={webViewRef}
-            source={{ uri: 'file:///android_asset/web/vditor.html' }}
-            style={{ flex: 1 }}
-            originWhitelist={['*']}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            allowFileAccess={true}
-            scalesPageToFit={false}
-            onMessage={onWebViewMessage}
-            onLoadEnd={injectInitialContent}
-          />
         </View>
-      </Modal>
+      }
+
     </View>
   );
 };

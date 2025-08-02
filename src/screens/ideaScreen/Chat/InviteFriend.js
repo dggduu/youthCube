@@ -111,7 +111,7 @@ const InviteFriend = () => {
         `${BASE_INFO.BASE_URL}api/chatrooms/${chatRoom_id}/invitations`,
         {
           user_id: userId,
-          description: `邀请您加入小组 ${teamData?.team_name}`
+          description: `邀请加入小组 ${teamData?.team_name}`
         },
         {
           headers: {

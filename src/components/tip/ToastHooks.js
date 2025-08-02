@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useRef } from 'react';
 import Toast from './Toast';
-
+import { Portal } from 'react-native-portalize';
 const ToastContext = createContext(null);
 
 export const ToastProvider = ({ children }) => {
@@ -23,12 +23,15 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {toast && (
-        <Toast
-          key={toast.key} 
-          message={toast.message}
-          type={toast.type}
-          onHide={hideToast}
-        />
+        <Portal>
+          <Toast
+            key={toast.key} 
+            message={toast.message}
+            type={toast.type}
+            onHide={hideToast}
+          />
+        </Portal>
+
       )}
     </ToastContext.Provider>
   );

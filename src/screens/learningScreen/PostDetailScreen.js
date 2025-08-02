@@ -10,7 +10,8 @@ import {
   TextInput,
   StyleSheet,
   Modal,
-  useColorScheme
+  useColorScheme,
+  KeyboardAvoidingView
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,10 +19,10 @@ import { BASE_INFO } from "../../constant/base";
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { useToast } from "../../components/tip/ToastHooks";
 import { getItemFromAsyncStorage } from "../../utils/LocalStorage";
-import Markdown from 'react-native-markdown-display';
+import Markdown from "react-native-marked";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { navigate } from "../../navigation/NavigatorRef";
-
+import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
 import axios from 'axios'
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 const api = axios.create();
@@ -246,55 +247,11 @@ const PostDetailScreen = () => {
     }
   }] : [];
 
-const mdStyle = {
-  body: {
-    fontSize: 12,
-    color: isDark ? '#FFFFFF' : '#000000',
-  },
-  heading1: {
-    fontWeight: 800,
-    padding: 5,
-  },
-  heading2: {
-    fontWeight:700,
-    margin: 5,
-  },
-  heading3: {
-    fontWeight:600,
-    margin: 5,
-  },
-   code: { // 内联代码样式
-      backgroundColor: isDark ? '#333333' : '#F5F5F5',
-      padding: 2,
-      borderRadius: 3,
-      color: isDark ? '#FFFFFF' : '#000000',
-    },
-    codeBlock: { // 代码块样式
-      backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
-      padding: 10,
-      borderRadius: 5,
-      overflow: 'hidden',
-      magrin: 10,
-    },
-    fence: { // 特定于 fenced code blocks 的样式
-      backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
-      magrin: 10,
-    },
-     list_item: {
-      color: isDark ? '#E6E6E6' : '#1A1A1A',
-    },
-    unordered_list_icon: {
-      color: isDark ? '#FF9800' : '#F57C00', // 修改圆点颜色
-    },
-    ordered_list_icon: {
-      color: isDark ? '#4CAF50' : '#388E3C', // 编号颜色
-    },
-};
-
   return (
     <>
-      <ScrollView
-        className="flex-1 bg-white dark:bg-gray-900"
+      <KeyboardAvoidingScrollView
+        style={{flex:1}}
+        className="bg-white dark:bg-gray-900"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -340,13 +297,12 @@ const mdStyle = {
               />
             </TouchableOpacity>
           )}
-
-          {/* <Text className="text-base text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
-            {post.content}
-          </Text> */}
-          <Markdown style={mdStyle}>
-            {post.content}
-          </Markdown>
+          <Markdown
+            value={post.content}
+            flatListProps={{
+              initialNumToRender: 8,
+            }}
+          />
 
           {tags.length > 0 && (
             <View className="flex-row flex-wrap mb-4">
@@ -410,7 +366,7 @@ const mdStyle = {
         </View>
 
         <CommentSection postId={postId} authToken={authToken} />
-      </ScrollView>
+      </KeyboardAvoidingScrollView>
 
       <Modal visible={imageViewerVisible} transparent={true}>
         <ImageViewer
@@ -520,7 +476,7 @@ const CommentSection = ({ postId, authToken }) => {
   useEffect(() => { fetchComments(0); }, [fetchComments]);
 
   return (
-    <View className="px-4 pb-4 border-t-8 border-gray-100 dark:border-gray-800 pt-4">
+    <View className="px-4 pb-2 border-t-8 border-gray-100 dark:border-gray-800 pt-4">
       <Text className="text-xl font-bold text-gray-900 dark:text-white mb-4">评论</Text>
 
       <View className="mb-4">
@@ -725,6 +681,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
               placeholderTextColor="#9ca3af"
               value={replyText}
               onChangeText={setReplyText}
+              style={{height:40}}
               multiline
             />
             <TouchableOpacity

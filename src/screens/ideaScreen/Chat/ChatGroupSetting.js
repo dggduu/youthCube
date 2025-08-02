@@ -521,7 +521,7 @@ const ChatGroupSetting = () => {
 
       {/* 编辑模态框 */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
@@ -560,7 +560,7 @@ const ChatGroupSetting = () => {
 
       {/* 角色变更模态框 */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={roleModalVisible}
         onRequestClose={() => setRoleModalVisible(false)}
@@ -622,7 +622,7 @@ const ChatGroupSetting = () => {
 
       {/* 转移所有权选择模态框 */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={transferOwnerModalVisible}
         onRequestClose={() => setTransferOwnerModalVisible(false)}
@@ -659,7 +659,7 @@ const ChatGroupSetting = () => {
       </Modal>
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
@@ -720,6 +720,7 @@ const ChatGroupSetting = () => {
                 value={editValue}
                 onChangeText={setEditValue}
                 multiline={editField === 'description'}
+                style={{height:50}}
                 placeholder={`输入新的值`}
                 placeholderTextColor={isDarkMode ? '#A0AEC0' : '#718096'}
               />

@@ -6,7 +6,7 @@ import { BASE_INFO } from "../../../constant/base";
 import { useToast } from "../../../components/tip/ToastHooks";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from "axios";
-import Markdown from "react-native-markdown-display";
+import Markdown from "react-native-marked";
 
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 const api = axios.create();
@@ -444,7 +444,12 @@ const submitComment = useCallback(async () => {
           </View>
         </View>
         <View>
-            <Markdown style={mdStyle}>{progressData.content}</Markdown>
+          <Markdown
+            value={progressData.content}
+            flatListProps={{
+              initialNumToRender: 8,
+            }}
+          />
         </View>
 
         {progressData.event_time && (

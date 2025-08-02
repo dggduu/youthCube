@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { View, Text, Image } from 'react-native';
-
+import FastImage from "react-native-fast-image";
 const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
   return (
     <TouchableOpacity
@@ -12,10 +12,14 @@ const FeedElem = ({ imgUrl, title, subtitle, onPress }) => {
       <View className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
         {/* 图片区域 */}
         {imgUrl && (
-          <Image
+          <FastImage
             source={{ uri: imgUrl }}
-            className="w-full aspect-video bg-gray-200 dark:bg-gray-700"
-            resizeMode="cover"
+            style={{
+              width: '100%',
+              aspectRatio: 16 / 9,
+              backgroundColor: '#e5e7eb',
+            }}
+            resizeMode={FastImage.resizeMode.cover}
           />
         )}
 

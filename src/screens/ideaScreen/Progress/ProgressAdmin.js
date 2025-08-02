@@ -10,6 +10,7 @@ import WaterfallFlow from 'react-native-waterfall-flow';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { WebView } from 'react-native-webview';
 import axios from "axios";
+import MarkdownInput from "../../../components/MarkdownInput";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 const api = axios.create();
 setupAuthInterceptors(api);
@@ -352,11 +353,29 @@ const ProgressAdmin = () => {
       </TouchableOpacity>
 
       {/* 添加进度Moral */}
-      <Modal
+      {/* <Modal
         visible={showAddModal}
         animationType="slide"
         onRequestClose={() => setShowAddModal(false)}
-      >
+      > */}
+        {showAddModal  && 
+          <View
+          className='bg-gray-50 dark:bg-gray-900'
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+          }}
+          // 点击遮罩关闭
+          onTouchEnd={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowAddModal(false);
+            }
+          }}
+        >
         <View className="flex-1 p-5 dark:bg-gray-900">
           <View className="flex-row justify-between items-center mb-5">
             <Text className="text-xl font-bold dark:text-white">添加进度</Text>
@@ -376,28 +395,11 @@ const ProgressAdmin = () => {
               style={{height:50}}
               className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
-
-            {/* Content Input */}
-            <TextInput
-              placeholder="进度内容 *"
-              placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={5}
-              className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            />
-
-            {/* Markdown Editor*/}
-            <TouchableOpacity
-              className="bg-blue-500 py-4 px-4 rounded-lg mb-3"
-              onPress={() => {
-                setVditorMarkdownContent(description);
-                setShowVditorModal(true);
-              }}
-            >
-              <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
-            </TouchableOpacity>
+          <MarkdownInput
+            value={description}
+            onChange={setDescription}
+            placeholder="请输入进度内容..."
+          />
 
             {/* Timeline Type*/}
             <View className="mb-3">
@@ -459,30 +461,9 @@ const ProgressAdmin = () => {
               )}
             </TouchableOpacity>
           </ScrollView>
-        </View>
-      </Modal>
-
-      {/* VDITOR Modal */}
-      <Modal
-        visible={showVditorModal}
-        animationType="slide"
-        onRequestClose={() => setShowVditorModal(false)}
-      >
-        <View style={{ flex: 1 }}>
-          <WebView
-            ref={webViewRef}
-            source={{ uri: 'file:///android_asset/web/vditor.html' }}
-            style={{ flex: 1 }}
-            originWhitelist={['*']}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            allowFileAccess={true}
-            scalesPageToFit={false}
-            onMessage={onWebViewMessage}
-            onLoadEnd={injectInitialContent}
-          />
-        </View>
-      </Modal>
+        </View>          
+        </View>        
+        }
     </View>
   );
 }

@@ -110,7 +110,7 @@ const InviteToTeam = () => {
           team_id,
           user_id,
           email: email,
-          description: `邀请您加入小组 ${team?.team_name || ''}`
+          description: `邀请加入小组 ${team?.team_name || ''}`
         },
         {
           headers: { Authorization: `Bearer ${accessToken}` },

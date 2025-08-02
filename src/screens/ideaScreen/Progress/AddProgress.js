@@ -16,6 +16,7 @@ import { useColorScheme } from 'nativewind';
 import { WebView } from 'react-native-webview';
 import axios from "axios";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+import MarkdownInput from "../../../components/MarkdownInput";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -176,7 +177,7 @@ const AddProgress = () => {
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
         {/* 描述输入 */}
-        <TextInput
+        {/* <TextInput
           placeholder="进度内容 *"
           placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
           value={description}
@@ -184,9 +185,9 @@ const AddProgress = () => {
           multiline
           numberOfLines={5}
           className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+        /> */}
         {/* Markdown 编辑按钮 */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="bg-blue-500 py-4 px-4 rounded-lg mb-3"
           onPress={() => {
             setVditorMarkdownContent(description);
@@ -195,8 +196,12 @@ const AddProgress = () => {
         >
           <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
         </TouchableOpacity>
-        <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text>
-
+        <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text> */}
+          <MarkdownInput
+            value={description}
+            onChange={setDescription}
+            placeholder="请输入进度内容..."
+          />
         {/* 提交按钮 */}
         <TouchableOpacity
           onPress={submitProgress}
@@ -214,28 +219,6 @@ const AddProgress = () => {
           )}
         </TouchableOpacity>
       </ScrollView>
-
-      {/* VDITOR 模态框 */}
-      <Modal
-        visible={showVditorModal}
-        animationType="slide"
-        onRequestClose={() => setShowVditorModal(false)}
-      >
-        <View style={{ flex: 1 }}>
-          <WebView
-            ref={webViewRef}
-            source={{ uri: 'file:///android_asset/web/vditor.html' }}
-            style={{ flex: 1 }}
-            originWhitelist={['*']}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            allowFileAccess={true}
-            scalesPageToFit={false}
-            onMessage={onWebViewMessage}
-            onLoadEnd={injectInitialContent}
-          />
-        </View>
-      </Modal>
     </View>
   );
 };

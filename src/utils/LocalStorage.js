@@ -26,6 +26,7 @@ export const setItemToAsyncStorage = async (key, value) => {
     try {
         const jsonValue = JSON.stringify(value);
         await AsyncStorage.setItem(key, jsonValue);
+        return {message:"ok"}
     } catch (e) {
         console.error(`AsyncStorage.setItem error for key "${key}":`, e);
     }

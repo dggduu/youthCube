@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import {useNavigation } from '@react-navigation/native';
 import { getItemFromAsyncStorage, setItemToAsyncStorage } from '../../../utils';
 import { BASE_INFO } from '../../../constant/base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -21,7 +21,6 @@ const ChatSection = () => {
     const [filterFollowing, setFilterFollowing] = useState(false);
     const [privateChatError, setPrivateChatError] = useState(null);
 
-    const isFocused = useIsFocused();
     const navigation = useNavigation();
     const showToast = useToast();
 
@@ -159,8 +158,8 @@ const ChatSection = () => {
             }
         };
 
-        if (isFocused) init();
-    }, [isFocused]);
+        init();
+    }, []);
 
     useEffect(() => {
         setPrivateChats(filterFollowing ? allPrivateChats.filter(chat => chat.other_user.is_following) : allPrivateChats);

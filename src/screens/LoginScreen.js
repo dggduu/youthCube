@@ -69,7 +69,7 @@ const LoginPage = ({ navigation }) => {
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+        style={{flex:1}}
       >
         <ScrollView
           contentContainerClassName="px-8 justify-center flex-grow pt-16 pb-14"

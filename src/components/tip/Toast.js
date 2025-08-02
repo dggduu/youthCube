@@ -9,7 +9,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useColorScheme } from 'nativewind';
-import { WhitePortal } from "react-native-portal";
 // 自定义Toast的类型和颜色
 const TOAST_TYPES = {
   success: {
@@ -78,7 +77,6 @@ const Toast = ({ message, type = 'info', onHide }) => {
   }, [message, type, onHide]);
 
   return (
-    <WhitePortal>
       <Animated.View
         className={`absolute top-20 self-center p-3 rounded-xl shadow-lg flex-row items-center z-50 ${backgroundColorClass}`}
         style={animatedStyle}
@@ -95,7 +93,6 @@ const Toast = ({ message, type = 'info', onHide }) => {
           {message}
         </Text>
       </Animated.View>
-    </WhitePortal>
 
   );
 };

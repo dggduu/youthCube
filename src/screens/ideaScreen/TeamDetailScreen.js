@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, ToastAndro
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { BASE_INFO } from '../../constant/base';
 import { GRADES, PartyGrade } from '../../constant/user';
-import { getItemFromAsyncStorage, setItemInAsyncStorage } from "../../utils/LocalStorage";
+import { getItemFromAsyncStorage, setItemToAsyncStorage } from "../../utils/LocalStorage";
 import { Screen } from 'react-native-screens';
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { navigate } from "../../navigation/NavigatorRef";
@@ -138,7 +138,8 @@ const handleApplyToJoin = async () => {
       {
         team_id: teamId,
         email: applicationData.email,
-        description: applicationData.description
+        description: applicationData.description,
+        user_id:userId
       },
       {
         headers: {
@@ -159,7 +160,7 @@ const handleApplyToJoin = async () => {
     
     // 存储申请时间
     try {
-      await setItemInAsyncStorage(`lastApply_${teamId}`, successTime.toString());
+      await setItemToAsyncStorage(`lastApply_${teamId}`, successTime.toString());
     } catch (storageError) {
       console.error('存储申请时间失败:', storageError);
     }
@@ -170,7 +171,7 @@ const handleApplyToJoin = async () => {
     // 设置5分钟冷却定时器
     const timer = setTimeout(() => {
       setLastApplicationTime(null);
-      setItemInAsyncStorage(`lastApply_${teamId}`, '');
+      setItemToAsyncStorage(`lastApply_${teamId}`, ' ');
     }, 5 * 60 * 1000);
 
     // 清理定时器
@@ -379,6 +380,7 @@ const handleApplyToJoin = async () => {
               value={applicationData.email}
               onChangeText={(text) => setApplicationData({...applicationData, email: text})}
               keyboardType="email-address"
+              style={{height:55}}
             />
             
             <Text className="text-gray-700 dark:text-gray-300 mb-1">申请描述</Text>

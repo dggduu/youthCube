@@ -397,10 +397,10 @@ const HelpChat = () => {
           setIsImageViewerVisible(true);
         }}
       >
-        <Image
+        <FastImage
           source={{ uri: props.currentMessage.image }}
-          className="w-48 h-48 rounded-lg my-1"
-          resizeMode="cover"
+          style={{ width: 150, height: 150, borderRadius: 16, marginRight: 10 }}
+          resizeMode={FastImage.resizeMode.cover}
         />
       </TouchableOpacity>
     );
@@ -619,9 +619,10 @@ const HelpChat = () => {
                         setIsImageViewerVisible(true);
                       }}
                     >
-                      <Image
+                      <FastImage
                         source={{ uri: selectedFile.uri }}
                         style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                        resizeMode={FastImage.resizeMode.cover}
                       />
                     </TouchableOpacity>
                   ) : (
@@ -689,9 +690,10 @@ const HelpChat = () => {
                         setIsImageViewerVisible(true);
                       }}
                     >
-                      <Image
+                      <FastImage
                         source={{ uri: selectedFile.uri }}
-                        style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                        style={{ width: 100, height: 100, borderRadius: 10}}
+                        resizeMode={FastImage.resizeMode.cover}
                       />
                     </TouchableOpacity>
                   ) : (

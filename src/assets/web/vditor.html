@@ -6,14 +6,28 @@
     <title>Markdown 编辑器</title>
     <link rel="stylesheet" href="./index.css" />
     <style>
+        /* 基础样式 */
         body {
             margin: 0;
             padding: 0;
-            background-color: #f8f8f8;
             display: flex;
             flex-direction: column;
             height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
+        /* 浅色模式背景 */
+        body.light {
+            background-color: #f8f8f8;
+            color: #1c1c1e;
+        }
+
+        /* 深色模式背景 */
+        body.dark {
+            background-color: #1c1c1e;
+            color: #f8f8f8;
+        }
+
         #vditor {
             flex-grow: 1;
             width: 100%;
@@ -21,30 +35,44 @@
             display: flex;
             flex-direction: column;
         }
+
         .vditor-toolbar {
             flex-shrink: 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #ddd;
         }
-        .vditor-editor {
-            flex-grow: 1;
+
+        .vditor-content {
+            background-color: transparent !important;
         }
+
+        .vditor-preview {
+            background-color: transparent !important;
+        }
+
         .vditor-toolbar, .vditor-content, .vditor-panel {
             box-shadow: none !important;
         }
+
+        /* 提交按钮容器 */
         .submit-button-container {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #ffffff;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #ddd;
             box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 12px;
             flex-shrink: 0;
         }
-        .submit-button {
-            background-color: #007AFF;
-            color: white;
+
+        body.dark .submit-button-container {
+            background-color: #2c2c2e;
+            border-top-color: #444;
+        }
+
+        .submit-button, .clear-button {
             padding: 12px 20px;
             border-radius: 8px;
             font-size: 16px;
@@ -52,25 +80,57 @@
             text-align: center;
             border: none;
             cursor: pointer;
-            width: 90%;
-            max-width: 400px;
+            width: 45%;
+            max-width: 180px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        .submit-button {
+            background-color: #007AFF;
+            color: white;
+        }
+
         .submit-button:active {
             background-color: #0056b3;
         }
+
+        .clear-button {
+            background-color: #ff3b30;
+            color: white;
+        }
+
+        .clear-button:active {
+            background-color: #d63030;
+        }
+
+        /* 深色模式下按钮样式 */
+        body.dark .submit-button {
+            background-color: #0A84FF;
+        }
+
+        body.dark .clear-button {
+            background-color: #FF453A;
+        }
     </style>
 </head>
-<body>
-    <div id="vditor"></div>
+<body class="light"> <div id="vditor"></div>
     <div class="submit-button-container">
         <button class="submit-button" id="submitBtn">完成编辑</button>
+        <button class="clear-button" id="clearBtn">清空内容</button>
     </div>
 
     <script src="./index.min.js"></script>
     <script>
         let vditorInstance;
-        window.onload = function() {
+        let currentContent = ''; // 新增变量来存储当前内容
+
+        // 初始化 Vditor
+        function initVditor(theme = 'classic', content = '') {
+            // 销毁旧实例
+            if (vditorInstance) {
+                vditorInstance.destroy();
+            }
+
             vditorInstance = new Vditor('vditor', {
                 height: 'auto',
                 minHeight: 200,
@@ -86,39 +146,73 @@
                 typewriterMode: true,
                 placeholder: '开始输入你的内容...',
                 after: () => {
+                    // 在实例初始化完成后，发送 ready 消息
                     if (window.ReactNativeWebView) {
                         window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_READY' }));
                     }
                 },
                 mode: 'ir',
+                theme: theme,
+                value: content, // 在初始化时设置内容
+                cache: { enable: false }
             });
+        }
 
-            document.getElementById('submitBtn').addEventListener('click', () => {
+        // 监听来自 React Native 的消息，放在顶层，保证能最早接收到
+        document.addEventListener('message', (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                console.log('Received message:', message);
+
+                if (message.type === 'SET_THEME') {
+                    currentContent = vditorInstance ? vditorInstance.getValue() : ''; // 在切换主题前保存内容
+                    const theme = message.theme === 'dark' ? 'dark' : 'classic';
+                    document.body.className = message.theme;
+                    initVditor(theme, currentContent); // 切换主题时，传入之前保存的内容
+                }
+
+                if (message.type === 'SET_INITIAL_CONTENT' && vditorInstance) {
+                    vditorInstance.setValue(message.content || '');
+                }
+                
+                // 统一处理清空消息，避免重复逻辑
+                if (message.type === 'VDITOR_CLEAR') {
+                    if (vditorInstance) {
+                        vditorInstance.setValue('');
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to parse message from RN:", e);
+            }
+        });
+        
+        // 提交按钮
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            if (vditorInstance) {
+                const markdownContent = vditorInstance.getValue();
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'VDITOR_SUBMIT',
+                        content: markdownContent
+                    }));
+                } else {
+                    console.log("内容:", markdownContent.substring(0, 100) + "...");
+                    alert("已复制到控制台");
+                }
+            }
+        });
+
+        // 清空按钮
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (window.ReactNativeWebView) {
+                // 通过 postMessage 发送清空指令，统一处理
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_CLEAR' }));
+            } else {
                 if (vditorInstance) {
-                    const markdownContent = vditorInstance.getValue();
-                    if (window.ReactNativeWebView) {
-                        window.ReactNativeWebView.postMessage(JSON.stringify({
-                            type: 'VDITOR_SUBMIT',
-                            content: markdownContent
-                        }));
-                    } else {
-                        console.log("Not in WebView, content:", markdownContent);
-                        alert("Content: " + markdownContent.substring(0, 100) + "...");
-                    }
+                    vditorInstance.setValue('');
                 }
-            });
-
-            document.addEventListener('message', (event) => {
-                try {
-                    const message = JSON.parse(event.data);
-                    if (message.type === 'SET_INITIAL_CONTENT' && vditorInstance) {
-                        vditorInstance.setValue(message.content || '');
-                    }
-                } catch (e) {
-                    console.error("无法从RN解析字符串:", e);
-                }
-            });
-        };
+            }
+        });
     </script>
 </body>
 </html>

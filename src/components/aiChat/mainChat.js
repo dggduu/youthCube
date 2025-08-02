@@ -25,7 +25,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { pick, types, isCancel } from '@react-native-documents/picker';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import FastImage from "react-native-fast-image";
 import { useToast } from "../tip/ToastHooks";
 
 import SquareGridBackground from "../misc/SquareGridBackground";
@@ -398,10 +398,10 @@ const MainChat = () => {
           setIsImageViewerVisible(true);
         }}
       >
-        <Image
+        <FastImage
           source={{ uri: props.currentMessage.image }}
-          className="w-48 h-48 rounded-lg my-1"
-          resizeMode="cover"
+          style={{ width: 100, height: 100, borderRadius: 10}}
+          resizeMode={FastImage.resizeMode.cover}
         />
       </TouchableOpacity>
     );
@@ -620,9 +620,10 @@ const MainChat = () => {
                         setIsImageViewerVisible(true);
                       }}
                     >
-                      <Image
+                      <FastImage
                         source={{ uri: selectedFile.uri }}
                         style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                        resizeMode={FastImage.resizeMode.cover}
                       />
                     </TouchableOpacity>
                   ) : (
@@ -690,9 +691,10 @@ const MainChat = () => {
                         setIsImageViewerVisible(true);
                       }}
                     >
-                      <Image
+                      <FastImage
                         source={{ uri: selectedFile.uri }}
                         style={{ width: 100, height: 100, borderRadius: 16, marginRight: 10 }}
+                        resizeMode={FastImage.resizeMode.cover}
                       />
                     </TouchableOpacity>
                   ) : (

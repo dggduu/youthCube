@@ -112,7 +112,7 @@ const CreateTeam = () => {
         await setItemToAsyncStorage("user",response.data);
         if (response.data.team_id) {
           showToast("您已加入一个队伍，无法创建新队伍", "warning");
-          navigation.goBack();
+          navigation.popToTop();
         }
         setUser(response.data);
       } catch (error) {
@@ -155,6 +155,10 @@ const CreateTeam = () => {
     }
     if (!teamName.trim()) {
       showToast("请输入队伍名称", "warning");
+      return;
+    }
+    if (!description.trim()) {
+      showToast("请输入描述", "warning");
       return;
     }
 

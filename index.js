@@ -5,18 +5,17 @@ import {Provider as AntdProvider} from '@ant-design/react-native';
 import { name as appName } from './app.json';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from "./src/components/tip/ToastHooks";
-import { PortalProvider } from 'react-native-portal';
-
+import { Host, Portal } from 'react-native-portalize';
 const Root = () => (
   <SafeAreaProvider>
-      <ToastProvider>
-        <PortalProvider>
+    <Host>
+        <ToastProvider>
           <AntdProvider>
             <App />
           </AntdProvider>
-        </PortalProvider>
+      </ToastProvider>
+    </Host>
 
-    </ToastProvider>     
   </SafeAreaProvider>
 );
 
