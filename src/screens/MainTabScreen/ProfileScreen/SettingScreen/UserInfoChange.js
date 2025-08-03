@@ -25,6 +25,14 @@ import { BASE_INFO } from "../../../../constant/base";
 import { updateProfile } from '../../../../store/auth/authSlice';
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomPicker from "../../../../components/custom/Custompicker";
+
+const GENDER_OPTIONS = [
+  { label: '男', value: 'male' },
+  { label: '女', value: 'female' },
+  { label: '不想说', value: 'idk' },
+];
+
 const isValidPassword = (password) => {
   if (!password) return { valid: false };
   const hasUpperCase = /[A-Z]/.test(password);
@@ -268,36 +276,8 @@ const UserInfoChange = () => {
             leftIconName="person"
           />
 
-          {/* 性别选择 */}
           <View className="mb-4">
-            <Text
-              className={`mb-3 ml-1 font-normal ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}
-            >
-              性别
-            </Text>
-            <View
-              className={`p-0 pl-2 rounded-lg border ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
-              }`}
-            >
-              <Picker
-                selectedValue={gender}
-                onValueChange={(value) => setGender(value)}
-                style={{
-                  color: isDarkMode ? 'white' : 'gray',
-                  backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                }}
-                dropdownIconColor={isDarkMode ? 'white' : 'black'}
-                mode="dropdown"
-              >
-                <Picker.Item label="请选择性别" value="" enabled={false} />
-                <Picker.Item label="男" value="male" />
-                <Picker.Item label="女" value="female" />
-                <Picker.Item label="不想说" value="idk" />
-              </Picker>
-            </View>
+            <CustomPicker label="性别" options={GENDER_OPTIONS} selectedValue={gender} onValueChange={setGender} placeholder="请选择性别" />
           </View>
 
           {/* 出生日期选择 */}
@@ -335,35 +315,7 @@ const UserInfoChange = () => {
 
           {/* 学年选择 */}
           <View className="mb-4">
-            <Text
-              className={`mb-3 ml-1 font-normal ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}
-            >
-              学年
-            </Text>
-            <View
-              className={`p-1 rounded-lg border ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
-              }`}
-            >
-              <Picker
-                selectedValue={learnStage}
-                onValueChange={(value) => setLearnStage(value)}
-                style={{
-                  color: isDarkMode ? 'white' : 'gray',
-                  backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                  height: 60,
-                }}
-                dropdownIconColor={isDarkMode ? 'white' : 'black'}
-                mode="dropdown"
-              >
-                <Picker.Item label="请选择学年" value="" enabled={false} />
-                {GRADES.map((item) => (
-                  <Picker.Item key={item.value} label={item.label} value={item.value} />
-                ))}
-              </Picker>
-            </View>
+            <CustomPicker label="学年" options={GRADES} selectedValue={learnStage} onValueChange={setLearnStage} placeholder="请选择学年" />
           </View>
 
           {/* 个人简介 */}

@@ -102,7 +102,7 @@ const CustomPicker = ({
               isDark ? 'bg-gray-800' : 'bg-white'
             } shadow-lg`}
             style={{
-              top: buttonPosition.y - 40,
+              top: buttonPosition.y,
               left: buttonPosition.x,
               width: buttonPosition.width,
               maxHeight: 200,

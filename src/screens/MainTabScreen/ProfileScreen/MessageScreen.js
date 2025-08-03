@@ -6,7 +6,8 @@ import {
   ActivityIndicator, 
   SafeAreaView,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  StatusBar
 } from 'react-native';
 import { getItemFromAsyncStorage } from "../../../utils/LocalStorage";
 import { useToast } from '../../../components/tip/ToastHooks';
@@ -18,13 +19,13 @@ import FeedElem from "../../../components/feedElem/feedElem";
 import BackIcon from "../../../components/backIcon/backIcon";
 import axios from 'axios';
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
-import { WhiteSpace } from '@ant-design/react-native';
+import { useColorScheme } from "nativewind";
+import { Shadow } from 'react-native-shadow-2';
 
 const api = axios.create();
 setupAuthInterceptors(api);
 
 const MessageScreen = ({ navigation }) => {
-  // 状态管理
   const [currentUser, setCurrentUser] = useState(null);
   const [teamInfo, setTeamInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,11 +33,13 @@ const MessageScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalPosts, setTotalPosts] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const { showToast } = useToast();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-  // 加载用户数据和团队信息
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -51,7 +54,6 @@ const MessageScreen = ({ navigation }) => {
 
         setCurrentUser(userData);
         
-        // 如果用户有团队，则获取团队信息
         if (userData.team_id) {
           await fetchTeamInfo(userData.team_id, token);
         }
@@ -64,23 +66,12 @@ const MessageScreen = ({ navigation }) => {
         setLoading(false);
       }
     };
-
     loadData();
   }, []);
 
-  // 获取团队信息 (使用axios)
   const fetchTeamInfo = async (teamId, token) => {
     try {
-      const response = await api.get(
-        `${BASE_INFO.BASE_URL}api/teams/${teamId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${teamId}`);
       setTeamInfo(response.data);
     } catch (error) {
       console.error("获取团队信息失败:", error);
@@ -88,23 +79,16 @@ const MessageScreen = ({ navigation }) => {
     }
   };
 
-  // 获取文章数据 (使用axios)
   const fetchPosts = async (pageNum, token) => {
     try {
       const response = await api.get(
-        `${BASE_INFO.BASE_URL}api/myposts?page=${pageNum}&size=10`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        `${BASE_INFO.BASE_URL}api/myposts?page=${pageNum}&size=10`
       );
-
       const result = response.data;
       setPosts(prev => pageNum === 0 ? result.items : [...prev, ...result.items]);
       setTotalPages(result.totalPages);
       setPage(result.currentPage);
+      setTotalPosts(result.totalItems);
     } catch (error) {
       console.error("获取文章失败:", error);
       throw error;
@@ -113,14 +97,12 @@ const MessageScreen = ({ navigation }) => {
     }
   };
 
-  // 下拉刷新
   const handleRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
       const token = await getItemFromAsyncStorage('accessToken');
       await fetchPosts(0, token);
       
-      // 刷新团队信息
       if (currentUser?.team_id) {
         await fetchTeamInfo(currentUser.team_id, token);
       }
@@ -131,7 +113,6 @@ const MessageScreen = ({ navigation }) => {
     }
   }, [currentUser]);
 
-  // 加载更多
   const handleLoadMore = useCallback(async () => {
     if (loadingMore || page >= totalPages - 1) return;
     
@@ -145,27 +126,27 @@ const MessageScreen = ({ navigation }) => {
     }
   }, [page, totalPages, loadingMore]);
 
-  // 学习阶段标签转换
   const getLearnStageLabel = (stageValue) => {
     return GRADES.find(grade => grade.value === stageValue)?.label || '未知';
   };
 
-  // 加载状态
   if (loading) {
     return (
-      <View className="flex-1 bg-white dark:bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
         <ActivityIndicator size="large" color="#3b82f6" />
         <Text className="mt-3 text-gray-500 dark:text-gray-400">加载中...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
-  // 错误状态
   if (error) {
     return (
-      <View className="flex-1 bg-white dark:bg-gray-900 justify-center items-center p-4">
-        <Text className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</Text>
-      </View>
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center p-4">
+        <Text className="text-red-500 dark:text-red-400 text-lg mb-4 text-center">{error}</Text>
+        <TouchableOpacity onPress={handleRefresh} className="p-3 bg-blue-500 rounded-lg">
+          <Text className="text-white font-semibold">重新加载</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     );
   }
 
@@ -191,98 +172,116 @@ const MessageScreen = ({ navigation }) => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         ListHeaderComponent={
-          <View>
-            <BackIcon/>
-            <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm shadow-gray-200 dark:shadow-gray-900 mx-3">
-              
-              {/* 用户资料卡片 */}
-              <View className="items-center mb-4">
-                <Image
-                  source={require("../../../assets/logo/ava.png")}
-                  className="w-24 h-24 rounded-full border-2 border-blue-200 dark:border-gray-600"
-                />
-                <Text 
-                  className="text-xl font-bold text-gray-800 dark:text-white mt-3"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {currentUser.name}
-                </Text>
-                <Text 
-                  className="text-[#409eff] dark:text-[#409eff] text-sm mt-1"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {currentUser.is_member ? '高级会员' : '普通用户'}
-                </Text>
-              </View>
+          <View className="px-4 mt-10">
 
-              <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-500 dark:text-gray-400">用户ID</Text>
-                  <Text 
-                    className="text-gray-800 dark:text-gray-200"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {currentUser.id}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-500 dark:text-gray-400">邮箱</Text>
-                  <Text 
-                    className="text-gray-800 dark:text-gray-200 flex-1 text-right ml-2"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {currentUser.email || '未设置'}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-500 dark:text-gray-400">学习阶段</Text>
-                  <Text 
-                    className="text-gray-800 dark:text-gray-200"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {getLearnStageLabel(currentUser.learn_stage)}
-                  </Text>
-                </View>
-                {currentUser.bio && (
-                  <View className="mt-3">
-                    <Text className="text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
+            {/* --- 用户名片 --- */}
+              <View className={`bg-white dark:bg-gray-800 p-6 rounded-t-2xl`}>
+                <View className="flex-row items-center mb-4">
+                  <Image
+                    source={require("../../../assets/logo/ava.png")}
+                    className="w-24 h-24 rounded-full border-4 border-blue-200 dark:border-gray-600"
+                  />
+                  <View className="flex-1 ml-4">
                     <Text 
-                      className="text-gray-800 dark:text-gray-200"
-                      numberOfLines={3}
+                      className="text-2xl font-bold text-gray-900 dark:text-white"
+                      numberOfLines={1}
                       ellipsizeMode="tail"
                     >
-                      {currentUser.bio}
+                      {currentUser.name}
                     </Text>
-                  </View>
-                )}
-                {/* 团队信息 */}
-                {currentUser.team_id && (
-                  <View className="flex-row justify-between mb-3">
-                    <Text className="text-gray-500 dark:text-gray-400">所属团队</Text>
-                    <View className="flex-1 ml-2">
-                      <Text
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                        className="text-gray-800 dark:text-gray-200 text-right"
-                      >
-                        {teamInfo?.team_name || '加载中...'}
-                      </Text>
+                    <Text 
+                      className="text-sm text-blue-500 dark:text-blue-400 font-semibold mt-1"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {currentUser.is_member ? '高级会员' : '普通用户'}
+                    </Text>
+                    <View className="flex-row items-center mt-2">
+                      <Text className="text-gray-500 dark:text-gray-400 text-sm">学习阶段：</Text>
+                      <Text className="text-gray-800 dark:text-gray-200 text-sm">{getLearnStageLabel(currentUser.learn_stage)}</Text>
                     </View>
                   </View>
-                )}
+                </View>
+
+                {/* 统计数据 */}
+                <View className="flex-row justify-around items-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <View className="items-center flex-1">
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">{totalPosts}</Text>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">总投稿数</Text>
+                  </View>
+                  <View className="items-center flex-1 border-x border-gray-200 dark:border-gray-700">
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">0</Text>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">关注</Text>
+                  </View>
+                  <View className="items-center flex-1">
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">0</Text>
+                    <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">粉丝</Text>
+                  </View>
+                </View>
               </View>
+            
+            {/* --- 个人简介卡片 --- */}
+            {currentUser.bio && (
+                <View className={`bg-white dark:bg-gray-800 p-6 rounded-t-2xl`}>
+                  <View className="flex-row items-center">
+                    <MaterialIcons name="account-circle" size={24} color="#3b82f6" />
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white ml-2">
+                      个人简介
+                    </Text>
+                  </View>
+                  <Text 
+                    className="text-gray-800 dark:text-gray-200 mt-3" 
+                    numberOfLines={4} 
+                    ellipsizeMode="tail"
+                  >
+                    {currentUser.bio}
+                  </Text>
+                </View>
+            )}
+            {/* --- 队伍信息卡片 --- */}
+            {currentUser.team_id && (
+                <View className={`bg-white dark:bg-gray-800 p-6 rounded-b-2xl `}>
+                  <View className="flex-row items-center mb-3">
+                    <MaterialIcons name="group" size={24} color="#3b82f6" />
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white ml-2">
+                      我的队伍
+                    </Text>
+                  </View>
+                  <View className="mb-2">
+                    <Text 
+                      className="text-gray-500 dark:text-gray-400"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      队伍名称: <Text className="font-semibold text-gray-800 dark:text-gray-200">{teamInfo?.team_name || '加载中...'}</Text>
+                    </Text>
+                  </View>
+                  {teamInfo?.description && (
+                    <View>
+                      <Text className="text-gray-500 dark:text-gray-400">队伍简介:</Text>
+                      <Text 
+                        className="text-gray-800 dark:text-gray-200 mt-1"
+                        numberOfLines={3}
+                        ellipsizeMode="tail"
+                      >
+                        {teamInfo.description}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+            )}
+            <View className="flex-row items-center mt-6 mb-2">
+              <MaterialIcons name="article" size={24} color="#3b82f6" />
+              <Text className="text-lg font-bold text-gray-900 dark:text-white ml-2">
+                我的文章
+              </Text>
             </View>
           </View>
         }
         ListEmptyComponent={
           <View className="py-8 items-center">
-            <MaterialIcons name="article" size={40} color="#9ca3af" />
-            <Text className="text-gray-500 dark:text-gray-400 mt-2">
+            <MaterialIcons name="article" size={48} color="#9ca3af" />
+            <Text className="text-gray-500 dark:text-gray-400 mt-2 text-base">
               {refreshing ? '加载中...' : '暂无文章'}
             </Text>
           </View>
@@ -305,6 +304,19 @@ const MessageScreen = ({ navigation }) => {
         }
         contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 40 }}
       />
+    <TouchableOpacity
+      onPress={() => navigation.goBack()}
+      style={{top:20,left:10}}
+      className={`absolute flex items-center justify-center rounded-full w-16 h-12 z-10 ${
+        isDark ? "bg-gray-800" : "bg-gray-300"
+      }`}
+    >
+      <MaterialIcons
+        name="arrow-back"
+        size={24}
+        color={isDark ? '#aaa' : '#000'}
+      />
+    </TouchableOpacity>
     </SafeAreaView>
   );
 };

@@ -11,7 +11,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { useSelector } from 'react-redux';
 import { navigate } from '../../navigation/NavigatorRef'
-import CrownIcon from '../../assets/registerScreen/crown.svg';
 import { GRADES } from '../../constant/index';
 
 export default function ProfileScreen() {
@@ -19,7 +18,6 @@ export default function ProfileScreen() {
   const isDark = colorScheme === 'dark';
   const { userData, isAuthReady, isAuthenticated } = useSelector((state) => state.auth);
 
-  // 构建等级 label 映射表
   const GRADES_MAP = GRADES.reduce((acc, current) => {
     acc[current.value] = current.label;
     return acc;
@@ -27,7 +25,6 @@ export default function ProfileScreen() {
 
   const getLabelByValueFromMap = (value) => GRADES_MAP[value];
 
-  // 学习模块数据
   const learningItems = [
     { 
       icon: 'chat', 
@@ -46,7 +43,6 @@ export default function ProfileScreen() {
     },
   ];
 
-  // 其他设置项
   const otherItems = [
     { 
       icon: 'verified-user', 
@@ -56,18 +52,55 @@ export default function ProfileScreen() {
     { 
       icon: 'help', 
       label: '帮助中心', 
-       action: () => navigate('RootProfile', { screen: 'HelpScreen' })
+      action: () => navigate('RootProfile', { screen: 'HelpScreen' })
+    },
+    { 
+      icon: 'settings', 
+      label: '设置', 
+      action: () => navigate('RootProfile', { screen: 'TopBar', params: { screen:"Setting"} })
     },
   ];
+
+  const renderSection = (title, items) => (
+    <View className={`rounded-2xl p-5 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <Text className="text-lg font-semibold mb-2 ml-1 text-neutral-800 dark:text-white">
+        {title}
+      </Text>
+      {items.map((item, index) => (
+        <TouchableOpacity
+          key={index}
+          className={`flex-row items-center justify-between py-4 ${
+            index < items.length - 1 && 'border-b border-gray-200 dark:border-gray-700'
+          }`}
+          onPress={item.action}
+        >
+          <View className="flex-row items-center">
+            <MaterialIcon
+              name={item.icon}
+              size={24}
+              color={isDark ? '#A9A9A9' : '#666'}
+            />
+            <Text className="text-base ml-4 text-neutral-800 dark:text-white">
+              {item.label}
+            </Text>
+          </View>
+          <MaterialIcon
+            name="chevron-right"
+            size={24}
+            color={isDark ? '#A9A9A9' : '#9ca3af'}
+          />
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
 
   return (
     <SafeAreaProvider>
       <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-        <View className="px-6 pt-4 pb-8 mt-3">
-
+        <View className="px-6 pt-4 pb-8">
           {/* --- 用户信息卡片 --- */}
           <View
-            className={`py-8 px-4 rounded-2xl mb-6 border border-gray-200 dark:border-gray-600 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            className={`py-8 px-4 rounded-2xl mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
             style={{
               elevation: 2,
               shadowColor: isDark ? '#000' : '#ccc',
@@ -97,63 +130,17 @@ export default function ProfileScreen() {
                   className="mr-4"
                   onPress={() => navigate('RootProfile', { screen: 'TopBar', params: {screen:"Message"} })}
                 >
-                  <MaterialIcon name="people" size={24} color={isDark ? '#A9A9A9' : '#888'} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigate('RootProfile', { screen: 'TopBar', params: { screen:"Setting"} })}
-                >
-                  <MaterialIcon name="settings" size={24} color={isDark ? '#A9A9A9' : '#888'} />
+                  <MaterialIcon name="more-vert" size={24} color={isDark ? '#A9A9A9' : '#888'} />
                 </TouchableOpacity>
               </View>
             </View>
           </View>
 
           {/* --- 我的学习模块 --- */}
-          <View
-            className={`p-5 rounded-2xl border border-gray-200 dark:border-gray-600 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
-          >
-            <Text className="text-lg font-semibold mb-4 ml-1 text-neutral-800 dark:text-white">
-              我的学习
-            </Text>
-
-            <View>
-              {learningItems.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  className={`flex-row items-center p-2 py-4 rounded-xl border-b border-gray-200 dark:border-gray-600`}
-                  onPress={item.action}
-                >
-                  <MaterialIcon name={item.icon} size={24} color={isDark ? '#A9A9A9' : '#666'} />
-                  <Text className="text-base ml-4 text-neutral-800 dark:text-white">
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
+          {renderSection('我的学习', learningItems)}
+          
           {/* --- 设置和其他选项 --- */}
-          <View
-            className={`rounded-2xl overflow-hidden border p-3 border-gray-200 dark:border-gray-600 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
-          >
-{otherItems.map((item, idx) => (
-              <React.Fragment key={idx}>
-                <TouchableOpacity
-                  className="flex-row items-center px-4 py-4"
-                  onPress={item.action}
-                >
-                  <MaterialIcon name={item.icon} size={22} color={isDark ? '#A9A9A9' : '#666'} />
-                  <Text className="text-base ml-5 text-neutral-800 dark:text-white">
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-                {idx !== otherItems.length - 1 && (
-                  <View className={`h-[1px] mx-4 ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
-                )}
-              </React.Fragment>
-            ))}
-          </View>
-
+          {renderSection('其他', otherItems)}
         </View>
       </ScrollView>
     </SafeAreaProvider>

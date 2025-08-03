@@ -136,7 +136,7 @@ const LoginPage = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('FindPswd')}
-            className="items-center mt-6"
+            className="items-center mt-4"
           >
             <Text className={`${isDark ? 'text-[#409eff]' : 'text-[#409eff]'}`}>
               忘记密码？
