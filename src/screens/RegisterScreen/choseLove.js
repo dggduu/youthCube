@@ -54,7 +54,7 @@ export default function ChoseLove({ navigation }) {
 
       {/* 已选结果显示 */}
       {selectedPreferences.length > 0 && (
-        <View className="mt-10 p-4 bg-gray-100 rounded-lg">
+        <View className="mt-10 p-4 bg-gray-50 rounded-lg">
           <Text className="text-base text-gray-700">
             已选兴趣: {selectedPreferences.join(', ')}
           </Text>

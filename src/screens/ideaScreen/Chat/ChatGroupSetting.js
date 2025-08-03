@@ -419,7 +419,7 @@ const ChatGroupSetting = () => {
               className="flex-row items-center"
               onPress={() => handleEditField('is_public', teamData.is_public)}
             >
-              <Text className="ml-1 text-blue-500 dark:text-gray-100">{teamData.is_public == 1 ? "公开" : "私有"}</Text>
+              <Text className="ml-1 text-[#409eff] dark:text-gray-100">{teamData.is_public == 1 ? "公开" : "私有"}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -451,7 +451,7 @@ const ChatGroupSetting = () => {
               <Text className={`text-sm px-2 py-0.5 rounded ${
                 member.role === 'owner' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
                 member.role === 'co_owner' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' :
-                'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                'bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
               }`}>
                 {member.role === 'owner' ? '组长' : member.role === 'co_owner' ? '管理' : '成员'}
               </Text>
@@ -477,14 +477,14 @@ const ChatGroupSetting = () => {
 
           {currentUserRole === 'owner' && (
             <TouchableOpacity 
-              className="bg-blue-500 p-3 rounded-lg"
+              className="bg-[#409eff] p-3 rounded-lg"
               onPress={() => setTransferOwnerModalVisible(true)}
             >
               <Text className="text-white font-bold text-center">转移组长权限</Text>
             </TouchableOpacity>
           )}
         <TouchableOpacity 
-          className="bg-gray-100 border border-gray-300 p-3 rounded-lg mt-2"
+          className="bg-gray-300 border border-gray-300 p-3 rounded-lg mt-2"
           onPress={()=>{
             navigation.navigate("InviteRedux",{
               team_id : teamData.team_id,
@@ -542,13 +542,13 @@ const ChatGroupSetting = () => {
             />
             <View className="flex-row justify-between">
               <TouchableOpacity 
-                className="bg-gray-500 p-3 rounded-lg flex-1 mr-2"
+                className="bg-gray-300 p-3 rounded-lg flex-1 mr-2"
                 onPress={() => setEditModalVisible(false)}
               >
                 <Text className="text-white font-bold text-center">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="bg-blue-500 p-3 rounded-lg flex-1 ml-2"
+                className="bg-[#409eff] p-3 rounded-lg flex-1 ml-2"
                 onPress={saveChanges}
               >
                 <Text className="text-white font-bold text-center">保存</Text>
@@ -734,7 +734,7 @@ const ChatGroupSetting = () => {
                 <Text className="text-white font-bold text-center">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="bg-blue-500 p-3 rounded-lg flex-1 ml-2"
+                className="bg-[#409eff] p-3 rounded-lg flex-1 ml-2"
                 onPress={saveChanges}
               >
                 <Text className="text-white font-bold text-center">保存</Text>

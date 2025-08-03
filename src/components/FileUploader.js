@@ -129,11 +129,11 @@ const FileUploader = ({ AccessToken }) => {
   }))
 
   return (
-    <View className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Upload button */}
       <TouchableOpacity
         className={`p-4 rounded-lg items-center justify-center mb-4 
-          ${isUploading ? 'bg-blue-300' : 'bg-blue-500'} 
+          ${isUploading ? 'bg-blue-300' : 'bg-[#409eff]'} 
           ${colorScheme === 'dark' ? 'border border-blue-400' : ''}`}
         onPress={handleFileUpload}
         disabled={isUploading}
@@ -186,7 +186,7 @@ const FileUploader = ({ AccessToken }) => {
               </Pressable>
             )}
 
-            <View className="flex-row items-center justify-between bg-gray-100 dark:bg-gray-800 p-2 rounded">
+            <View className="flex-row items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded">
               <Text 
                 className="text-gray-600 dark:text-gray-300 text-xs flex-1 mr-2"
                 numberOfLines={1}

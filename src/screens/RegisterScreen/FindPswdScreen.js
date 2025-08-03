@@ -230,7 +230,7 @@ const FindPswdScreen = () => {
                 <TouchableOpacity
                 onPress={handleSendResetEmail}
                 disabled={loading}
-                className="bg-blue-500 dark:bg-blue-700 py-3 rounded-lg items-center mt-4"
+                className="bg-[#409eff] dark:bg-blue-700 py-3 rounded-lg items-center mt-4"
                 >
                 {loading ? (
                     <ActivityIndicator color="white" />
@@ -278,7 +278,7 @@ const FindPswdScreen = () => {
                 <TouchableOpacity
                 onPress={handleResetPassword}
                 disabled={loading}
-                className="bg-blue-500 dark:bg-blue-700 py-3 rounded-lg items-center"
+                className="bg-[#409eff] dark:bg-blue-700 py-3 rounded-lg items-center"
                 >
                 {loading ? (
                     <ActivityIndicator color="white" />

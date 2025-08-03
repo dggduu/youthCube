@@ -13,23 +13,23 @@ import { useColorScheme } from 'nativewind';
 const TOAST_TYPES = {
   success: {
     icon: 'check-circle',
-    colorLight: 'bg-[#4c662b]',
-    colorDark: 'bg-[#4c662b]',
+    colorLight: 'bg-[#67c23a]',
+    colorDark: 'bg-[#67c23a]',
   },
   error: {
     icon: 'error',
-    colorLight: 'bg-[#98000a]',
-    colorDark: 'bg-[#98000a]',
+    colorLight: 'bg-[#f56c6c]',
+    colorDark: 'bg-[#f56c6c]',
   },
   warning: {
     icon: 'warning',
-    colorLight: 'bg-yellow-500',
-    colorDark: 'bg-yellow-700',
+    colorLight: 'bg-[#e6a23c]',
+    colorDark: 'bg-[#e6a23c]',
   },
   info: {
     icon: 'info',
-    colorLight: 'bg-blue-500',
-    colorDark: 'bg-blue-700',
+    colorLight: 'bg-[#409eff]',
+    colorDark: 'bg-[#409eff]',
   },
 };
 

@@ -163,7 +163,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
               size={18}
               color={showReplyInput ? "#3b82f6" : "#6b7280"}
             />
-            <Text className={`ml-1 ${showReplyInput ? "text-blue-500" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
+            <Text className={`ml-1 ${showReplyInput ? "text-[#409eff]" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
               回复
             </Text>
           </TouchableOpacity>
@@ -173,7 +173,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
           <View className="mt-3">
             <View className="flex-row items-center">
               <TextInput
-                className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
+                className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
                 placeholder={`回复 ${comment.author?.name || '这个评论'}...`}
                 placeholderTextColor="#9ca3af"
                 value={replyText}
@@ -182,7 +182,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
                 multiline
               />
               <TouchableOpacity
-                className="ml-2 bg-blue-500 rounded-full p-2"
+                className="ml-2 bg-[#409eff] rounded-full p-2"
                 onPress={submitReply}
               >
                 <Icon name="send" size={15} color="white" />
@@ -198,7 +198,7 @@ const CommentItem = ({ comment, authToken, progressId }) => {
             ) : (
               <>
                 {replies.map(reply => (
-                  <View key={reply.comment_id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 mb-2">
+                  <View key={reply.comment_id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 mb-2">
                     <View className="flex-row items-center mb-1">
                       <Image
                         source={reply.author?.avatar_key ? { uri: reply.author.avatar_key } : require("../../../assets/logo/ava.png")}
@@ -512,7 +512,7 @@ const submitComment = useCallback(async () => {
   return (
     <KeyboardAvoidingView className='flex-1'>
     <ScrollView
-      className='flex-1 bg-gray-100 dark:bg-gray-900 px-3'
+      className='flex-1 bg-gray-50 dark:bg-gray-900 px-3'
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#3b82f6"]} />
       }

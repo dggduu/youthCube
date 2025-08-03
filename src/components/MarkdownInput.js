@@ -93,7 +93,7 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
             />
 
             <TouchableOpacity
-                className="bg-blue-600 py-4 px-4 rounded-lg mb-3 flex-row items-center justify-center"
+                className="bg-[#409eff] py-4 px-4 rounded-lg mb-3 flex-row items-center justify-center"
                 onPress={() => setShowModal(true)}
             >
                 <MaterialIcons name="edit" size={20} color="white" />

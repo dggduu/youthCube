@@ -155,7 +155,7 @@ const TeamInvitationSolve = () => {
                         ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                         : item.status === 'expired'
                         ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        : 'bg-gray-50 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                 }`}>
                     {item.status === 'pending'
                         ? '待处理'
@@ -178,7 +178,7 @@ const TeamInvitationSolve = () => {
     );
 
     return (
-        <View className="flex-1 bg-gray-100 dark:bg-gray-900 p-4"> 
+        <View className="flex-1 bg-gray-50 dark:bg-gray-900 p-4"> 
             {isLoading ? (
                 <ActivityIndicator className="my-4" size="large" />
             ) : isError ? (
@@ -238,7 +238,7 @@ const TeamInvitationSolve = () => {
                                     
                                     <View className="mb-4">
                                         <Text className="text-gray-600 dark:text-gray-400 font-medium mb-1">团队信息</Text>
-                                        <View className="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                                        <View className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                             <Text className="text-gray-800 dark:text-gray-200">
                                                 类型: {selectedInvitation?.team?.is_public ? '公开团队' : '私有团队'}
                                             </Text>
@@ -253,7 +253,7 @@ const TeamInvitationSolve = () => {
                                     
                                     <View className="mb-4">
                                         <Text className="text-gray-600 dark:text-gray-400 font-medium mb-1">邀请信息</Text>
-                                        <View className="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                                        <View className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                             <Text className="text-gray-800 dark:text-gray-200">
                                                 邀请人: {selectedInvitation?.inviter?.name}
                                             </Text>
@@ -272,7 +272,7 @@ const TeamInvitationSolve = () => {
                                     {selectedInvitation?.description && (
                                         <View className="mb-4">
                                             <Text className="text-gray-600 dark:text-gray-400 font-medium mb-1">邀请理由</Text>
-                                            <View className="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                                            <View className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                                 <Text className="text-gray-800 dark:text-gray-200">
                                                     {selectedInvitation.description}
                                                 </Text>

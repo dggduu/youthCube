@@ -179,7 +179,7 @@ const PersonalProfile = () => {
         <Text className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</Text>
         <TouchableOpacity
           onPress={loadData}
-          className="bg-blue-500 px-4 py-2 rounded"
+          className="bg-[#409eff] px-4 py-2 rounded"
         >
           <Text className="text-white">重试</Text>
         </TouchableOpacity>
@@ -188,7 +188,7 @@ const PersonalProfile = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900 px-3">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-3">
       <WaterfallFlow
         data={posts}
         renderItem={({ item }) => (
@@ -229,7 +229,7 @@ const PersonalProfile = () => {
               <Text className="text-xl font-bold text-gray-800 dark:text-white mt-3">
                 {currentUser.name}
               </Text>
-              <Text className="text-blue-500 dark:text-blue-400 text-sm mt-1">
+              <Text className="text-[#409eff] dark:text-[#409eff] text-sm mt-1">
                 {currentUser.is_member ? '高级会员' : '普通用户'}
               </Text>
               
@@ -237,7 +237,7 @@ const PersonalProfile = () => {
                 !isFriendRequestSent ? (
                   <TouchableOpacity
                     onPress={openFriendRequestModal}
-                    className="mt-4 bg-blue-500 px-6 py-2 rounded-full flex-row items-center"
+                    className="mt-4 bg-[#409eff] px-6 py-2 rounded-full flex-row items-center"
                     disabled={!canSendRequest}
                   >
                     <MaterialIcons name="person-add" size={18} color="white" />
@@ -287,7 +287,7 @@ const PersonalProfile = () => {
               {currentUser.team && (
                 <View className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4 rounded-xl">
                   <Text className="text-gray-500 dark:text-gray-400 mb-2">所属团队</Text>
-                  <Text className="text-blue-600 dark:text-blue-400 font-semibold">{currentUser.team.team_name}</Text>
+                  <Text className="text-blue-600 dark:text-[#409eff] font-semibold">{currentUser.team.team_name}</Text>
                   <Text className="text-gray-600 dark:text-gray-300 mt-1 text-sm">{currentUser.team.description}</Text>
                 </View>
               )}
@@ -329,7 +329,7 @@ const PersonalProfile = () => {
               申请理由:
             </Text>
             <TextInput
-              className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-gray-800 dark:text-white h-32"
+              className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-gray-800 dark:text-white h-32"
               multiline
               placeholder="请输入申请理由..."
               placeholderTextColor="#9ca3af"
@@ -346,7 +346,7 @@ const PersonalProfile = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={confirmFriendRequest}
-                className="px-4 py-2 bg-blue-500 rounded-lg ml-2"
+                className="px-4 py-2 bg-[#409eff] rounded-lg ml-2"
               >
                 <Text className="text-white">发送申请</Text>
               </TouchableOpacity>

@@ -71,7 +71,7 @@ const ProgressScreen = () => {
   }
 
   return (
-    <View className='flex-1 bg-gray-100 dark:bg-gray-900'>
+    <View className='flex-1 bg-gray-50 dark:bg-gray-900'>
       <View className='flex-row mt-3'>
         {/* 多队伍管理，待讨论 */}
         {/* <TouchableOpacity
@@ -105,7 +105,7 @@ const ProgressScreen = () => {
       
       {teamId && (
         <TouchableOpacity
-          className='absolute bottom-6 right-6 bg-blue-500 dark:bg-blue-700 p-5 rounded-full shadow-lg dark:border-gray-600 border border-gray-300'
+          className='absolute bottom-6 right-6 bg-[#409eff] dark:bg-blue-700 p-5 rounded-full shadow-lg dark:border-gray-600 border border-gray-300'
           onPress={() => {
             navigation.navigate("Add", { screen: "AddEnd", params: { teamId: teamId } });
           }}

@@ -309,7 +309,7 @@ const PostDetailScreen = () => {
               {tags.map(tag => (
                 <TouchableOpacity
                   key={tag.tag_id}
-                  className="bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2"
+                  className="bg-gray-300 dark:bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2"
                   onPress={() => navigation.navigate('Tag', { id: tag.tag_id })}
                 >
                   <Text className="text-sm text-gray-800 dark:text-gray-200">
@@ -482,7 +482,7 @@ const CommentSection = ({ postId, authToken }) => {
       <View className="mb-4">
         <View className="flex-row items-center">
           <TextInput
-            className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
+            className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
             placeholder="发表一个友善的评论..."
             placeholderTextColor="#9ca3af"
             style={{height:40}}
@@ -491,7 +491,7 @@ const CommentSection = ({ postId, authToken }) => {
             multiline
           />
           <TouchableOpacity
-            className="ml-2 bg-blue-500 rounded-full p-2"
+            className="ml-2 bg-[#409eff] rounded-full p-2"
             onPress={submitComment}
           >
             <Icon name="send" size={15} color="white" />
@@ -666,7 +666,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
             size={18}
             color={showReplyInput ? "#3b82f6" : "#6b7280"}
           />
-          <Text className={`ml-1 ${showReplyInput ? "text-blue-500" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
+          <Text className={`ml-1 ${showReplyInput ? "text-[#409eff]" : "text-gray-600 dark:text-gray-300 text-sm"}`}>
             回复
           </Text>
         </TouchableOpacity>
@@ -676,7 +676,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
         <View className="mt-3">
           <View className="flex-row items-center">
             <TextInput
-              className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
+              className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200"
               placeholder={`回复 ${comment.user?.name || '这个评论'}...`}
               placeholderTextColor="#9ca3af"
               value={replyText}
@@ -685,7 +685,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
               multiline
             />
             <TouchableOpacity
-              className="ml-2 bg-blue-500 rounded-full p-2"
+              className="ml-2 bg-[#409eff] rounded-full p-2"
               onPress={submitReply}
             >
               <Icon name="send" size={15} color="white" />
@@ -701,7 +701,7 @@ const CommentItem = ({ comment, authToken, postId }) => {
           ) : (
             <>
               {replies.map(reply => (
-                <View key={reply.comment_id} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-2 mb-2">
+                <View key={reply.comment_id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 mb-2">
                   <View className="flex-row items-center mb-1">
                     <Image
                       source={reply.user?.avatar_key ? { uri: reply.user.avatar_key } : require("../../assets/logo/ava.png")}
@@ -750,7 +750,7 @@ const LoadingIndicator = () => (
 
 const LoadMoreButton = ({ onPress, loading = false, text }) => (
   <TouchableOpacity
-    className="py-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex-row justify-center items-center"
+    className="py-2 bg-gray-300 dark:bg-gray-700 rounded-lg flex-row justify-center items-center"
     onPress={onPress}
     disabled={loading}
   >

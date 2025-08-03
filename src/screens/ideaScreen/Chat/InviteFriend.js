@@ -182,7 +182,7 @@ const InviteFriend = () => {
   }
 
   return (
-    <View className="flex-1 bg-gray-100 dark:bg-gray-900 px-2" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900 px-2" style={{ paddingTop: insets.top }}>
       {/* 小组信息 */}
       <View className="p-5 border-b border-gray-200 dark:border-gray-700 rounded-xl bg-white mt-3">
         <View className="flex-row items-center mb-2">
@@ -235,7 +235,7 @@ const InviteFriend = () => {
               </View>
 
               {isInTeam ? (
-                <View className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 flex-row items-center">
+                <View className="px-3 py-1 rounded-full bg-gray-50 dark:bg-gray-700 flex-row items-center">
                   <MaterialIcons name="check" size={14} color="#4b5563" />
                   <Text className="text-sm text-gray-600 dark:text-gray-300 ml-1">已加入</Text>
                 </View>
@@ -267,7 +267,7 @@ const InviteFriend = () => {
         {/* 分页控制 */}
         <View className="flex-row justify-between items-center p-4">
           <TouchableOpacity
-            className="px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 flex-row items-center"
+            className="px-4 py-2 rounded-md bg-gray-300 dark:bg-gray-700 flex-row items-center"
             onPress={() => setPage(Math.max(0, page - 1))}
             disabled={page === 0}
           >
@@ -280,7 +280,7 @@ const InviteFriend = () => {
           </Text>
           
           <TouchableOpacity
-            className="px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-700 flex-row items-center"
+            className="px-4 py-2 rounded-md bg-gray-300 dark:bg-gray-700 flex-row items-center"
             onPress={() => setPage(page + 1)}
             disabled={page >= (followingData?.totalPages || 1) - 1}
           >

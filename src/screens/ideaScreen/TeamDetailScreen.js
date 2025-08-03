@@ -215,7 +215,7 @@ const handleApplyToJoin = async () => {
   const gradeLabel = GRADES.find(grade => grade.value === teamData.grade)?.label || '未知';
 
   return (
-    <ScrollView className="flex-1 p-4 bg-gray-100 dark:bg-gray-900">
+    <ScrollView className="flex-1 p-4 bg-gray-50 dark:bg-gray-900">
       {/* 团队名称 */}
       <View className='mb-4 bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-xl justify-between'>
         <View className="flex-row justify-between items-start mb-4">
@@ -249,7 +249,7 @@ const handleApplyToJoin = async () => {
           className={`${
             teamData.chatRoom.members?.some(member => member.user_id === userId)
               ? 'bg-gray-300 dark:bg-gray-600'
-              : 'bg-blue-500 dark:bg-blue-700'
+              : 'bg-[#409eff] dark:bg-blue-700'
           } py-3 rounded-lg`}
           onPress={() => {
             if (!teamData.chatRoom?.members?.some(member => member.user_id === userId)) {
@@ -299,7 +299,7 @@ const handleApplyToJoin = async () => {
             {teamData.chatRoom.members.map((member, index) => (
               <TouchableOpacity
                 key={index}
-                className='mr-4 py-1 px-3 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900' 
+                className='mr-4 py-1 px-3 items-center justify-center rounded-md bg-gray-300 dark:bg-gray-900' 
                 onPress={()=>{
                   navigation.navigate("profile", {
                     team_id : teamData.team_id,
@@ -401,7 +401,7 @@ const handleApplyToJoin = async () => {
                 <Text className="dark:text-white">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 bg-blue-500 dark:bg-blue-700 rounded"
+                className="px-4 py-2 bg-[#409eff] dark:bg-blue-700 rounded"
                 onPress={handleApplyToJoin}
                 disabled={isApplying}
               >

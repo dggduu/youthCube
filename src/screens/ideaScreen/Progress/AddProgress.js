@@ -144,7 +144,7 @@ const AddProgress = () => {
       <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
         <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
         <TouchableOpacity
-          className="px-4 py-2 bg-blue-600 rounded-lg"
+          className="px-4 py-2 bg-[#409eff] rounded-lg"
           onPress={() => setError(null)}
         >
           <Text className="text-white">重试</Text>
@@ -188,7 +188,7 @@ const AddProgress = () => {
         /> */}
         {/* Markdown 编辑按钮 */}
         {/* <TouchableOpacity
-          className="bg-blue-500 py-4 px-4 rounded-lg mb-3"
+          className="bg-[#409eff] py-4 px-4 rounded-lg mb-3"
           onPress={() => {
             setVditorMarkdownContent(description);
             setShowVditorModal(true);
@@ -208,8 +208,8 @@ const AddProgress = () => {
           disabled={isSubmitting || !description.trim()}
           className={`p-4 rounded-lg items-center mb-10 ${
             isSubmitting || !description.trim() 
-              ? 'bg-gray-400' 
-              : 'bg-blue-600'
+              ? 'bg-gray-300' 
+              : 'bg-[#409eff]'
           }`}
         >
           {isSubmitting ? (

@@ -3,8 +3,8 @@ export const BASE_INFO={
         url: 'http://192.168.5.3:1234',
         model: 'qwen2-vl-2b-instruct',
     },
-    BASE_URL: 'http://192.168.5.3:3000/v1/',
-    BASE_SOCKET_URL: 'http://192.168.5.3:3000',
+    BASE_URL: 'http://192.168.5.3:3166/v1/',
+    BASE_SOCKET_URL: 'http://192.168.5.3:3166',
     fakeUser: {
         id: '8',
         email: 'dev@example.com',

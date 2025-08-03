@@ -461,7 +461,7 @@ const MainChat = () => {
   const renderSend = props => {
     return (
       <Send {...props}>
-        <View className="mr-2 ml-2 mb-2 p-2 bg-blue-500 rounded-full self-center justify-center">
+        <View className="mr-2 ml-2 mb-2 p-2 bg-[#409eff] rounded-full self-center justify-center">
           <MaterialIcon name={"send"} size={16} color={isDarkMode ? '#eee' : '#fff'} />
         </View>
       </Send>
@@ -508,7 +508,7 @@ const MainChat = () => {
           <Text className="text-lg font-semibold mb-5 text-black dark:text-gray-300 text-center">选择图片来源</Text>
           <Pressable
             onPress={selectImageFromGallery}
-            className="px-4 py-3 rounded bg-blue-500 dark:bg-blue-600 mb-3 items-center"
+            className="px-4 py-3 rounded bg-[#409eff] dark:bg-[#409eff] mb-3 items-center"
           >
             <Text className="text-white text-base">从相册选择</Text>
           </Pressable>

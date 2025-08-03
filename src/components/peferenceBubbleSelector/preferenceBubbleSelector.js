@@ -97,7 +97,7 @@ const PreferenceBubbleSelector = ({ options, onSubmit }) => {
       <TouchableOpacity
         className={`
           mt-6 py-4 rounded-lg items-center justify-center
-          ${isDark ? 'bg-blue-600' : 'bg-blue-500'}
+          ${isDark ? 'bg-[#409eff]' : 'bg-[#409eff]'}
         `}
         onPress={() => onSubmit(selected)}
       >

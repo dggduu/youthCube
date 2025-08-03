@@ -252,7 +252,7 @@ const ChatSection = () => {
                             size={18}
                             color={filterFollowing ? '#1976d2' : '#666'}
                         />
-                        <Text className={`ml-1 text-xs ${filterFollowing ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-200'}`}>
+                        <Text className={`ml-1 text-xs ${filterFollowing ? 'text-blue-600 dark:text-[#409eff]' : 'text-gray-500 dark:text-gray-200'}`}>
                             {filterFollowing ? '仅显示关注' : '筛选'}
                         </Text>
                     </TouchableOpacity>
@@ -283,7 +283,7 @@ const ChatSection = () => {
                                 {privateChatError?.includes('失败') && (
                                     <TouchableOpacity 
                                         onPress={() => fetchPrivateChats(0)}
-                                        className="mt-2 px-4 py-2 bg-blue-500 rounded-lg"
+                                        className="mt-2 px-4 py-2 bg-[#409eff] rounded-lg"
                                     >
                                         <Text className="text-white">重新加载</Text>
                                     </TouchableOpacity>

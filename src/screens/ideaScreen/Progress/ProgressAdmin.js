@@ -299,7 +299,7 @@ const ProgressAdmin = () => {
             
             <TouchableOpacity
               onPress={() => handleStatusUpdate(item.progress_id, 'pending')}
-              className="px-3 py-1 bg-gray-100 rounded-lg mr-2"
+              className="px-3 py-1 bg-gray-300 rounded-lg mr-2"
             >
               <Text className="text-black text-sm">重审</Text>
             </TouchableOpacity>
@@ -340,14 +340,14 @@ const ProgressAdmin = () => {
         onPress={()=>{
           navigation.navigate("TeamUploader");
         }}
-        className="absolute bottom-24 right-6 bg-blue-500 p-4 rounded-full shadow-lg"
+        className="absolute bottom-24 right-6 bg-[#409eff] p-4 rounded-full shadow-lg"
       >
         <MaterialIcons name="task" size={24} color="white" />
       </TouchableOpacity>
       {/* 添加进度 */}
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
-        className="absolute bottom-6 right-6 bg-blue-500 p-4 rounded-full shadow-lg"
+        className="absolute bottom-6 right-6 bg-[#409eff] p-4 rounded-full shadow-lg"
       >
         <MaterialIcons name="add" size={24} color="white" />
       </TouchableOpacity>
@@ -408,7 +408,7 @@ const ProgressAdmin = () => {
                 {['meeting', 'deadline', 'competition'].map((type) => (
                   <TouchableOpacity
                     key={type}
-                    className={`px-4 py-2 mr-2 rounded-lg ${timelineType === type ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-700'}`}
+                    className={`px-4 py-2 mr-2 rounded-lg ${timelineType === type ? 'bg-[#409eff]' : 'bg-gray-200 dark:bg-gray-700'}`}
                     onPress={() => setTimelineType(type)}
                   >
                     <Text className={timelineType === type ? 'text-white' : 'text-gray-800 dark:text-gray-200'}>
@@ -450,8 +450,8 @@ const ProgressAdmin = () => {
               disabled={isSubmitting || !title.trim() || !description.trim()}
               className={`p-4 rounded-lg items-center mb-10 ${
                 isSubmitting || !title.trim() || !description.trim() 
-                  ? 'bg-gray-400' 
-                  : 'bg-blue-600'
+                  ? 'bg-gray-300' 
+                  : 'bg-[#409eff]'
               }`}
             >
               {isSubmitting ? (

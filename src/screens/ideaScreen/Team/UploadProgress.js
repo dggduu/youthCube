@@ -112,7 +112,7 @@ const ProgressCard = ({ progress, onEdit, onDelete}) => {
           />
       <View className="flex-row justify-end mt-4">
         <TouchableOpacity
-          className="bg-blue-500 py-2 px-3 rounded-md mr-2"
+          className="bg-[#409eff] py-2 px-3 rounded-md mr-2"
           onPress={() => onEdit(progress)}
         >
           <Text className="text-white text-sm">编辑</Text>
@@ -420,7 +420,7 @@ const UploadProgress = () => {
       <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
         <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
         <TouchableOpacity
-          className="px-4 py-2 bg-blue-600 rounded-lg"
+          className="px-4 py-2 bg-[#409eff] rounded-lg"
           onPress={() => setError(null)}
         >
           <Text className="text-white">重试</Text>
@@ -464,7 +464,7 @@ const UploadProgress = () => {
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
-      <View className="absolute bottom-6 right-6 bg-blue-600 rounded-full justify-center items-center border border-gray-600">
+      <View className="absolute bottom-6 right-6 bg-[#409eff] rounded-full justify-center items-center border border-gray-600">
         <TouchableOpacity
           onPress={() => openProgressModal()}
           className='p-2 self-center justify-center'
@@ -519,7 +519,7 @@ const UploadProgress = () => {
               <TouchableOpacity
                 key={type}
                 className={`py-2 px-4 mr-3 rounded-lg ${
-                  timelineType === type ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                  timelineType === type ? 'bg-[#409eff]' : 'bg-gray-200 dark:bg-gray-700'
                 }`}
                 onPress={() => setTimelineType(type)}
               >
@@ -561,7 +561,7 @@ const UploadProgress = () => {
             className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           />
           <TouchableOpacity
-            className="bg-blue-600 py-4 px-4 rounded-lg mb-3"
+            className="bg-[#409eff] py-4 px-4 rounded-lg mb-3"
             onPress={() => {
               setVditorMarkdownContent(description);
               setShowVditorModal(true);
@@ -581,8 +581,8 @@ const UploadProgress = () => {
             disabled={isSubmitting || !description.trim() || !title.trim()}
             className={`p-4 rounded-lg items-center mb-5 ${
               isSubmitting || !description.trim() || !title.trim()
-                ? 'bg-gray-400'
-                : 'bg-blue-600'
+                ? 'bg-gray-300'
+                : 'bg-[#409eff]'
             }`}
           >
             {isSubmitting ? (
@@ -595,7 +595,7 @@ const UploadProgress = () => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={closeProgressModal}
-            className="p-4 rounded-lg items-center bg-gray-400 mb-10"
+            className="p-4 rounded-lg items-center bg-gray-300 mb-10"
           >
             <Text className="text-white font-bold">取消</Text>
           </TouchableOpacity>

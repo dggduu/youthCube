@@ -62,7 +62,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaProvider>
-      <ScrollView className="flex-1 bg-gray-100 dark:bg-gray-900">
+      <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
         <View className="px-6 pt-4 pb-8 mt-3">
 
           {/* --- 用户信息卡片 --- */}

@@ -229,7 +229,7 @@ const UserInfoChange = () => {
     return (
       <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-4">
         <Text className="text-red-600 dark:text-red-400 text-lg text-center">无法获取用户资料。请确保已登录。</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} className="mt-4 px-6 py-3 bg-blue-500 rounded-lg">
+        <TouchableOpacity onPress={() => navigation.navigate('Login')} className="mt-4 px-6 py-3 bg-[#409eff] rounded-lg">
           <Text className="text-white font-semibold">去登录</Text>
         </TouchableOpacity>
       </View>
@@ -318,7 +318,7 @@ const UserInfoChange = () => {
               <Text className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 {birthday.toLocaleDateString()}
               </Text>
-              <Text className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>选择日期</Text>
+              <Text className={`${isDarkMode ? 'text-[#409eff]' : 'text-blue-600'}`}>选择日期</Text>
             </TouchableOpacity>
           </View>
 
@@ -424,7 +424,7 @@ const UserInfoChange = () => {
             onPress={handleSubmit}
             disabled={isSubmitting || authLoading}
             className={`py-3 rounded-lg items-center justify-center mt-8 ${
-              isSubmitting || authLoading ? 'bg-gray-400 dark:bg-gray-700' : 'bg-blue-500'
+              isSubmitting || authLoading ? 'bg-gray-300 dark:bg-gray-700' : 'bg-[#409eff]'
             }`}
           >
             {isSubmitting || authLoading ? (
@@ -437,7 +437,7 @@ const UserInfoChange = () => {
           {/* 联系工作人员 */}
           <TouchableOpacity onPress={() => navigation.navigate('HelpScreen')}>
             <View>
-              <Text className={`mt-6 self-center font-semibold ${isDarkMode ? 'text-blue-500' : 'text-blue-400'}`}>
+              <Text className={`mt-6 self-center font-semibold ${isDarkMode ? 'text-[#409eff]' : 'text-[#409eff]'}`}>
                 有问题？联系工作人员
               </Text>
             </View>

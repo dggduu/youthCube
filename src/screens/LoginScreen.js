@@ -72,11 +72,11 @@ const LoginPage = ({ navigation }) => {
         style={{flex:1}}
       >
         <ScrollView
-          contentContainerClassName="px-8 justify-center flex-grow pt-16 pb-14"
+          contentContainerClassName="px-8 justify-center flex-grow pt-16"
         >
           <Image
             source={require('../assets/logo/ava.png')}
-            className="w-28 h-28 self-center mb-10"
+            className="w-28 h-28 self-center mb-8"
             resizeMode="contain"
           />
 
@@ -88,7 +88,7 @@ const LoginPage = ({ navigation }) => {
             欢迎回来
           </Text>
 
-          <View className="mb-4">
+          <View>
             <InputBox
               label="邮箱地址"
               placeholder="请输入邮箱"
@@ -101,7 +101,7 @@ const LoginPage = ({ navigation }) => {
             />
           </View>
 
-          <View className="mb-4">
+          <View>
             <InputBox
               label="密码"
               placeholder="请输入密码"
@@ -113,20 +113,24 @@ const LoginPage = ({ navigation }) => {
             />
           </View>
 
-          <Button
-            type="primary"
+          <TouchableOpacity
             onPress={handleLogin}
-            className="mt-4 py-3 rounded-lg "
+            className="mt-2 py-3 rounded-lg bg-[#409eff] justify-center items-center"
           >
-            登录
-          </Button>
+            <Text
+              className='text-white font-semibold text-lg'
+            >
+              登录
+            </Text>
+            
+          </TouchableOpacity>
 
           <WhiteSpace size="lg" />
           <TouchableOpacity
             onPress={() => navigation.navigate('registerFlow')}
             className="items-center mt-6"
           >
-            <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
+            <Text className={`${isDark ? 'text-[#409eff]' : 'text-[#409eff]'}`}>
               没有账号？去注册
             </Text>
           </TouchableOpacity>
@@ -134,7 +138,7 @@ const LoginPage = ({ navigation }) => {
             onPress={() => navigation.navigate('FindPswd')}
             className="items-center mt-6"
           >
-            <Text className={`${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
+            <Text className={`${isDark ? 'text-[#409eff]' : 'text-[#409eff]'}`}>
               忘记密码？
             </Text>
           </TouchableOpacity>

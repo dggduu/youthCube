@@ -142,7 +142,7 @@ const InviteToTeam = () => {
           </Text>
         </View>
         <TouchableOpacity
-          className='bg-blue-500 py-4 rounded-lg items-center mb-2'
+          className='bg-[#409eff] py-4 rounded-lg items-center mb-2'
           onPress={() => navigation.navigate("Upload", { teamId:team_id })}
         >
           <Text className='text-white text-lg font-bold'>下一步</Text>
@@ -170,7 +170,7 @@ const InviteToTeam = () => {
             </Text>
           </View>
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full ${isInvited ? 'bg-gray-400' : 'bg-blue-500'}`}
+            className={`px-4 py-2 rounded-full ${isInvited ? 'bg-gray-300' : 'bg-[#409eff]'}`}
             onPress={() => handleInvite(item)}
             disabled={isInvited}
           >
@@ -192,7 +192,7 @@ const InviteToTeam = () => {
   }
 
   return (
-    <View className='flex-1 bg-gray-100 dark:bg-gray-900'>
+    <View className='flex-1 bg-gray-50 dark:bg-gray-900'>
         {/* 帮助AI */}
         <TouchableOpacity
           onPress={()=>{

@@ -267,7 +267,7 @@ const TagSection = () => {
       {scrollY > 200 && (
         <TouchableOpacity
           onPress={scrollToTop}
-          className="absolute right-4 bottom-4 bg-blue-600 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+          className="absolute right-4 bottom-4 bg-[#409eff] dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
         >
           <Icon name="arrow-upward" size={24} color="white" />
         </TouchableOpacity>

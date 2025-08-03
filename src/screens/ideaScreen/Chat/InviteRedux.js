@@ -89,7 +89,7 @@ const InviteRedux = () => {
     };
 
     return (
-        <View className="flex-1 bg-gray-100 dark:bg-gray-900 p-4"> 
+        <View className="flex-1 bg-gray-50 dark:bg-gray-900 p-4"> 
             {isLoading ? (
                 <ActivityIndicator className="my-4" size="large" />
             ) : isError ? (
@@ -121,7 +121,7 @@ const InviteRedux = () => {
                                                     ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                                     : invitation.status === 'expired'
                                                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                                    : 'bg-gray-50 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                                             }`}>
                                                 {invitation.status === 'pending'
                                                     ? '待处理'

@@ -170,7 +170,7 @@ const MessageScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <WaterfallFlow
         data={posts}
         renderItem={({ item }) => (
@@ -209,7 +209,7 @@ const MessageScreen = ({ navigation }) => {
                   {currentUser.name}
                 </Text>
                 <Text 
-                  className="text-blue-500 dark:text-blue-400 text-sm mt-1"
+                  className="text-[#409eff] dark:text-[#409eff] text-sm mt-1"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >

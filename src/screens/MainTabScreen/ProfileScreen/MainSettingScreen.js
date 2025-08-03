@@ -56,7 +56,7 @@ const MainSetting = ( {navigation} ) => {
   };
 
   return (
-    <KeyboardAwareScrollView className="flex-1 bg-gray-100 dark:bg-gray-900">
+    <KeyboardAwareScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <BackIcon/>
       <Text className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mt-5 mb-8 px-5">设置</Text>
 

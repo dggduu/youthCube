@@ -163,7 +163,7 @@ const TeamFeed = () => {
   };
 
   return (
-    <View className='flex-1 bg-gray-100 dark:bg-gray-900 rounded-t-lg'>
+    <View className='flex-1 bg-gray-50 dark:bg-gray-900 rounded-t-lg'>
       <WaterfallFlow
         ref={scrollViewRef}
         data={data}

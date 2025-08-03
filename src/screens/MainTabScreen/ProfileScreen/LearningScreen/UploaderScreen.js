@@ -230,7 +230,7 @@ const UploaderScreen = () => {
             <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
                 <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
                 <TouchableOpacity
-                    className="px-4 py-2 bg-blue-600 rounded-lg"
+                    className="px-4 py-2 bg-[#409eff] rounded-lg"
                     onPress={() => setError(null)}
                 >
                     <Text className="text-white">重试</Text>
@@ -271,7 +271,7 @@ const UploaderScreen = () => {
 
                 <TouchableOpacity
                     onPress={selectCoverImage}
-                    className="border border-gray-300 dark:border-gray-600 p-4 mb-3 rounded-lg items-center bg-gray-50 dark:bg-gray-700"
+                    className="border border-gray-300 dark:border-gray-600 p-4 mb-3 rounded-lg items-center bg-gray-300 dark:bg-gray-700"
                 >
                     <Text className="text-gray-700 dark:text-gray-300">
                         {coverImage ? '更换封面图片' : '选择封面图片'}
@@ -292,7 +292,7 @@ const UploaderScreen = () => {
                         <View className="flex-row space-x-2">
                             <TouchableOpacity
                                 onPress={() => setShowTagSelection(true)}
-                                className="px-3 py-1 bg-blue-600 rounded-full"
+                                className="px-3 py-1 bg-[#409eff] rounded-full"
                             >
                                 <Text className="text-white text-sm">选择标签</Text>
                             </TouchableOpacity>
@@ -317,7 +317,7 @@ const UploaderScreen = () => {
                                 {selectedTags.tags.map(tag => (
                                     <View 
                                         key={tag.tag_id}
-                                        className="px-2 py-1 m-1 rounded-full bg-blue-600"
+                                        className="px-2 py-1 m-1 rounded-full bg-[#409eff]"
                                     >
                                         <Text className="text-white text-xs">
                                             {tag.tag_name}
@@ -344,7 +344,7 @@ const UploaderScreen = () => {
                     onPress={createPost}
                     disabled={isUploading || (Date.now() - lastSubmitTimeRef.current < 5000)}
                     className={`p-4 rounded-lg items-center mb-10 ${
-                        isUploading || (Date.now() - lastSubmitTimeRef.current < 5000) ? 'bg-gray-400' : 'bg-blue-600'
+                        isUploading || (Date.now() - lastSubmitTimeRef.current < 5000) ? 'bg-gray-50' : 'bg-[#409eff]'
                     }`}
                 >
                     <Text className="text-white font-bold">

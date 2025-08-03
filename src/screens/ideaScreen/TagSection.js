@@ -187,7 +187,7 @@ const TagSection = () => {
           <View className="flex-row flex-wrap">
           </View>
         </View>
-        <View className="bg-gray-100 dark:bg-gray-700 rounded-full w-10 h-10 items-center justify-center ml-2">
+        <View className="bg-gray-50 dark:bg-gray-700 rounded-full w-10 h-10 items-center justify-center ml-2">
           <Icon name="groups" size={20} color="#6b7280" />
         </View>
       </View>
@@ -238,7 +238,7 @@ const TagSection = () => {
       {scrollY > 200 && (
         <TouchableOpacity
           onPress={scrollToTop}
-          className="absolute right-4 bottom-4 bg-blue-600 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+          className="absolute right-4 bottom-4 bg-[#409eff] dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
         >
           <Icon name="arrow-upward" size={24} color="white" />
         </TouchableOpacity>

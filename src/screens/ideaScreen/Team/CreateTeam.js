@@ -132,7 +132,7 @@ const CreateTeam = () => {
           您已加入一个队伍，无法创建新队伍
         </Text>
         <TouchableOpacity
-          className="bg-blue-500 px-6 py-3 rounded-lg"
+          className="bg-[#409eff] px-6 py-3 rounded-lg"
           onPress={() => navigation.goBack()}
         >
           <Text className="text-white font-medium">返回</Text>
@@ -269,13 +269,13 @@ const CreateTeam = () => {
           <Text className="text-base font-medium mb-2 text-gray-900 dark:text-gray-300">加入方式</Text>
           <View className="flex-row">
             <TouchableOpacity 
-              className={`px-4 py-2 border rounded mr-2 ${isPublic ? 'bg-blue-500 border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
+              className={`px-4 py-2 border rounded mr-2 ${isPublic ? 'bg-[#409eff] border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
               onPress={() => setIsPublic(true)}
             >
               <Text className={`${isPublic ? 'text-white' : 'text-gray-900 dark:text-gray-300'}`}>公开加入</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              className={`px-4 py-2 border rounded ${!isPublic ? 'bg-blue-500 border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
+              className={`px-4 py-2 border rounded ${!isPublic ? 'bg-[#409eff] border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600'}`}
               onPress={() => setIsPublic(false)}
             >
               <Text className={`${!isPublic ? 'text-white' : 'text-gray-900 dark:text-gray-300'}`}>仅邀请</Text>
@@ -289,7 +289,7 @@ const CreateTeam = () => {
           <View className='flex-row'>
             <TouchableOpacity 
               onPress={() => setShowTagSelection(true)}
-              className="px-3 py-2 bg-blue-500 rounded-full mb-2 mr-3"
+              className="px-3 py-2 bg-[#409eff] rounded-full mb-2 mr-3"
             >
               <Text className="text-white text-sm">
                 {selectedTags.tagIds.length > 0 ? 
@@ -312,7 +312,7 @@ const CreateTeam = () => {
               {selectedTags.tags.map(tag => (
                 <View 
                   key={tag.tag_id}
-                  className="px-3 py-2 m-1 rounded-full bg-blue-500"
+                  className="px-3 py-2 m-1 rounded-full bg-[#409eff]"
                 >
                   <Text className="text-white text-sm">
                     {tag.tag_name}
@@ -329,7 +329,7 @@ const CreateTeam = () => {
             onPress={() => setIsAgreed(!isAgreed)}
             className="mr-2 items-center"
           >
-            <View className={`w-5 h-5 rounded border items-center justify-center ${isAgreed ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}>
+            <View className={`w-5 h-5 rounded border items-center justify-center ${isAgreed ? 'bg-[#409eff] border-blue-500' : 'border-gray-400'}`}>
               {isAgreed && <Icon name="check" size={12} color="white" />}
             </View>
           </TouchableOpacity>
@@ -337,13 +337,13 @@ const CreateTeam = () => {
             我已阅读并同意
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Safe')}>
-            <Text className="text-blue-500 font-bold">《户外活动安全声明》</Text>
+            <Text className="text-[#409eff] font-bold">《户外活动安全声明》</Text>
           </TouchableOpacity>
         </View>
 
         {/* 创建按钮 */}
         <TouchableOpacity 
-          className={`py-4 rounded-lg items-center mt-5 mb-10 ${isLoading ? 'bg-gray-400' : 'bg-blue-500'}`}
+          className={`py-4 rounded-lg items-center mt-5 mb-10 ${isLoading ? 'bg-gray-300' : 'bg-[#409eff]'}`}
           onPress={handleCreateTeam}
           disabled={isLoading}
         >
@@ -381,7 +381,7 @@ const CreateTeam = () => {
                 <Text className="dark:text-white">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 bg-blue-500 rounded"
+                className="px-4 py-2 bg-[#409eff] rounded"
                 onPress={handleCreateTag}
               >
                 <Text className="text-white">创建</Text>

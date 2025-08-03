@@ -88,7 +88,7 @@ const TagSelectionToast = ({
         className={`
           px-3 py-2 m-1 rounded-full
           ${isSelected
-            ? 'bg-blue-600'
+            ? 'bg-[#409eff]'
             : colorScheme === 'dark' 
               ? 'bg-gray-700' 
               : 'bg-gray-200'
@@ -204,7 +204,7 @@ const TagSelectionToast = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleConfirm}
-              className="flex-1 py-3 rounded-lg bg-blue-600 mx-2"
+              className="flex-1 py-3 rounded-lg bg-[#409eff] mx-2"
             >
               <Text className="text-center font-semibold text-white">确定</Text>
             </TouchableOpacity>
