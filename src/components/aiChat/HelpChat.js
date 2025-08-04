@@ -29,7 +29,7 @@ import CustomPicker from "../../components/custom/Custompicker";
 
 const CHAT_HISTORY_KEY = '@chat_history_';
 const TOPIC_HISTORY_KEY = '@topic_list';
-const MAX_TOPICS = 2;
+const MAX_TOPICS = 5;
 
 const HelpChat = () => {
   const [messages, setMessages] = useState([]);
@@ -67,7 +67,7 @@ const HelpChat = () => {
             user: {
               _id: 2,
               name: '聪宝',
-              avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+              avatar: require("../../assets/logo/ava.png"),
             },
           },
         ]));
@@ -95,7 +95,7 @@ const HelpChat = () => {
             user: {
               _id: 2,
               name: '聪宝',
-              avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+              avatar: require("../../assets/logo/ava.png"),
             },
           },
         ];
@@ -228,7 +228,7 @@ const HelpChat = () => {
         user: {
           _id: 2,
           name: '聪宝',
-          avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+          avatar: require("../../assets/logo/ava.png"),
         },
       };
 
@@ -244,7 +244,7 @@ const HelpChat = () => {
         user: {
           _id: 2,
           name: '聪宝',
-          avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+          avatar: require("../../assets/logo/ava.png"),
         },
       };
       const updatedMessagesWithError = GiftedChat.append(currentChatMessages, [errorMessage]);
@@ -281,7 +281,7 @@ const HelpChat = () => {
       user: {
         _id: 2,
         name: '聪宝',
-        avatar: 'https://s21.ax1x.com/2025/06/19/pVVEzbn.png',
+        avatar: require("../../assets/logo/ava.png"),
       },
     };
 
@@ -396,7 +396,7 @@ const HelpChat = () => {
       >
         <FastImage
           source={{ uri: props.currentMessage.image }}
-          style={{ width: 100, height: 100, borderRadius: 10}}
+          style={{ width: 150, height: 150, borderRadius: 10}}
           resizeMode={FastImage.resizeMode.cover}
         />
       </TouchableOpacity>
@@ -447,6 +447,14 @@ const HelpChat = () => {
             },
             right: { // 发送者文本样式
               color: isDarkMode ? '#fff' : '#000',
+            },
+          }}
+         timeTextStyle={{
+            left: {
+              color: isDarkMode ? '#ccc' : '#666', // AI 消息时间颜色
+            },
+            right: {
+              color: isDarkMode ? '#ccc' : '#666', // 发送者消息时间颜色
             },
           }}
         />}
@@ -622,7 +630,6 @@ const HelpChat = () => {
             selectedValue={selectedTopic}
             onValueChange={setSelectedTopic}
             placeholder="请选择话题"
-            key="topic-picker"
           />
         </View>
 
@@ -778,9 +785,9 @@ const HelpChat = () => {
       </Modal>
 
       <Modal visible={isImageViewerVisible} transparent={true} onRequestClose={() => setIsImageViewerVisible(false)}>
-        <TouchableOpacity onPress={() => setIsImageViewerVisible(false)} style={{ position: 'absolute', top: 15, left: 10, zIndex: 1 }} className='bg-gray-300 dark:bg-gray-600 p-2 rounded-full z-0'>
+        <TouchableOpacity onPress={() => setIsImageViewerVisible(false)} style={{ position: 'absolute', top: 15, left: 10, zIndex: 1 }} className='bg-transparent p-2 rounded-full z-0'>
           <MaterialIcon name={"close"} size={30} style={{
-            color: isDarkMode ? '#eee' : '#000',
+            color: isDarkMode ? '#ddd' : '#fff',
           }} />
         </TouchableOpacity>
         <ImageViewer

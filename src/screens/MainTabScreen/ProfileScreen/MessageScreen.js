@@ -152,6 +152,7 @@ const MessageScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <BackIcon/>
       <WaterfallFlow
         data={posts}
         renderItem={({ item }) => (
@@ -172,7 +173,7 @@ const MessageScreen = ({ navigation }) => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         ListHeaderComponent={
-          <View className="px-4 mt-10">
+          <View className="px-4 mt-2">
 
             {/* --- 用户名片 --- */}
               <View className={`bg-white dark:bg-gray-800 p-6 rounded-t-2xl`}>
@@ -222,7 +223,7 @@ const MessageScreen = ({ navigation }) => {
             
             {/* --- 个人简介卡片 --- */}
             {currentUser.bio && (
-                <View className={`bg-white dark:bg-gray-800 p-6 rounded-t-2xl`}>
+                <View className={`bg-white dark:bg-gray-800 p-6 rounded-b-2xl`}>
                   <View className="flex-row items-center">
                     <MaterialIcons name="account-circle" size={24} color="#3b82f6" />
                     <Text className="text-lg font-bold text-gray-900 dark:text-white ml-2">
@@ -240,7 +241,7 @@ const MessageScreen = ({ navigation }) => {
             )}
             {/* --- 队伍信息卡片 --- */}
             {currentUser.team_id && (
-                <View className={`bg-white dark:bg-gray-800 p-6 rounded-b-2xl `}>
+                <View className={`bg-white dark:bg-gray-800 p-6 rounded-2xl mt-3 `}>
                   <View className="flex-row items-center mb-3">
                     <MaterialIcons name="group" size={24} color="#3b82f6" />
                     <Text className="text-lg font-bold text-gray-900 dark:text-white ml-2">
@@ -304,19 +305,6 @@ const MessageScreen = ({ navigation }) => {
         }
         contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 40 }}
       />
-    <TouchableOpacity
-      onPress={() => navigation.goBack()}
-      style={{top:20,left:10}}
-      className={`absolute flex items-center justify-center rounded-full w-16 h-12 z-10 ${
-        isDark ? "bg-gray-800" : "bg-gray-300"
-      }`}
-    >
-      <MaterialIcons
-        name="arrow-back"
-        size={24}
-        color={isDark ? '#aaa' : '#000'}
-      />
-    </TouchableOpacity>
     </SafeAreaView>
   );
 };

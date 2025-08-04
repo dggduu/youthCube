@@ -1,15 +1,20 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import BackIcon from "../../../components/backIcon/backIcon";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import BackIcon from '../../../components/backIcon/backIcon';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useColorScheme } from 'nativewind';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
+import CustomAlert from '../../../components/custom/CustomAlert';
+
 const SettingItem = ({ description, iconName, onPress }) => {
   const { colorScheme } = useColorScheme();
-  const navigation = useNavigation();
   const iconColor = colorScheme === 'dark' ? '#D1D5DB' : '#333';
   const chevronColor = colorScheme === 'dark' ? '#9CA3AF' : '#555';
 
@@ -29,39 +34,35 @@ const SettingItem = ({ description, iconName, onPress }) => {
   );
 };
 
-const MainSetting = ( {navigation} ) => {
+const MainSetting = () => {
   const dispatch = useDispatch();
-
-  const handlePressNotifications = () => {
-    Alert.alert("通知", "前面的道路以后再来探索吧");
-  };
+  const navigation = useNavigation();
+  const [alertVisible, setAlertVisible] = useState(false);
 
   const handlePressLogout = () => {
-    Alert.alert(
-      "登出",
-      "您确定要登出吗？",
-      [
-        {
-          text: "取消",
-          style: "cancel"
-        },
-        {
-          text: "确定",
-          onPress: () => {
-            dispatch(logout());
-          }
-        }
-      ]
-    );
+    setAlertVisible(true);
+  };
+
+  const handleConfirmLogout = () => {
+    dispatch(logout());
+    setAlertVisible(false);
+  };
+
+  const handleCloseAlert = () => {
+    setAlertVisible(false);
   };
 
   return (
     <KeyboardAwareScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <BackIcon/>
-      <Text className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mt-5 mb-8 px-5">设置</Text>
+      <BackIcon />
+      <Text className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mt-5 mb-8 px-5">
+        设置
+      </Text>
 
       {/* 通用设置部分 */}
-      <Text className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-5 mb-2 px-5">通用设置</Text>
+      <Text className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-5 mb-2 px-5">
+        通用设置
+      </Text>
       <SettingItem
         description="账户信息修改"
         iconName="security"
@@ -72,33 +73,43 @@ const MainSetting = ( {navigation} ) => {
         iconName="privacy-tip"
         onPress={() => navigation.navigate('SettingDetail', { screen: 'PolicyInfo' })}
       />
-      {/* <SettingItem
-        description="语言"
-        iconName="language"
-        onPress={() => Alert.alert("导航", "选择应用语言")}
-      /> */}
-
+      
       {/* 关于我们部分 */}
-      <Text className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-5 mb-2 px-5">关于</Text>
+      <Text className="text-lg font-bold text-gray-600 dark:text-gray-300 mt-5 mb-2 px-5">
+        关于
+      </Text>
       <SettingItem
         description="关于我们"
         iconName="info"
         onPress={() => navigation.navigate('SettingDetail', { screen: 'PartyInfo' })}
       />
-      {/* <SettingItem
-        description="版本信息"
-        iconName="build"
-        onPress={() => navigation.navigate('SettingDetail', { screen: 'VersionInfo' })}
-      /> */}
 
-      {/* 增加底部间距，防止内容被底部导航栏或其他元素遮挡 */}
-      <View className="h-10" /> 
+      <View className="h-10" />
 
       {/* 登出按钮 */}
       <SettingItem
         description="登出"
         iconName="logout"
         onPress={handlePressLogout}
+      />
+
+      {/* 自定义登出确认弹窗 */}
+      <CustomAlert
+        visible={alertVisible}
+        title="登出"
+        message="您确定要登出吗？"
+        onClose={handleCloseAlert}
+        buttons={[
+          {
+            text: '取消',
+            style: 'cancel',
+          },
+          {
+            text: '确定',
+            style: 'destructive',
+            onPress: handleConfirmLogout,
+          },
+        ]}
       />
     </KeyboardAwareScrollView>
   );

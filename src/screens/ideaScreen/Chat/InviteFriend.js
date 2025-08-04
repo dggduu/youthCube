@@ -28,13 +28,11 @@ const InviteFriend = () => {
   const [invitedUsers, setInvitedUsers] = useState(new Set());
   const size = 10;
 
-  // 从存储加载已邀请用户
   const loadInvitedUsers = async () => {
     try {
       const storedData = await getItemFromAsyncStorage(STORAGE_KEY);
       if (storedData) {
         const parsedData = storedData;
-        // 只存储当前小组的邀请记录
         const teamInvites = parsedData[team_id] || [];
         setInvitedUsers(new Set(teamInvites));
       }
@@ -43,31 +41,23 @@ const InviteFriend = () => {
     }
   };
 
-  // 保存已邀请用户到存储
   const saveInvitedUsers = async (newInvitedUsers) => {
     try {
-      // 先读取现有数据
       const storedData = await getItemFromAsyncStorage(STORAGE_KEY);
       const parsedData = storedData ? storedData : {};
-      
-      // 更新当前小组的邀请记录
       parsedData[team_id] = Array.from(newInvitedUsers);
-      
-      // 保存回存储
       await setItemToAsyncStorage(STORAGE_KEY, parsedData);
     } catch (error) {
       console.error('保存邀请记录失败:', error);
     }
   };
 
-  // 添加已邀请用户
   const addInvitedUser = async (userId) => {
     const newSet = new Set(invitedUsers).add(userId);
     setInvitedUsers(newSet);
     await saveInvitedUsers(newSet);
   };
 
-  // 获取用户关注列表
   const { data: followingData, isLoading: isFollowingLoading, refetch } = useQuery({
     queryKey: ['userFollowing', userData?.id, page, size],
     queryFn: async () => {
@@ -80,13 +70,11 @@ const InviteFriend = () => {
           size,
         },
       });
-
       return response.data;
     },
     enabled: !!userData?.id && !!accessToken,
   });
 
-  // 获取小组信息
   const { data: teamData, isLoading: isTeamLoading } = useQuery({
     queryKey: ['team', team_id],
     queryFn: async () => {
@@ -98,13 +86,11 @@ const InviteFriend = () => {
           },
         }
       );
-
       return response.data;
     },
     enabled: !!team_id && !!accessToken,
   });
 
-  // 邀请好友加入聊天室
   const inviteMutation = useMutation({
     mutationFn: async (userId) => {
       const response = await api.post(
@@ -120,7 +106,6 @@ const InviteFriend = () => {
           },
         }
       );
-
       return response.data;
     },
     onSuccess: (data, userId) => {
@@ -144,29 +129,26 @@ const InviteFriend = () => {
     loadData();
   }, [team_id]);
 
-  // 检查用户是否已经在小组中
   const isUserInTeam = (userId) => {
     return teamData?.chatRoom.members.some(member => member.user_id === userId);
   };
 
-  // 检查用户是否已被邀请
   const isUserInvited = (userId) => {
     return invitedUsers.has(userId);
   };
 
-  // 渲染用户头像
   const renderAvatar = (user) => {
     if (user.avatar_key) {
       return (
         <Image
           source={{ uri: user.avatar_key }}
-          className="w-12 h-12 rounded-full"
+          className="w-10 h-10 rounded-full"
         />
       );
     }
     return (
-      <View className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-        <Text className="text-lg font-medium text-gray-700 dark:text-gray-200">
+      <View className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+        <Text className="text-lg font-medium text-gray-500">
           {user.name.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -175,122 +157,152 @@ const InviteFriend = () => {
 
   if (isFollowingLoading || isTeamLoading || !accessToken || !userData) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#409eff" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900 px-2" style={{ paddingTop: insets.top }}>
-      {/* 小组信息 */}
-      <View className="p-5 border-b border-gray-200 dark:border-gray-700 rounded-xl bg-white mt-3">
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+      {/* 顶部卡片 - 小组信息 */}
+      <View className="mx-4 mt-4 p-4 bg-white rounded-lg shadow-sm">
         <View className="flex-row items-center mb-2">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white">队伍名：</Text>
-          <Text className="text-lg font-bold text-gray-900 dark:text-white">
-            {teamData?.team_name}
-          </Text>
+          <Text className="text-lg font-semibold text-gray-800">队伍信息</Text>
         </View>
-        <Text className="text-sm text-gray-600 dark:text-gray-300">
-          队伍描述: {teamData?.description}
-        </Text>
-        <View className="flex-row items-center mt-2">
-          <MaterialIcons name="people" size={16} color="#9ca3af" />
-          <Text className="text-sm text-gray-500 dark:text-gray-400 ml-1">
-            当前成员: {teamData?.chatRoom.members.length}人
-          </Text>
+        <View className="space-y-2">
+          <View className="flex-row items-center">
+            <Text className="text-sm text-gray-500 w-20">队伍名称</Text>
+            <Text className="text-sm text-gray-800 flex-1">{teamData?.team_name}</Text>
+          </View>
+          <View className="flex-row items-start">
+            <Text className="text-sm text-gray-500 w-20">队伍描述</Text>
+            <Text className="text-sm text-gray-800 flex-1">{teamData?.description || '暂无描述'}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <Text className="text-sm text-gray-500 w-20">成员数量</Text>
+            <Text className="text-sm text-gray-800 flex-1">{teamData?.chatRoom.members.length}人</Text>
+          </View>
         </View>
       </View>
 
       {/* 好友列表 */}
-      <ScrollView className="flex-1 bg-white rounded-xl my-4 p-1">
-        <View className="px-4 py-3 flex-row items-center border-b border-gray-100 dark:border-gray-800">
-          <Text className="text-gray-500 dark:text-gray-400 font-medium ml-2">
-            我的关注 ({followingData?.totalItems})
+      <View className="mx-4 mt-4 bg-white rounded-lg shadow-sm flex-1">
+        <View className="p-4 border-b border-gray-100">
+          <Text className="text-base font-semibold text-gray-800">
+            我的关注 ({followingData?.totalItems || 0})
           </Text>
         </View>
-
-        {followingData?.items.map((item) => {
-          const isInTeam = isUserInTeam(item.following.id);
-          const isInvited = isUserInvited(item.following.id);
-          
-          return (
-            <View 
-              key={item.follow_id} 
-              className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100 dark:border-gray-800"
-            >
-              <View className="flex-row items-center">
-                {renderAvatar(item.following)}
-                <View className="ml-3">
-                  <Text className="text-base font-medium text-gray-900 dark:text-white">
-                    {item.following.name}
-                  </Text>
-                  <View className="flex-row items-center">
-                    <MaterialIcons name="schedule" size={14} color="#9ca3af" />
-                    <Text className="text-sm text-gray-500 dark:text-gray-400 ml-1">
+        
+        <ScrollView className="flex-1">
+          {followingData?.items?.length > 0 ? (
+            followingData.items.map((item) => {
+              const isInTeam = isUserInTeam(item.following.id);
+              const isInvited = isUserInvited(item.following.id);
+              
+              return (
+                <View 
+                  key={item.follow_id} 
+                  className="p-3 flex-row items-center border-b border-gray-100"
+                >
+                  {renderAvatar(item.following)}
+                  
+                  <View className="ml-3 flex-1">
+                    <Text className="text-sm font-medium text-gray-800">
+                      {item.following.name}
+                    </Text>
+                    <Text className="text-xs text-gray-400 mt-1">
                       关注于 {new Date(item.created_at).toLocaleDateString()}
                     </Text>
                   </View>
-                </View>
-              </View>
-
-              {isInTeam ? (
-                <View className="px-3 py-1 rounded-full bg-gray-50 dark:bg-gray-700 flex-row items-center">
-                  <MaterialIcons name="check" size={14} color="#4b5563" />
-                  <Text className="text-sm text-gray-600 dark:text-gray-300 ml-1">已加入</Text>
-                </View>
-              ) : isInvited ? (
-                <View className="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900 flex-row items-center">
-                  <MaterialIcons name="done-all" size={14} color="#4b5563" />
-                  <Text className="text-sm text-green-600 dark:text-green-300 ml-1">已邀请</Text>
-                </View>
-              ) : (
-                <TouchableOpacity 
-                  className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 flex-row items-center"
-                  onPress={() => inviteMutation.mutate(item.following.id)}
-                  disabled={inviteMutation.isLoading}
-                >
-                  {inviteMutation.isLoading ? (
-                    <ActivityIndicator size="small" color="#3b82f6" />
+                  
+                  {isInTeam ? (
+                    <View className="px-3 py-1 rounded-full bg-gray-100 flex-row items-center">
+                      <MaterialIcons name="check" size={14} color="#67c23a" />
+                      <Text className="text-xs text-gray-600 ml-1">已加入</Text>
+                    </View>
+                  ) : isInvited ? (
+                    <View className="px-3 py-1 rounded-full bg-green-100 flex-row items-center">
+                      <MaterialIcons name="done-all" size={14} color="#67c23a" />
+                      <Text className="text-xs text-green-600 ml-1">已邀请</Text>
+                    </View>
                   ) : (
-                    <MaterialIcons name="person-add" size={14} color="#3b82f6" />
+                    <TouchableOpacity 
+                      className="px-3 py-1 rounded-full bg-blue-100 flex-row items-center"
+                      onPress={() => inviteMutation.mutate(item.following.id)}
+                      disabled={inviteMutation.isLoading}
+                    >
+                      {inviteMutation.isLoading ? (
+                        <ActivityIndicator size="small" color="#409eff" />
+                      ) : (
+                        <MaterialIcons name="person-add" size={14} color="#409eff" />
+                      )}
+                      <Text className="text-xs text-blue-500 ml-1">
+                        {inviteMutation.isLoading ? '邀请中...' : '邀请'}
+                      </Text>
+                    </TouchableOpacity>
                   )}
-                  <Text className="text-sm text-blue-600 dark:text-blue-300 ml-1">
-                    {inviteMutation.isLoading ? '邀请中...' : '邀请'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+                </View>
+              );
+            })
+          ) : (
+            <View className="p-8 items-center justify-center">
+              <MaterialIcons name="people-outline" size={48} color="#c0c4cc" />
+              <Text className="text-sm text-gray-400 mt-2">暂无关注的好友</Text>
             </View>
-          );
-        })}
+          )}
+        </ScrollView>
 
         {/* 分页控制 */}
-        <View className="flex-row justify-between items-center p-4">
-          <TouchableOpacity
-            className="px-4 py-2 rounded-md bg-gray-300 dark:bg-gray-700 flex-row items-center"
-            onPress={() => setPage(Math.max(0, page - 1))}
-            disabled={page === 0}
-          >
-            <MaterialIcons name="chevron-left" size={18} color="#4b5563" />
-            <Text className="text-gray-700 dark:text-gray-200 ml-1">上一页</Text>
-          </TouchableOpacity>
-          
-          <Text className="text-gray-600 dark:text-gray-300">
-            第 {page + 1} 页 / 共 {followingData?.totalPages} 页
-          </Text>
-          
-          <TouchableOpacity
-            className="px-4 py-2 rounded-md bg-gray-300 dark:bg-gray-700 flex-row items-center"
-            onPress={() => setPage(page + 1)}
-            disabled={page >= (followingData?.totalPages || 1) - 1}
-          >
-            <Text className="text-gray-700 dark:text-gray-200 mr-1">下一页</Text>
-            <MaterialIcons name="chevron-right" size={18} color="#4b5563" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        {followingData?.totalPages > 1 && (
+          <View className="p-3 flex-row items-center justify-between border-t border-gray-100">
+            <TouchableOpacity
+              className={`px-3 py-1 rounded ${page === 0 ? 'opacity-50' : ''}`}
+              onPress={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0}
+            >
+              <Text className={`text-sm ${page === 0 ? 'text-gray-400' : 'text-gray-600'}`}>上一页</Text>
+            </TouchableOpacity>
+            
+            <View className="flex-row items-center space-x-2">
+              {Array.from({ length: Math.min(5, followingData.totalPages) }, (_, i) => {
+                let pageNum;
+                if (followingData.totalPages <= 5) {
+                  pageNum = i;
+                } else if (page < 3) {
+                  pageNum = i;
+                } else if (page > followingData.totalPages - 4) {
+                  pageNum = followingData.totalPages - 5 + i;
+                } else {
+                  pageNum = page - 2 + i;
+                }
+                
+                return (
+                  <TouchableOpacity
+                    key={pageNum}
+                    className={`w-8 h-8 rounded-full items-center justify-center ${page === pageNum ? 'bg-blue-100' : ''}`}
+                    onPress={() => setPage(pageNum)}
+                  >
+                    <Text className={`text-sm ${page === pageNum ? 'text-blue-500 font-medium' : 'text-gray-600'}`}>
+                      {pageNum + 1}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            
+            <TouchableOpacity
+              className={`px-3 py-1 rounded ${page >= (followingData.totalPages - 1) ? 'opacity-50' : ''}`}
+              onPress={() => setPage(page + 1)}
+              disabled={page >= (followingData.totalPages - 1)}
+            >
+              <Text className={`text-sm ${page >= (followingData.totalPages - 1) ? 'text-gray-400' : 'text-gray-600'}`}>下一页</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </View>
   )
 }
 
-export default InviteFriend
+export default InviteFriend;

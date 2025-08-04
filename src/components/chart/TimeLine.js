@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ActivityIndicator, RefreshControl, Pressableyyy } from 'react-native';
 import Timeline from 'react-native-timeline-flatlist';
 import { useColorScheme } from 'react-native';
 import { getItemFromAsyncStorage } from '../../utils/LocalStorage';
@@ -12,26 +12,63 @@ import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 const api = axios.create();
 setupAuthInterceptors(api);
 // 类型颜色
+// 根据类型返回颜色（深色/浅色模式适配）
 const getColorByType = (type, isDark) => {
   switch (type) {
-    case 'meeting': return isDark? "#887628" : '#f8e287';
-    case 'deadline': return isDark? "#93000a" : '#f87171';
-    case 'competition': return isDark? "#517f7c" : '#bcece7';
-    case 'progress_report': return isDark? '#4c662b' : '#c5ecce';
-    default: return isDark ? '#1a1a1a' : '#888';
+    case 'meeting':     // 会议
+      return isDark ? "#887628" : '#f8e287';
+    case 'deadline':    // 截止
+      return isDark ? "#93000a" : '#f87171';
+    case 'competition': // 比赛
+      return isDark ? "#517f7c" : '#bcece7';
+    case 'progress_report': // 进度报告
+      return isDark ? '#4c662b' : '#c5ecce';
+    default:
+      return isDark ? '#1a1a1a' : '#888';
   }
 };
 
-// 状态颜色
+// 状态颜色（不区分深色模式）
 const getColorByStatus = (status) => {
   switch (status) {
-    case 'accept': return '#10b981';
-    case 'pending': return '#555';
-    case 'reject': return '#ef4444';
-    default: return '#9ca3af';
+    case 'accept':  // 已通过
+      return '#10b981';
+    case 'pending': // 待处理
+      return '#555';
+    case 'reject':  // 已拒绝
+      return '#ef4444';
+    default:
+      return '#9ca3af';
+  }
+};
+const getTypeClasses = (type) => {
+  switch (type) {
+    case 'meeting':
+      return 'bg-yellow-100 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800';
+    case 'deadline':
+      return 'bg-red-100 dark:bg-red-900 border-red-200 dark:border-red-800';
+    case 'competition':
+      return 'bg-teal-100 dark:bg-teal-900 border-teal-200 dark:border-teal-800';
+    case 'progress_report':
+      return 'bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-800';
+    default:
+      return 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700';
   }
 };
 
+// 状态颜色（使用 tailwind 类名）
+const getStatusColorClass = (status) => {
+  switch (status) {
+    case 'accept':
+      return 'bg-emerald-500';
+    case 'pending':
+      return 'bg-gray-500';
+    case 'reject':
+      return 'bg-rose-500';
+    default:
+      return 'bg-gray-400';
+  }
+};
 // 日期格式化函数
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -86,7 +123,7 @@ const TimeLine = ({ teamId, role}) => {
               title: item.title || '未填写标题',
               description: '',
               icon: null,
-              lineColor: isPast ? '#3b82f6' : '#555',
+              lineColor: isPast ? '#3b82f6' : '#ddd',
               status:
                 item.status === 'pending'
                   ? '待处理'
@@ -141,28 +178,27 @@ const TimeLine = ({ teamId, role}) => {
   };
 
   // 自定义渲染详情内容
-  const renderDetail = (rowData) => (
-    <View
-      className='mr-2 justify-between items-center flex-row rounded-xl border border-gray-300 dark:border-gray-600'
-      style={{
-        backgroundColor: getColorByType(rowData.type, isDark),
-      }}
-    >
-      <View className='p-4'>
-        <Text style={{ fontWeight: '600'}} className='overflow-hidden dark:text-gray-300'>
-          {rowData.title}
-        </Text>
-        <Text className='text-sm text-black dark:text-gray-300 mt-1 overflow-hidden'>提交者：{rowData.userName}</Text>
+ const renderDetail = (rowData) => (
+      <View
+        className={`flex-row justify-between items-center rounded-xl ${getTypeClasses(rowData.type)} border`}
+      >
+        <View className='p-4'>
+          <Text style={{ fontWeight: '600'}} className='overflow-hidden dark:text-gray-300'>
+            {rowData.title}
+          </Text>
+          <Text className='text-sm text-black dark:text-gray-300 mt-1 overflow-hidden'>提交者：{rowData.userName}</Text>
+        </View>
+        {rowData.type === "progress_report" && (
+          <View className={`px-4 h-full ${getStatusColorClass(rowData.statusKey)} rounded-r-xl items-center justify-center`}>
+            <Text className="text-sm text-white dark:text-gray-300 font-medium">
+              {rowData.status}
+            </Text>
+          </View>
+        )}
       </View>
-    {rowData.type == "progress_report" &&
-      <View className='px-4 h-full bg-[#73a273] dark:bg-[#172b00] rounded-r-xl items-center justify-center'>
-        <Text className={`text-sm text-white  dark:text-gray-300 font-medium`}>
-          {rowData.status}
-        </Text>
-      </View>}
-    </View>
   );
 
+  
   if (isLoading && data.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

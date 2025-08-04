@@ -250,8 +250,8 @@ const PersonChat = ( {chatId} ) => {
         <Bubble
           {...props}
           wrapperStyle={{
-            left: {
-              backgroundColor: isDarkMode ? '#2f312a' : '#e8e9de',
+            left: { // AI消息气泡样式
+              backgroundColor: isDarkMode ? '#313131' : '#f0f0f0',
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
               borderBottomRightRadius: 10,
@@ -261,8 +261,8 @@ const PersonChat = ( {chatId} ) => {
               paddingTop: 5,
               marginBottom: 10,
             },
-            right: {
-              backgroundColor: isDarkMode ? '#8a9579' : '#477572',
+            right: { // 发送者消息气泡样式
+              backgroundColor: isDarkMode ? '#313131' : '#f0f0f0',
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
               borderBottomLeftRadius: 10,
@@ -278,7 +278,15 @@ const PersonChat = ( {chatId} ) => {
               color: isDarkMode ? '#fff' : '#000',
             },
             right: {
-              color: isDarkMode ? '#fff' : '#fff',
+              color: isDarkMode ? '#fff' : '#000',
+            },
+          }}
+         timeTextStyle={{
+            left: {
+              color: isDarkMode ? '#ccc' : '#666',
+            },
+            right: {
+              color: isDarkMode ? '#ccc' : '#666',
             },
           }}
         />
@@ -300,20 +308,13 @@ const PersonChat = ( {chatId} ) => {
   const renderSend = (props) => (
     <Send {...props}>
       <View style={styles.sendButton}>
-        <MaterialIcon name="send" size={16} color="#fff" />
+        <MaterialIcon name="send" size={15} color="#fff" />
       </View>
     </Send>
   );
 
     return (
-    <View className='flex-1 bg-gray-900'>
-        {isDarkMode ? 
-        (
-            <>
-            <SquareGridBackground
-                pattern={PatternSVG}
-                size={70}
-            />
+    <View style={{ flex: 1, backgroundColor: isDarkMode ? "#141414" : "#fff" }}>
             <GiftedChat
                 messages={messages}
                 onSend={onSend}
@@ -338,14 +339,15 @@ const PersonChat = ( {chatId} ) => {
                 maxLength: 200,
                 }}
                 textInputStyle={{
-                color: '#fff',
-                fontSize: 16,
-                maxHeight: 100,
-                minHeight: 40,
-                flex: 1,
-                backgroundColor:"#2b2b32",
-                borderRadius: 20,
-                paddingHorizontal: 15,
+                  color: isDarkMode ? '#fff' : '#000',
+                  fontSize: 16,
+                  padding: 10,
+                  maxHeight: 100,
+                  minHeight: 40,
+                  flex: 1,
+                  backgroundColor: isDarkMode ? "#141414" : "#fefefe",
+                  borderRadius: 20,
+                  paddingHorizontal: 15,
                 }}
                 listViewProps={{
                 style: { backgroundColor: 'transparent' },
@@ -356,52 +358,6 @@ const PersonChat = ( {chatId} ) => {
                 <ActivityIndicator size="large" color="#477572" />
                 </View>
             )}
-            </>
-        ) : (
-            <LinearGradient colors={['#f0f9eb', '#c9e5b5']} style={{ flex: 1 }}>
-            <GiftedChat
-                messages={messages}
-                onSend={onSend}
-                user={{
-                _id: user?.id || 0,
-                name: user?.name || '',
-                avatar:'',
-                }}
-                placeholder="输入消息..."
-                renderUsernameOnMessage
-                isKeyboardInternallyDisabled={isChatLoading}
-                renderBubble={renderBubble}
-                renderSend={renderSend}
-                onLoadEarlier={loadEarlierMessages}
-                isLoadingEarlier={isChatLoading}
-                loadEarlier={hasMoreMessages}
-                infiniteScroll
-                bottomOffset={Platform.OS === 'ios' ? 34 : 0}
-                keyboardShouldPersistTaps="handled"
-                textInputProps={{
-                maxLength: 200,
-                }}
-                textInputStyle={{
-                color: isDarkMode ? '#fff' : '#000',
-                fontSize: 16,
-                maxHeight: 100,
-                minHeight: 40,
-                flex: 1,
-                backgroundColor: "#f9faef",
-                borderRadius: 20,
-                paddingHorizontal: 15,
-                }}
-                listViewProps={{
-                style: { backgroundColor: 'transparent' },
-                }}
-            />
-            {isChatLoading && (
-                <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color="#477572" />
-                </View>
-            )}
-            </LinearGradient>
-        )}
     </View>
     );
 };

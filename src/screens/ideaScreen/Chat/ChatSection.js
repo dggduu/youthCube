@@ -1,13 +1,13 @@
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import {useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { getItemFromAsyncStorage, setItemToAsyncStorage } from '../../../utils';
 import { BASE_INFO } from '../../../constant/base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useToast } from '../../../components/tip/ToastHooks';
 import axios from "axios";
-
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -26,35 +26,36 @@ const ChatSection = () => {
 
     useEffect(() => {
         const fetchUserData = async () => {
-        try {
-            const userString = await getItemFromAsyncStorage("user");
-            if (!userString) {
-            setLoading(false);
-            return;
-            }
-
-            const userObj = userString;
-            const userId = userObj.id;
-
-            const response = await axios.get(
-            `${BASE_INFO.BASE_URL}api/users/${userId}`,
-            {
-                headers: {
-                'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+            try {
+                const userString = await getItemFromAsyncStorage("user");
+                if (!userString) {
+                    setLoading(false);
+                    return;
                 }
-            }
-            );
 
-            await setItemToAsyncStorage("user",response.data);
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-        } finally {
-            setLoading(false);
-        }
+                const userObj = userString;
+                const userId = userObj.id;
+
+                const response = await axios.get(
+                    `${BASE_INFO.BASE_URL}api/users/${userId}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+                        }
+                    }
+                );
+
+                await setItemToAsyncStorage("user", response.data);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchUserData();
     }, []);
+
     const fetchTeamChat = async (teamId) => {
         try {
             const accessToken = await getItemFromAsyncStorage('accessToken');
@@ -78,7 +79,7 @@ const ChatSection = () => {
         }
     };
 
-   const fetchPrivateChats = async (pageNum = 0) => {
+    const fetchPrivateChats = async (pageNum = 0) => {
         if (!hasMore && pageNum !== 0) return;
 
         try {
@@ -105,7 +106,6 @@ const ChatSection = () => {
             const newChats = Array.isArray(data.items) ? data.items : [];
 
             if (newChats.length === 0 && pageNum === 0) {
-                // 这里修改为只设置状态，不显示toast
                 setPrivateChatError(filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录');
             } else if (newChats.length === 0 && pageNum > 0) {
                 setHasMore(false);
@@ -167,130 +167,189 @@ const ChatSection = () => {
 
     const renderPrivateChat = ({ item }) => (
         <TouchableOpacity
-            className={`p-4 border border-gray-300 dark:border-gray-600 rounded-xl flex-row items-center ${item.other_user.is_following ? 'bg-blue-50 dark:bg-blue-900' : 'bg-transparent'}`}
-            onPress={() => navigation.navigate('single', { chatId: item.room_id, name:item.other_user.name })}
+            className={`p-4 mb-3 rounded-lg shadow-sm 
+                ${item.other_user.is_following 
+                    ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500' 
+                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                }`}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('single', { chatId: item.room_id, name: item.other_user.name })}
         >
-            <MaterialIcons
-                name={item.other_user.is_following ? 'favorite' : 'person'}
-                size={20}
-                color={item.other_user.is_following ? '#4B77D1' : '#666'}
-            />
-            <View className="flex-1 ml-2">
-                <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ flexShrink: 1 }}
-                    className={`text-base ${item.other_user.is_following ? 'text-blue-600 font-bold dark:text-blue-100' : 'text-black dark:text-gray-300'}`}>
-                    
-                    {item.other_user.name}
-                </Text>
-                <Text className="text-gray-500 text-xs dark:text-gray-300">
-                    最近消息: {item.last_message || '暂无消息'}
-                </Text>
-            </View>
-            {item.unreadCount > 0 && (
-                <View className="bg-red-500 rounded-full w-5 h-5 justify-center items-center">
-                    <Text className="text-white text-xs dark:text-gray-300">{item.unreadCount}</Text>
+            <View className="flex-row items-center">
+                <View className={`p-2 rounded-full mr-3 ${item.other_user.is_following ? 'bg-blue-100 dark:bg-blue-800' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                    <MaterialIcons
+                        name={item.other_user.is_following ? 'favorite' : 'person'}
+                        size={20}
+                        color={item.other_user.is_following ? '#409eff' : '#909399'}
+                    />
                 </View>
-            )}
+                <View className="flex-1">
+                    <View className="flex-row justify-between items-center">
+                        <Text
+                            numberOfLines={1}
+                            className={`text-base font-medium 
+                                ${item.other_user.is_following 
+                                    ? 'text-blue-600 dark:text-blue-300' 
+                                    : 'text-gray-800 dark:text-gray-200'
+                                }`}
+                        >
+                            {item.other_user.name}
+                        </Text>
+                        {item.unreadCount > 0 && (
+                            <View className="bg-red-500 rounded-full w-5 h-5 justify-center items-center">
+                                <Text className="text-white text-xs">{item.unreadCount}</Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text className="text-gray-500 text-sm mt-1 dark:text-gray-400">
+                        {item.last_message || '暂无消息'}
+                    </Text>
+                </View>
+            </View>
         </TouchableOpacity>
     );
 
     return (
         <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-            <View className='px-4 mt-3'>
+            {/* Header Buttons */}
+            <View className="flex-row p-4 space-x-3">
                 <TouchableOpacity
-                    onPress={()=>{
-                        navigation.navigate("FriendInvite");
-                    }}
-                    className='items-center rounded-lg justify-center p-3 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600'
+                    className="flex-1 items-center justify-center p-3 rounded-l-lg 
+                        bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                        shadow-sm active:bg-gray-100 dark:active:bg-gray-700"
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("FriendInvite")}
                 >
-                    <Text className='dark:text-white'>新朋友</Text>
+                    <View className="flex-row items-center">
+                        <MaterialIcons name="person-add" size={18} color="#409eff" />
+                        <Text className="ml-2 text-gray-800 dark:text-gray-200">新朋友</Text>
+                    </View>
                 </TouchableOpacity>
                 <TouchableOpacity
-                className='items-center rounded-lg justify-center p-3 mt-3 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600'
-                    onPress={()=>{
-                        navigation.navigate("TeamInvite");
-                    }}
+                    className="flex-1 items-center justify-center p-3 rounded-r-lg 
+                        bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                        shadow-sm active:bg-gray-100 dark:active:bg-gray-700"
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("TeamInvite")}
                 >
-                    <Text className='dark:text-white'>群通知</Text>
+                    <View className="flex-row items-center">
+                        <MaterialIcons name="notifications" size={18} color="#e6a23c" />
+                        <Text className="ml-2 text-gray-800 dark:text-gray-200">群通知</Text>
+                    </View>
                 </TouchableOpacity>
             </View>
 
-            {/* 团队聊天 */}
+            {/* Team Chat Section */}
             {teamChat && (
-                <View className="p-4">
-                    <Text className="font-bold mb-2 dark:text-gray-200">团队聊天</Text>
+                <View className="px-4 mb-4">
+                    <Text className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">团队聊天</Text>
                     <TouchableOpacity
-                        className="p-4 bg-blue-50 rounded-lg flex-row items-center dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                        onPress={() => navigation.navigate('group', { chatId: teamChat.chatRoomId, team_id:teamChat.teamId, name:teamChat.name })}
+                        className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                            shadow-sm active:bg-gray-50 dark:active:bg-gray-700/50"
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('group', { 
+                            chatId: teamChat.chatRoomId, 
+                            team_id: teamChat.teamId, 
+                            name: teamChat.name 
+                        })}
                     >
-                        <MaterialIcons name="groups" size={24} color="#1976d2" />
-                        <View className="flex-1 ml-2">
-                            <Text
-                                className="text-base font-bold dark:text-gray-300"
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                                style={{ flexShrink: 1 }}>{teamChat.name}</Text>
-                            <Text className="text-gray-500 text-xs dark:text-gray-300">团队 ID: {teamChat.teamId}</Text>
+                        <View className="flex-row items-center">
+                            <View className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3">
+                                <MaterialIcons name="groups" size={22} color="#409eff" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-base font-medium text-gray-800 dark:text-gray-200">
+                                    {teamChat.name}
+                                </Text>
+                                <Text className="text-gray-500 text-sm mt-1 dark:text-gray-400">
+                                    团队 ID: {teamChat.teamId}
+                                </Text>
+                            </View>
+                            <MaterialIcons 
+                                name="chevron-right" 
+                                size={24} 
+                                color="#c0c4cc" 
+                            />
                         </View>
-                        <MaterialIcons name="chevron-right" size={24} color="#666" />
                     </TouchableOpacity>
                 </View>
             )}
 
-            {/* 私聊列表 */}
-            <View className="p-4 flex-1 mb-10">
-                <View className="flex-row justify-between items-center mb-2">
-                    <Text className="font-bold dark:text-gray-200">私聊列表</Text>
+            {/* Private Chats Section */}
+            <View className="flex-1 px-4">
+                <View className="flex-row justify-between items-center mb-3">
+                    <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">私聊列表</Text>
                     <TouchableOpacity
-                        className={`px-2 py-1 flex-row items-center rounded-full ${filterFollowing ? 'bg-blue-50' : 'bg-transparent'}`}
+                        className={`px-3 py-1.5 rounded-full flex-row items-center 
+                            ${filterFollowing 
+                                ? 'bg-blue-100 dark:bg-blue-900/30' 
+                                : 'bg-gray-100 dark:bg-gray-700'
+                            }`}
+                        activeOpacity={0.7}
                         onPress={() => setFilterFollowing(!filterFollowing)}
                     >
                         <MaterialIcons
                             name={filterFollowing ? 'filter-alt' : 'filter-list'}
-                            size={18}
-                            color={filterFollowing ? '#1976d2' : '#666'}
+                            size={16}
+                            color={filterFollowing ? '#409eff' : '#909399'}
                         />
-                        <Text className={`ml-1 text-xs ${filterFollowing ? 'text-blue-600 dark:text-[#409eff]' : 'text-gray-500 dark:text-gray-200'}`}>
-                            {filterFollowing ? '仅显示关注' : '筛选'}
+                        <Text className={`ml-1 text-sm 
+                            ${filterFollowing 
+                                ? 'text-blue-600 dark:text-blue-300' 
+                                : 'text-gray-600 dark:text-gray-300'
+                            }`}
+                        >
+                            {filterFollowing ? '仅关注' : '筛选'}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 {loading && page === 0 ? (
-                    <ActivityIndicator size="large" className="mt-5" />
+                    <View className="flex-1 justify-center items-center">
+                        <ActivityIndicator size="large" color="#409eff" />
+                    </View>
                 ) : (
                     <FlatList
                         data={privateChats}
                         renderItem={renderPrivateChat}
                         keyExtractor={(item) => item.room_id}
+                        contentContainerStyle={{ paddingBottom: 20 }}
                         onEndReached={() => !loading && hasMore && fetchPrivateChats(page + 1)}
-                        onEndReachedThreshold={0.5}
+                        onEndReachedThreshold={0.3}
                         ListFooterComponent={() =>
-                            loading && page > 0 ? <ActivityIndicator size="small" /> : null
+                            loading && page > 0 ? (
+                                <View className="py-4">
+                                    <ActivityIndicator size="small" color="#409eff" />
+                                </View>
+                            ) : null
                         }
                         ListEmptyComponent={() => (
-                            <View className="py-4 items-center">
+                            <View className="py-10 items-center justify-center">
                                 <MaterialIcons 
                                     name={privateChatError?.includes('失败') ? 'error-outline' : 'chat'} 
-                                    size={24} 
-                                    color={privateChatError?.includes('失败') ? '#ef4444' : '#9ca3af'} 
+                                    size={40} 
+                                    color={privateChatError?.includes('失败') ? '#f56c6c' : '#c0c4cc'} 
                                 />
-                                <Text className={`mt-2 ${privateChatError?.includes('失败') ? 'text-red-500' : 'text-gray-500'}`}>
+                                <Text className={`mt-3 text-lg 
+                                    ${privateChatError?.includes('失败') 
+                                        ? 'text-red-500' 
+                                        : 'text-gray-500 dark:text-gray-400'
+                                    }`}
+                                >
                                     {privateChatError || (filterFollowing ? '暂无关注的私聊记录' : '暂无私聊记录')}
                                 </Text>
                                 {privateChatError?.includes('失败') && (
                                     <TouchableOpacity 
                                         onPress={() => fetchPrivateChats(0)}
-                                        className="mt-2 px-4 py-2 bg-[#409eff] rounded-lg"
+                                        className="mt-4 px-6 py-2 bg-blue-500 rounded-lg 
+                                            active:bg-blue-600"
+                                        activeOpacity={0.7}
                                     >
                                         <Text className="text-white">重新加载</Text>
                                     </TouchableOpacity>
                                 )}
                             </View>
                         )}
-                        className="flex-1"
                     />
                 )}
             </View>

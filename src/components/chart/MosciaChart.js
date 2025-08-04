@@ -11,10 +11,10 @@ import {
 import { useToast } from '../../components/tip/ToastHooks';
 import { getItemFromAsyncStorage } from '../../utils/LocalStorage';
 import { BASE_INFO } from '../../constant/base';
-
-import axios from 'axios'
+import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 import { WhiteSpace } from '@ant-design/react-native';
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -73,16 +73,26 @@ const calculateMonthLabels = (weeks) => {
 
   weeks.forEach((week, weekIndex) => {
     if (!week.length) return;
-    const firstDay = new Date(week[0]);
-    const month = firstDay.getMonth() + 1;
-    const key = `${firstDay.getFullYear()}-${month}`;
+    
+    // Find the first day of the month in this week
+    const firstDayOfMonth = week.find(day => {
+      const d = new Date(day);
+      return d.getDate() === 1;
+    });
 
-    if (!seenMonths.has(key)) {
-      seenMonths.add(key);
-      monthLabels.push({
-        month,
-        weekIndex,
-      });
+    if (firstDayOfMonth) {
+      const d = new Date(firstDayOfMonth);
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const key = `${year}-${month}`;
+
+      if (!seenMonths.has(key)) {
+        seenMonths.add(key);
+        monthLabels.push({
+          month,
+          weekIndex,
+        });
+      }
     }
   });
 
@@ -117,16 +127,7 @@ const getColorByType = (types, isDarkMode, maxCount) => {
   return isDarkMode ? '#1a1a1a' : '#ebedf0';
 };
 
-const useChartStyles = (isDarkMode) => {
-  const colors = {
-    bg: isDarkMode ? '#121212' : '#fff',
-    itemBg: isDarkMode ? '#1a1a1a' : '#ebedf0',
-    todayBorder: isDarkMode ? '#fff' : '#333',
-    monthLabel: isDarkMode ? '#ccc' : '#000',
-    weekdayLabel: isDarkMode ? '#999' : '#000',
-    legendText: isDarkMode ? '#fff' : '#000',
-  };
-
+const useChartStyles = () => {
   return StyleSheet.create({
     legendContainer: {
       flexDirection: 'row',
@@ -144,10 +145,6 @@ const useChartStyles = (isDarkMode) => {
       marginRight: 4,
       borderRadius: 2,
     },
-    legendText: {
-      fontSize: 10,
-      color: colors.legendText,
-    },
     months: {
       height: 16,
       position: 'absolute',
@@ -159,19 +156,17 @@ const useChartStyles = (isDarkMode) => {
     monthLabel: {
       position: 'absolute',
       fontSize: 10,
-      color: colors.monthLabel,
     },
     days: {
       left: 3,
       width: 16,
       height: '100%',
       zIndex: 1,
-      marginTop:13
+      marginTop: 13
     },
     weekDay: {
       position: 'absolute',
       fontSize: 10,
-      color: colors.weekdayLabel,
     },
     gridContainer: {
       flexDirection: 'row',
@@ -185,15 +180,13 @@ const useChartStyles = (isDarkMode) => {
       height: 12,
       marginBottom: 3,
       borderRadius: 4,
-      backgroundColor: colors.itemBg,
     },
     todayHighlight: {
       borderWidth: 1,
-      borderColor: colors.todayBorder,
     },
     scrollView: {
       width: Dimensions.get('window').width - 32,
-      marginLeft:4
+      marginLeft: 4
     },
     scrollViewContent: {
       paddingRight: 16,
@@ -218,8 +211,7 @@ const MosciaChart = ({ team_id }) => {
   }
 
   const monthLabels = calculateMonthLabels(weeks);
-
-  const styles = useChartStyles(isDark);
+  const styles = useChartStyles();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -272,29 +264,25 @@ const MosciaChart = ({ team_id }) => {
   }, [isLoading]);
 
   if (isLoading) {
-    return (
-      <View style={styles.container}>
-      </View>
-    );
+    return <View style={styles.container} />;
   }
-  if(!team_id){
-    return (
-      <WhiteSpace/>
-    )
+  
+  if (!team_id) {
+    return <WhiteSpace />;
   }
+
   return (
-    <View className='justify-center bg-white dark:bg-gray-700 py-5 px-3 mx-3 rounded-xl items-center border border-gray-300 dark:border-gray-600'>
-      {/* <Text className='font-semibold self-start text-lg mb-3 ml-2'>过去一年的时间线：</Text> */}
-      <View className=' flex-row'>
+    <View className="justify-center bg-white dark:bg-gray-700 py-5 px-3 mx-3 rounded-xl items-center border border-gray-300 dark:border-gray-600">
+      <View className="flex-row">
         {/* 星期标签 */}
         <View style={styles.days}>
-          <Text style={[styles.weekDay, { top: 0 }]}>日</Text>
-          <Text style={[styles.weekDay, { top: 15 }]}>一</Text>
-          <Text style={[styles.weekDay, { top: 30 }]}>二</Text>
-          <Text style={[styles.weekDay, { top: 45 }]}>三</Text>
-          <Text style={[styles.weekDay, { top: 60 }]}>四</Text>
-          <Text style={[styles.weekDay, { top: 75 }]}>五</Text>
-          <Text style={[styles.weekDay, { top: 90 }]}>六</Text>
+          <Text style={[styles.weekDay, { top: 0 }]} className="text-gray-800 dark:text-gray-300">日</Text>
+          <Text style={[styles.weekDay, { top: 15 }]} className="text-gray-800 dark:text-gray-300">一</Text>
+          <Text style={[styles.weekDay, { top: 30 }]} className="text-gray-800 dark:text-gray-300">二</Text>
+          <Text style={[styles.weekDay, { top: 45 }]} className="text-gray-800 dark:text-gray-300">三</Text>
+          <Text style={[styles.weekDay, { top: 60 }]} className="text-gray-800 dark:text-gray-300">四</Text>
+          <Text style={[styles.weekDay, { top: 75 }]} className="text-gray-800 dark:text-gray-300">五</Text>
+          <Text style={[styles.weekDay, { top: 90 }]} className="text-gray-800 dark:text-gray-300">六</Text>
         </View>
 
         <ScrollView
@@ -316,6 +304,7 @@ const MosciaChart = ({ team_id }) => {
                       left: label.weekIndex * 15 + 2,
                     },
                   ]}
+                  className="text-gray-800 dark:text-gray-300"
                 >
                   {label.month}月
                 </Text>
@@ -331,7 +320,7 @@ const MosciaChart = ({ team_id }) => {
                       key={day}
                       style={[
                         styles.gridItem,
-                        day === today && styles.todayHighlight,
+                        day === today && [styles.todayHighlight, { borderColor: isDark ? '#fff' : '#333' }],
                         {
                           backgroundColor: getColorByType(mosaicTile[day], isDark, maxCount),
                         },
@@ -350,25 +339,25 @@ const MosciaChart = ({ team_id }) => {
       </View>
 
       {/* 图例 */}
-      <View className='flex-row mt-3 self-center'>
+      <View className="flex-row mt-3 self-center">
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#3b82f6' }]} />
-          <Text style={styles.legendText}>比赛</Text>
+          <Text className="text-xs text-gray-800 dark:text-gray-300">比赛</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#facc15' }]} />
-          <Text style={styles.legendText}>会议</Text>
+          <Text className="text-xs text-gray-800 dark:text-gray-300">会议</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#66bb6a' }]} />
           <View style={[styles.legendColor, { backgroundColor: '#81c784' }]} />
           <View style={[styles.legendColor, { backgroundColor: '#43a047' }]} />
           <View style={[styles.legendColor, { backgroundColor: '#1b5e20' }]} />
-          <Text style={styles.legendText}>进度报告</Text>
+          <Text className="text-xs text-gray-800 dark:text-gray-300">进度报告</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#ef4444' }]} />
-          <Text style={styles.legendText}>截止时间</Text>
+          <Text className="text-xs text-gray-800 dark:text-gray-300">任务点</Text>
         </View>
       </View>
     </View>
