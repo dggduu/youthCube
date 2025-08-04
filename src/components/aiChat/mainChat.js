@@ -550,7 +550,7 @@ const MainChat = () => {
     return (
 
       <View
-        className={`flex-row  px-3 py-2 border rounded-2xl mb-3 mx-2 border-gray-400 `}
+        className={`flex-row  px-3 py-2 border rounded-2xl mb-3 mx-2 border-gray-200 `}
       >
         <View className="mr-2 flex-row items-center justify-center">
           <TouchableOpacity 

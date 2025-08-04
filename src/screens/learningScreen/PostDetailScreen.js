@@ -309,17 +309,16 @@ const PostDetailScreen = () => {
               {tags.map(tag => (
                 <TouchableOpacity
                   key={tag.tag_id}
-                  className="bg-gray-300 dark:bg-gray-700 rounded-full px-3 py-1 mr-2 mb-2"
+                  className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full mr-2 mb-2 border border-blue-100 dark:border-blue-800 flex-row items-center"
                   onPress={() => navigation.navigate('Tag', { id: tag.tag_id })}
                 >
-                  <Text className="text-sm text-gray-800 dark:text-gray-200">
+                  <Text className="text-blue-600 dark:text-blue-300 text-sm font-medium">
                     #{tag.tag_name}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           )}
-
           <View className="flex-row items-center border-t border-b border-gray-200 dark:border-gray-700 py-3 mb-4">
             <TouchableOpacity
               className="flex-row items-center mr-6"

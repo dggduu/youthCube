@@ -26,9 +26,9 @@ const TeamCard = ({ title, tags, onPress }) => {
                     params: { tagId: tag.tag_id },
                   })
                 }
-                className="bg-indigo-100 dark:bg-indigo-700 px-3 py-1 rounded-full mr-2 mb-1"
+                className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full mr-2 mb-2 border border-blue-100 dark:border-blue-800 flex-row items-center"
               >
-                <Text className="text-sm text-indigo-800 dark:text-gray-100 font-medium">
+                <Text className="text-blue-600 dark:text-blue-300 text-sm font-medium">
                   {tag.tag_name}
                 </Text>
               </TouchableOpacity>

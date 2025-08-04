@@ -188,7 +188,7 @@ const TagSection = () => {
       {item.imgUrl && (
         <Image 
           source={{ uri: item.imgUrl }} 
-          className="w-full h-40" 
+          className="aspect-video" 
           resizeMode="cover"
         />
       )}

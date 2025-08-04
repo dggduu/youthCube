@@ -1,22 +1,23 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, ToastAndroid, Modal, TextInput, useColorScheme } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Modal, TextInput, useColorScheme } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { BASE_INFO } from '../../constant/base';
 import { GRADES, PartyGrade } from '../../constant/user';
 import { getItemFromAsyncStorage, setItemToAsyncStorage } from "../../utils/LocalStorage";
-import { Screen } from 'react-native-screens';
-import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { navigate } from "../../navigation/NavigatorRef";
 import { useToast } from "../../components/tip/ToastHooks";
-import axios from 'axios'
+import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+
 const api = axios.create();
 setupAuthInterceptors(api);
+
 const TeamDetailScreen = () => {
   const route = useRoute();
   const { showToast } = useToast();
   const { teamId, teamName } = route.params || {};
-  const isDark = useColorScheme() == 'dark';
+  const isDark = useColorScheme() === 'dark';
   const [teamData, setTeamData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,20 +33,22 @@ const TeamDetailScreen = () => {
   const [articlesLoading, setArticlesLoading] = useState(false);
   const [lastApplicationTime, setLastApplicationTime] = useState(null);
 
-  useLayoutEffect(()=>{
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity
-            onPress={() => navigate('MainTabNavigator', { screen: '想法市场'})}
-            style={{ marginRight: 10 }}
-          >
-            <MaterialIcons name="home" size={24} color={isDark ? "#eee" : "#333"}/>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          onPress={() => navigate('MainTabNavigator', { screen: '想法市场' })}
+          className="mr-4"
+        >
+          <MaterialIcons 
+            name="home" 
+            size={24} 
+            color={isDark ? "#e5e7eb" : "#1f2937"} 
+          />
+        </TouchableOpacity>
       ),
     });
-  },[navigation]);
+  }, [navigation, isDark]);
 
   useEffect(() => {
     const fetchTeamDetails = async () => {
@@ -207,7 +210,8 @@ const handleApplyToJoin = async () => {
   if (error) {
     return (
       <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
-        <Text className="text-red-500 dark:text-red-400">加载失败: {error}</Text>
+        <MaterialIcons name="error-outline" size={48} color="#ef4444" />
+        <Text className="mt-4 text-red-500 dark:text-red-400 text-lg">加载失败: {error}</Text>
       </View>
     );
   }
@@ -215,200 +219,258 @@ const handleApplyToJoin = async () => {
   const gradeLabel = GRADES.find(grade => grade.value === teamData.grade)?.label || '未知';
 
   return (
-    <ScrollView className="flex-1 p-4 bg-gray-50 dark:bg-gray-900">
-      {/* 团队名称 */}
-      <View className='mb-4 bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-xl justify-between'>
-        <View className="flex-row justify-between items-start mb-4">
-          <View className='ml-1 flex-1 mr-2'>
-            <Text 
-              className="text-2xl dark:text-white mb-2" 
-              style={{fontFamily:"NotoSerifSC"}}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {teamData.team_name}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              创建于 {new Date(teamData.create_at).toLocaleDateString()}
-            </Text>
-          </View>
-          {/* 等级与公开状态*/}
-          <View className="">
-            <View className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-t-lg">
-              <Text className="text-blue-700 dark:text-gray-200 text-sm">推荐加入等级: {gradeLabel}</Text>
-            </View>
-            <View className="bg-green-100 dark:bg-cyan-600 px-3 py-2 rounded-b-lg">
-              <Text className="text-green-700 dark:text-gray-300 text-sm">
-                {teamData.is_public ? '公开团队' : '私密团队'}
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      {/* Main Team Card */}
+      <View className="m-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+        <View className="p-5">
+          <View className="flex-row justify-between items-start mb-4">
+            <View className="flex-1 mr-3">
+              <Text 
+                className="text-2xl font-bold text-gray-800 dark:text-white mb-2" 
+                style={{ fontFamily: "NotoSerifSC" }}
+                numberOfLines={2}
+              >
+                {teamData.team_name}
               </Text>
+              <View className="flex-row items-center">
+                <MaterialIcons name="date-range" size={16} color="#6b7280" />
+                <Text className="ml-1 text-sm text-gray-500 dark:text-gray-400">
+                  创建于 {new Date(teamData.create_at).toLocaleDateString()}
+                </Text>
+              </View>
+            </View>
+            
+            <View className="flex-col ">
+              <View className="bg-blue-100 dark:bg-blue-900 px-5 py-1.5 rounded-t-lg flex-row">
+                <MaterialIcons name="grade" size={16} color="#1d4ed8" className="mr-1" />
+                <Text className="text-blue-800 dark:text-blue-100 text-sm font-medium">
+                  {gradeLabel}
+                </Text>
+              </View>
+              <View className={`${teamData.is_public ? 'bg-green-100 dark:bg-green-900' : 'bg-purple-100 dark:bg-purple-900'} px-3 py-1.5 roundedt-b-lg flex-row items-center`}>
+                <MaterialIcons 
+                  name={teamData.is_public ? "public" : "lock"} 
+                  size={16} 
+                  color={teamData.is_public ? "#166534" : "#6b21a8"} 
+                  className="mr-1"
+                />
+                <Text className={`${teamData.is_public ? 'text-green-800 dark:text-green-100' : 'text-purple-800 dark:text-purple-100'} text-sm font-medium`}>
+                  {teamData.is_public ? '公开团队' : '私密团队'}
+                </Text>
+              </View>
             </View>
           </View>
+          
+          <TouchableOpacity
+            className={`mt-4 py-3 rounded-md flex-row justify-center items-center ${
+              teamData.chatRoom.members?.some(member => member.user_id === userId)
+                ? 'bg-gray-200 dark:bg-gray-700'
+                : 'bg-blue-500 dark:bg-blue-600'
+            }`}
+            onPress={() => !teamData.chatRoom?.members?.some(member => member.user_id === userId) && setShowApplyModal(true)}
+            disabled={teamData.chatRoom?.members?.some(member => member.user_id === userId)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons 
+              name={teamData.chatRoom?.members?.some(member => member.user_id === userId) ? "check-circle" : "send"} 
+              size={20} 
+              color={teamData.chatRoom?.members?.some(member => member.user_id === userId) 
+                ? (isDark ? "#9ca3af" : "#6b7280") 
+                : "white"} 
+              className="mr-2"
+            />
+            <Text className={`font-medium ${
+              teamData.chatRoom?.members?.some(member => member.user_id === userId)
+                ? 'text-gray-600 dark:text-gray-300'
+                : 'text-white'
+            }`}>
+              {teamData.chatRoom?.members?.some(member => member.user_id === userId)
+                ? '已是成员'
+                : '申请加入'}
+            </Text>
+          </TouchableOpacity>
         </View>
-        {/* 申请加入按钮*/}
-        <TouchableOpacity
-          className={`${
-            teamData.chatRoom.members?.some(member => member.user_id === userId)
-              ? 'bg-gray-300 dark:bg-gray-600'
-              : 'bg-[#409eff] dark:bg-blue-700'
-          } py-3 rounded-lg`}
-          onPress={() => {
-            if (!teamData.chatRoom?.members?.some(member => member.user_id === userId)) {
-              setShowApplyModal(true);
-            }
-          }}
-          disabled={teamData.chatRoom?.members?.some(member => member.user_id === userId)}
-        >
-          <Text className={`text-center font-bold ${
-            teamData.chatRoom?.members?.some(member => member.user_id === userId)
-              ? 'text-gray-700 dark:text-gray-300'
-              : 'text-white'
-          }`}>
-            {teamData.chatRoom?.members?.some(member => member.user_id === userId)
-              ? '你已经是队伍成员'
-              : '申请加入队伍'}
-          </Text>
-        </TouchableOpacity>
+        
+        <View className="h-px bg-gray-200 dark:bg-gray-700 mx-5" />
+        
+        {teamData.tags?.length > 0 && (
+          <View className="px-5 mt-2">
+            <View className="flex-row items-center mb-3">
+              <MaterialIcons name="tag" size={20} color="#3b82f6" className="mr-2" />
+              <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队标签</Text>
+            </View>
+            <View className="flex-row flex-wrap">
+              {teamData.tags.map((tag) => (
+                <TouchableOpacity
+                  key={tag.tag_id}
+                  onPress={() => navigation.navigate("Tag", { tagId: tag.tag_id })}
+                  className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full mr-2 mb-2 border border-blue-100 dark:border-blue-800 flex-row items-center"
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="label" size={14} color="#3b82f6" className="mr-1" />
+                  <Text className="text-blue-600 dark:text-blue-300 text-sm font-medium">{tag.tag_name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+        {/* Description Card */}
+          <View className="px-5 py-4">
+            <View className="flex-row items-center mb-3">
+              <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队描述</Text>
+            </View>
+            <Text className="text-gray-700 dark:text-gray-300 leading-6">
+              {teamData.description || "暂无描述"}
+            </Text>
+          </View>
       </View>
 
-      {/* 标签 */}
-      {teamData.tags?.length > 0 && 
-        <View className="mb-4">
-          <Text className="font-semibold text-gray-700 dark:text-gray-300 mb-2 text-lg">标签</Text>
-          <View className="flex-row flex-wrap">
-            {teamData.tags.map((tag) => (
-              <TouchableOpacity 
-                key={tag.tag_id}
-                onPress={()=>{
-                  navigation.navigate("Tag",{
-                    tagId: tag.tag_id
-                  });
-                }}
-                className="bg-indigo-100 dark:bg-indigo-900 px-3 py-1 rounded-full mr-2 mb-2"
-              >
-                <Text className="text-indigo-700 dark:text-gray-200 text-sm">{tag.tag_name}</Text>
-              </TouchableOpacity>
-            ))}
+      {/* Members Card */}
+      <View className="mx-4 mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+        <View className="p-5">
+          <View className="flex-row items-center mb-3">
+            <MaterialIcons name="people" size={20} color="#3b82f6" className="mr-2" />
+            <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队成员</Text>
           </View>
-        </View>
-      }
-      {/* 队伍成员 */}
-      { teamData.chatRoom &&
-        <View className='mb-4 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'>
-          <Text className='font-semibold text-dark dark:text-gray-300 mt-1 text-lg'>队伍成员：</Text>
-          <View className='flex-row px-1 py-2'>
-            {teamData.chatRoom.members.map((member, index) => (
-              <TouchableOpacity
-                key={index}
-                className='mr-4 py-1 px-3 items-center justify-center rounded-md bg-gray-300 dark:bg-gray-900' 
-                onPress={()=>{
-                  navigation.navigate("profile", {
-                    team_id : teamData.team_id,
-                    user_id : member.user_id,
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+            <View className="flex-row">
+              {teamData.chatRoom.members.map((member, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="mr-3 py-2 px-4 items-center rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                  onPress={() => navigation.navigate("profile", {
+                    team_id: teamData.team_id,
+                    user_id: member.user_id,
                     user_name: member.name
-                  });
-                }}
+                  })}
+                  activeOpacity={0.7}
+                >
+                  <View className="flex-row items-center mb-1">
+                    <MaterialIcons
+                      name={member.role === 'member' ? 'person' : 'star'}
+                      color={isDark ? "#3b82f6" : "#2563eb"}
+                      size={18}
+                      className="mr-1"
+                    />
+                    <Text className="text-gray-800 dark:text-white font-medium text-sm">
+                      {member.name}
+                    </Text>
+                  </View>
+                  <Text className="text-gray-600 dark:text-gray-300 text-xs">
+                    {PartyGrade.find(role => role.value === member.role)?.grade || member.role}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+
+      {/* Articles Card */}
+      {articlesLoading ? (
+        <View className="mx-4 my-6 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 items-center">
+          <ActivityIndicator size="small" color="#3b82f6" />
+        </View>
+      ) : associatedArticles.length > 0 && (
+        <View className="mx-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+          <View className="p-5">
+            <View className="flex-row items-center mb-3">
+              <MaterialIcons name="article" size={20} color="#3b82f6" className="mr-2" />
+              <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队文章</Text>
+            </View>
+            {associatedArticles.map((article) => (
+              <TouchableOpacity
+                key={article.post_id}
+                onPress={() => navigation.navigate("Post", {
+                  screen: "PostDetail",
+                  params: { postId: article.post_id }
+                })}
+                className="mb-4 p-4 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                activeOpacity={0.7}
               >
-                <MaterialIcons 
-                  name={member.role === 'member' ? 'person' : 'star'} 
-                  color={isDark ? "#fff" : "#000"} 
-                  size={20}
-                />
-                <Text className='text-gray-700 dark:text-gray-300 leading-relaxed font-semibold text-sm mt-1'>{member.name}</Text>
-                <Text className='text-gray-700 dark:text-gray-300 leading-relaxed text-sm'>
-                  {PartyGrade.find(role => role.value === member.role)?.grade || member.role}
+                <Text className="text-lg font-bold text-gray-800 dark:text-white mb-1">{article.title}</Text>
+                <View className="flex-row items-center mb-2">
+                  <MaterialIcons name="person" size={14} color="#6b7280" className="mr-1" />
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                    作者: {article.author?.name || '未知'}
+                  </Text>
+                </View>
+                <Text className="text-gray-600 dark:text-gray-300" numberOfLines={2}>
+                  {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 100)}...
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
-      }
-      {/* 描述 */}
-      <View className="mb-4 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <Text className='font-semibold text-dark dark:text-gray-300 mt-1 text-lg'>队伍描述：</Text>
-        <Text className="text-gray-700 dark:text-gray-300 leading-relaxed">
-          {teamData.description}
-        </Text>
-      </View>
-
-      {/* 关联文章 */}
-      {articlesLoading ? (
-        <ActivityIndicator size="small" color="#3b82f6" className="my-4" />
-      ) : associatedArticles.length > 0 && (
-        <View className="mb-6">
-          <Text className="font-semibold text-gray-700 dark:text-gray-300 mb-2">已发布的文章</Text>
-          {associatedArticles.map((article) => (
-            <TouchableOpacity 
-              key={article.post_id} 
-              onPress={()=>{
-                navigation.navigate("Post",{
-                  screen: "PostDetail",
-                  params :{
-                    postId: article.post_id
-                  }
-                });
-              }}
-              className="mb-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-            >
-              <Text className="text-lg font-bold text-gray-800 dark:text-white mb-1">{article.title}</Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                作者: {article.author?.name || '未知'}
-              </Text>
-              <Text className="text-gray-600 dark:text-gray-300" numberOfLines={2}>
-                {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 100)}...
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       )}
 
-      {/* 申请加入模态框 */}
+      {/* Apply Modal */}
       <Modal
         visible={showApplyModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowApplyModal(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/70 p-4">
-          <View className="w-full bg-white dark:bg-gray-800 rounded-lg p-6">
-            <Text className="text-xl font-bold dark:text-white mb-4">申请加入团队</Text>
+        <View className="flex-1 justify-center items-center bg-black/50 p-4">
+          <View className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+            <View className="p-5 border-b border-gray-200 dark:border-gray-700 flex-row items-center">
+              <MaterialIcons name="send" size={20} color="#3b82f6" className="mr-2" />
+              <Text className="text-xl font-bold text-gray-800 dark:text-white">申请加入团队</Text>
+            </View>
             
-            <Text className="text-gray-700 dark:text-gray-300 mb-1">邮箱</Text>
-            <TextInput
-              className="border border-gray-300 dark:border-gray-600 rounded p-2 mb-4 dark:text-white dark:bg-gray-700"
-              placeholder="请输入您的邮箱"
-              placeholderTextColor="#9CA3AF"
-              value={applicationData.email}
-              onChangeText={(text) => setApplicationData({...applicationData, email: text})}
-              keyboardType="email-address"
-              style={{height:55}}
-            />
+            <View className="p-5">
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">邮箱地址</Text>
+                <View className="flex-row items-center border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                  <MaterialIcons name="email" size={20} color="#6b7280" className="ml-2" />
+                  <TextInput
+                    className="flex-1 h-12 px-3 text-gray-800 dark:text-white dark:bg-gray-700"
+                    placeholder="请输入您的邮箱"
+                    placeholderTextColor={isDark ? "#9ca3af" : "#6b7280"}
+                    value={applicationData.email}
+                    onChangeText={(text) => setApplicationData({...applicationData, email: text})}
+                    keyboardType="email-address"
+                  />
+                </View>
+              </View>
+              
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">申请理由</Text>
+                <View className="border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                  <TextInput
+                    className="h-24 px-3 py-2 text-gray-800 dark:text-white dark:bg-gray-700"
+                    placeholder="请说明您想加入的原因"
+                    placeholderTextColor={isDark ? "#9ca3af" : "#6b7280"}
+                    value={applicationData.description}
+                    onChangeText={(text) => setApplicationData({...applicationData, description: text})}
+                    multiline
+                  />
+                </View>
+              </View>
+            </View>
             
-            <Text className="text-gray-700 dark:text-gray-300 mb-1">申请描述</Text>
-            <TextInput
-              className="border border-gray-300 dark:border-gray-600 rounded p-2 mb-6 h-24 dark:text-white dark:bg-gray-700"
-              placeholder="请说明您想加入的原因"
-              placeholderTextColor="#9CA3AF"
-              value={applicationData.description}
-              onChangeText={(text) => setApplicationData({...applicationData, description: text})}
-              multiline
-            />
-            
-            <View className="flex-row justify-end">
+            <View className="p-4 border-t border-gray-200 dark:border-gray-700 flex-row justify-end space-x-3">
               <TouchableOpacity
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded mr-2"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md flex-row items-center"
                 onPress={() => setShowApplyModal(false)}
+                activeOpacity={0.7}
               >
-                <Text className="dark:text-white">取消</Text>
+                <MaterialIcons name="close" size={18} color="#6b7280" className="mr-1" />
+                <Text className="text-gray-700 dark:text-gray-300 font-medium">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 bg-[#409eff] dark:bg-blue-700 rounded"
+                className="px-4 py-2 bg-blue-500 dark:bg-blue-600 rounded-md flex-row items-center"
                 onPress={handleApplyToJoin}
                 disabled={isApplying}
+                activeOpacity={0.7}
               >
                 {isApplying ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-white">提交申请</Text>
+                  <>
+                    <MaterialIcons name="check" size={18} color="white" className="mr-1" />
+                    <Text className="text-white font-medium">提交申请</Text>
+                  </>
                 )}
               </TouchableOpacity>
             </View>

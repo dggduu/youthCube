@@ -46,7 +46,7 @@ const TeamNavigator = () => {
         component={TagSection}
         options={({ navigation }) => ({
           headerShown: true,
-          title: '根据Tag查询文章',
+          title: '根据Tag查询队伍',
           headerBackTitle: '返回',
           headerLeft: (props) => (
             <HeaderBackButton
