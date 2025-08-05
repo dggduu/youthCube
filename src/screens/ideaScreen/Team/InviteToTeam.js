@@ -147,7 +147,15 @@ const InviteToTeam = () => {
         >
           <Text className='text-white text-lg font-bold'>下一步</Text>
         </TouchableOpacity>
-        <Text className='text-sm mb-4 mt-2'>注：后面也可以单独添加</Text>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("SelctExample")}
+          className='bg-transparent items-center mt-2 mb-2'
+        >
+          <Text className='text-[#409eff]'>从模板创建</Text>
+        </TouchableOpacity>
+
+        <Text className='text-sm mb-4 mt-2 dark:text-gray-300 text-gray-700'>注：后面也可以单独添加</Text>
       </View>
     );
   };

@@ -19,7 +19,6 @@ import { GiftedChat, Send, Bubble, InputToolbar } from 'react-native-gifted-chat
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { BASE_INFO } from "../../constant/base";
-import { Shadow } from "react-native-shadow-2";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { pick, types, isCancel } from '@react-native-documents/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -621,7 +620,6 @@ const HelpChat = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? "#141414" : "#fff" }}>
-      <Shadow distance={10}>
         <View className="px-3 flex-row items-center justify-between shadow rounded-lg w-full " style={{ backgroundColor: isDarkMode ? "#0a0a0a" : "#fff", }}>
         <View className="flex-1 mr-2">
           <CustomPicker
@@ -647,7 +645,6 @@ const HelpChat = () => {
             <MaterialIcon name={"delete"} size={15} color={isDarkMode ? '#eee' : '#eee'} />
           </TouchableOpacity>
         </View>
-      </Shadow>
         <View style={{ flex: 1 }}>
           <GiftedChat
             messages={messages}

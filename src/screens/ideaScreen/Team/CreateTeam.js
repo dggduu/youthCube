@@ -5,14 +5,13 @@ import { BASE_INFO } from "../../../constant/base";
 import axios from "axios";
 import InputBox from "../../../components/inputBox/inputBox";
 import { useToast } from "../../../components/tip/ToastHooks";
-import { Picker } from '@react-native-picker/picker';
 import { useColorScheme } from 'nativewind';
 import { useNavigation } from "@react-navigation/native";
 import { GRADES } from "../../../constant/user";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import TagSelectionToast from "../../../components/TagSelectionToast";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
-
+import Custompicker from "../../../components/custom/Custompicker";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -24,8 +23,8 @@ const CreateTeam = () => {
   const [selectedGrade, setSelectedGrade] = useState('mature');
   const [isPublic, setIsPublic] = useState(true);
   const [selectedTags, setSelectedTags] = useState({
-    tagIds: [],    // 选中的标签ID数组
-    tags: []       // 选中的标签对象数组
+    tagIds: [],
+    tags: []
   });
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
@@ -37,10 +36,10 @@ const CreateTeam = () => {
   useEffect(() => {
     const checkUserTeam = async () => {
       const userData = await getItemFromAsyncStorage("user");
-      if (userData?.team_id) {
-        showToast("您已加入一个队伍，无法创建新队伍", "warning");
-        navigation.goBack();
-      }
+      // if (userData?.team_id) {
+      //   showToast("您已加入一个队伍，无法创建新队伍", "warning");
+      //   navigation.goBack();
+      // }
       setUser(userData);
     };
     checkUserTeam();
@@ -110,10 +109,10 @@ const CreateTeam = () => {
         );
 
         await setItemToAsyncStorage("user",response.data);
-        if (response.data.team_id) {
-          showToast("您已加入一个队伍，无法创建新队伍", "warning");
-          navigation.popToTop();
-        }
+        // if (response.data.team_id) {
+        //   showToast("您已加入一个队伍，无法创建新队伍", "warning");
+        //   navigation.popToTop();
+        // }
         setUser(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -125,21 +124,21 @@ const CreateTeam = () => {
     fetchUserData();
   }, []);
 
-  if (user?.team_id) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
-        <Text className="text-lg text-gray-900 dark:text-white mb-4">
-          您已加入一个队伍，无法创建新队伍
-        </Text>
-        <TouchableOpacity
-          className="bg-[#409eff] px-6 py-3 rounded-lg"
-          onPress={() => navigation.goBack()}
-        >
-          <Text className="text-white font-medium">返回</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // if (user?.team_id) {
+  //   return (
+  //     <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
+  //       <Text className="text-lg text-gray-900 dark:text-white mb-4">
+  //         您已加入一个队伍，无法创建新队伍
+  //       </Text>
+  //       <TouchableOpacity
+  //         className="bg-[#409eff] px-6 py-3 rounded-lg"
+  //         onPress={() => navigation.goBack()}
+  //       >
+  //         <Text className="text-white font-medium">返回</Text>
+  //       </TouchableOpacity>
+  //     </View>
+  //   );
+  // }
 
   const handleTagSelection = (tagData) => {
     setSelectedTags({
@@ -238,31 +237,17 @@ const CreateTeam = () => {
           className="mb-4"
         />
         
-        {/* 适龄段选择 */}
-        <View className="mb-5">
-          <Text className="text-base font-medium mb-2 text-gray-900 dark:text-gray-300">适龄段</Text>
-          <View className="rounded-lg border border-gray-300 overflow-hidden dark:border-gray-600">
-            <Picker
-              selectedValue={selectedGrade}
-              onValueChange={(itemValue) => setSelectedGrade(itemValue)}
-              style={{
-                color: colorScheme === 'dark' ? 'white' : 'gray',
-                backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#FFFFFF',
-                height: 55,
-              }}
-              dropdownIconColor={colorScheme === 'dark' ? 'white' : 'black'}
-              mode="dropdown"
-            >
-              {GRADES.map((option) => (
-                <Picker.Item 
-                  key={option.value} 
-                  label={option.label} 
-                  value={option.value} 
-                />
-              ))}
-            </Picker>
-          </View>
-        </View>
+      {/* 适龄段选择 */}
+      <View className="mb-5">
+        <Custompicker
+          label="适龄段"
+          options={GRADES}
+          selectedValue={selectedGrade}
+          onValueChange={setSelectedGrade}
+          placeholder="请选择适龄段"
+          key="grade-picker"
+        />
+      </View>
         
         {/* 公开/私有设置 */}
         <View className="mb-5">

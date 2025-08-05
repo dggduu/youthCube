@@ -8,6 +8,9 @@ import CreateTeam from "../../screens/ideaScreen/Team/CreateTeam";
 import HelpChat from "../../components/aiChat/HelpChat";
 import InviteToTeam from "../../screens/ideaScreen/Team/InviteToTeam";
 import UploadProgress from "../../screens/ideaScreen/Team/UploadProgress";
+import UploadEmaple from "../../screens/ideaScreen/Team/UploadEmaple";
+import SelectEample from "../../screens/ideaScreen/Team/SelectEample";
+
 
 import Icon from "@react-native-vector-icons/material-icons";
 import { TouchableOpacity } from "react-native";
@@ -54,6 +57,34 @@ const CreateTeamNavigtor = () => {
           title: '问聪宝',
           headerBackTitle: '返回',
           })}
+      />
+      <Stack.Screen
+        name="SelctExample"
+        component={SelectEample}
+        options={()=> ({
+          headerShown: true,
+          title: '选择项目模板',
+          headerBackTitle: '返回',
+          })}
+      />
+      <Stack.Screen
+        name="UploadExmaple"
+        component={UploadEmaple}
+        options={()=> ({
+          headerShown: true,
+          title: '从模板创建',
+          headerBackTitle: '返回',
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+               navigate('MainTabNavigator', { screen: '想法市场'});
+              }}
+              style={{ marginRight: 10 }}
+            >
+              <Icon name="save" size={26} color="#007AFF" />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="Invite"

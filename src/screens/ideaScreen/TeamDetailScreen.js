@@ -241,20 +241,20 @@ const handleApplyToJoin = async () => {
             </View>
             
             <View className="flex-col ">
-              <View className="bg-blue-100 dark:bg-blue-900 px-5 py-1.5 rounded-t-lg flex-row">
-                <MaterialIcons name="grade" size={16} color="#1d4ed8" className="mr-1" />
-                <Text className="text-blue-800 dark:text-blue-100 text-sm font-medium">
+              <View className="bg-blue-100 dark:bg-blue-900 px-3 py-1.5 rounded-t-lg flex-row">
+                <MaterialIcons name="grade" size={16} color="#1d4ed8"  />
+                <Text className="text-blue-800 dark:text-blue-100 text-sm font-medium ml-1">
                   {gradeLabel}
                 </Text>
               </View>
-              <View className={`${teamData.is_public ? 'bg-green-100 dark:bg-green-900' : 'bg-purple-100 dark:bg-purple-900'} px-3 py-1.5 roundedt-b-lg flex-row items-center`}>
+              
+              <View className={`${teamData.is_public ? 'bg-green-100 dark:bg-green-900' : 'bg-purple-100 dark:bg-purple-900'} px-3 py-1.5 rounded-b-lg flex-row`}>
                 <MaterialIcons 
                   name={teamData.is_public ? "public" : "lock"} 
                   size={16} 
                   color={teamData.is_public ? "#166534" : "#6b21a8"} 
-                  className="mr-1"
                 />
-                <Text className={`${teamData.is_public ? 'text-green-800 dark:text-green-100' : 'text-purple-800 dark:text-purple-100'} text-sm font-medium`}>
+                <Text className={`ml-1 ${teamData.is_public ? 'text-green-800 dark:text-green-100' : 'text-purple-800 dark:text-purple-100'} text-sm font-medium`}>
                   {teamData.is_public ? '公开团队' : '私密团队'}
                 </Text>
               </View>
@@ -272,14 +272,13 @@ const handleApplyToJoin = async () => {
             activeOpacity={0.8}
           >
             <MaterialIcons 
-              name={teamData.chatRoom?.members?.some(member => member.user_id === userId) ? "check-circle" : "send"} 
+              name={teamData.chatRoom?.members?.some(member => member.user_id === userId) ? "check" : "send"} 
               size={20} 
               color={teamData.chatRoom?.members?.some(member => member.user_id === userId) 
                 ? (isDark ? "#9ca3af" : "#6b7280") 
                 : "white"} 
-              className="mr-2"
             />
-            <Text className={`font-medium ${
+            <Text className={`font-medium ml-1  ${
               teamData.chatRoom?.members?.some(member => member.user_id === userId)
                 ? 'text-gray-600 dark:text-gray-300'
                 : 'text-white'

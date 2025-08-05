@@ -46,13 +46,13 @@ const InputBox = ({
             name={leftIconName}
             size={20}
             color={isDark ? '#A9A9A9' : '#888'}
-            style={{ marginLeft: 12, marginRight: 10 }}
+            style={{ marginLeft: 12, marginRight: 5 }}
           />
         )}
 
         {/* 输入框 */}
         <TextInput
-          className={`flex-1 py-4 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}
+          className={`flex-1 py-4 ${isDark ? 'text-gray-200' : 'text-gray-800 ml-2'}`}
           style={{ height: 55 }}
           placeholder={placeholder}
           placeholderTextColor={isDark ? '#666' : '#999'}

@@ -15,7 +15,6 @@ import {
   Send,
   InputToolbar
 } from 'react-native-gifted-chat';
-import { LinearGradient } from 'react-native-linear-gradient';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute,useNavigation } from '@react-navigation/native';
 import { useToast } from '../../components/tip/ToastHooks';
@@ -26,10 +25,6 @@ import {
 import { BASE_INFO } from '../../constant/base';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { refreshAccessToken } from "../../utils/LoginUtil";
-
-import SquareGridBackground from "../misc/SquareGridBackground";
-import PatternSVG from "../../assets/background/pattern.svg";
 import { setupSocketIOInterceptor } from "../../utils/SocketIOInterceptor";
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 const api = axios.create();

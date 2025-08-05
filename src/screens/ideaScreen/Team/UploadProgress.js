@@ -23,8 +23,10 @@ import Markdown from "react-native-marked";
 import InputBox from "../../../components/inputBox/inputBox";
 import { useNavigation } from "@react-navigation/native";
 import MarkdownInput from "../../../components/MarkdownInput";
-import axios from 'axios'
+import axios from 'axios';
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+import CustomAlert from "../../../components/custom/CustomAlert";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -34,61 +36,13 @@ const ProgressCard = ({ progress, onEdit, onDelete}) => {
   const subTextColor = colorScheme === 'dark' ? 'text-gray-400' : 'text-gray-600';
   const cardBg = colorScheme === 'dark' ? 'bg-gray-800' : 'bg-white';
   const borderColor = colorScheme === 'dark' ? 'border-gray-700' : 'border-gray-300';
-
-  const isDark = colorScheme == "dark";
   const formattedEventTime = new Date(progress.event_time).toLocaleString();
-  const formattedCreatedAt = new Date(progress.created_at).toLocaleString();
 
   const timelineTypeMap = {
     meeting: '会议',
-    deadline: '截止日期',
+    deadline: '任务点',
     competition: '比赛',
     progress_report: '进度报告'
-  };
-
-  const mdStyle = {
-    body: {
-      fontSize: 12,
-      color: isDark ? '#FFFFFF' : '#000000',
-    },
-    heading1: {
-      fontWeight: 800,
-      padding: 5,
-    },
-    heading2: {
-      fontWeight:700,
-      margin: 5,
-    },
-    heading3: {
-      fontWeight:600,
-      margin: 5,
-    },
-    code: { // 内联代码样式
-        backgroundColor: isDark ? '#333333' : '#F5F5F5',
-        padding: 2,
-        borderRadius: 3,
-        color: isDark ? '#FFFFFF' : '#000000',
-      },
-      codeBlock: { // 代码块样式
-        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
-        padding: 10,
-        borderRadius: 5,
-        overflow: 'hidden',
-        magrin: 10,
-      },
-      fence: { // 特定于 fenced code blocks 的样式
-        backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
-        magrin: 10,
-      },
-      list_item: {
-        color: isDark ? '#E6E6E6' : '#1A1A1A',
-      },
-      unordered_list_icon: {
-        color: isDark ? '#FF9800' : '#F57C00', // 修改圆点颜色
-      },
-      ordered_list_icon: {
-        color: isDark ? '#4CAF50' : '#388E3C', // 编号颜色
-      },
   };
 
   return (
@@ -152,11 +106,11 @@ const UploadProgress = () => {
   const [authToken, setAuthToken] = useState(null);
   const [error, setError] = useState(null);
 
-  const [showVditorModal, setShowVditorModal] = useState(false);
-  const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
-  const webViewRef = useRef(null);
-
   const navigation = useNavigation();
+
+  // CustomAlert 相关状态
+  const [isDeleteAlertVisible, setIsDeleteAlertVisible] = useState(false);
+  const [progressToDeleteId, setProgressToDeleteId] = useState(null);
 
   const ALLOWED_TIMELINE_TYPES = ['meeting', 'deadline', 'competition'];
 
@@ -245,14 +199,12 @@ const UploadProgress = () => {
       setCurrentProgressId(progress.progress_id);
       setTitle(progress.title);
       setDescription(progress.content);
-      setVditorMarkdownContent(progress.content);
       setTimelineType(ALLOWED_TIMELINE_TYPES.includes(progress.timeline_type) ? progress.timeline_type : 'meeting');
       setEventTime(new Date(progress.event_time));
     } else {
       setCurrentProgressId(null);
       setTitle('');
       setDescription('');
-      setVditorMarkdownContent('');
       setTimelineType('meeting');
       setEventTime(new Date());
     }
@@ -264,7 +216,6 @@ const UploadProgress = () => {
     setCurrentProgressId(null);
     setTitle('');
     setDescription('');
-    setVditorMarkdownContent('');
     setTimelineType('meeting');
     setEventTime(new Date());
   };
@@ -291,9 +242,8 @@ const UploadProgress = () => {
     try {
       setIsSubmitting(true);
 
-      let response;
       if (currentProgressId) {
-        response = await api.put(
+        await api.put(
           `${BASE_INFO.BASE_URL}api/progress/${currentProgressId}`,
           progressData,
           {
@@ -304,7 +254,7 @@ const UploadProgress = () => {
           }
         );
       } else {
-        response = await api.post(
+        await api.post(
           `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
           progressData,
           {
@@ -339,81 +289,43 @@ const UploadProgress = () => {
     }
   };
 
-  const handleDeleteProgress = async (progressId) => {
-    Alert.alert(
-      "确认删除",
-      "你确定要删除这个进度报告吗？",
-      [
-        { text: "取消", style: "cancel" },
-        {
-          text: "删除",
-          onPress: async () => {
-            try {
-              await api.delete(
-                `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${authToken}`,
-                  },
-                }
-              );
-
-              showToast("进度删除成功", "success");
-              setPage(0);
-              setTotalPages(1);
-              fetchProgressList(true);
-
-            } catch (err) {
-              let errorMessage = '删除进度失败';
-
-              if (err.response && err.response.data) {
-                errorMessage = err.response.data.message || errorMessage;
-              } else if (err.request) {
-                errorMessage = '网络错误，请检查您的连接';
-              } else {
-                errorMessage = err.message;
-              }
-
-              showToast(`删除失败: ${errorMessage}`, "error");
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteProgress = (progressId) => {
+    setProgressToDeleteId(progressId);
+    setIsDeleteAlertVisible(true);
   };
+  
+  const confirmDelete = async () => {
+    if (!progressToDeleteId) return;
 
-  // VDITOR
-  const onWebViewMessage = (event) => {
     try {
-      const message = JSON.parse(event.nativeEvent.data);
-      if (message.type === 'contentChange') {
-        setVditorMarkdownContent(message.content);
-        setDescription(message.content);
+      await api.delete(
+        `${BASE_INFO.BASE_URL}api/progress/${progressToDeleteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      showToast("进度删除成功", "success");
+      setPage(0);
+      setTotalPages(1);
+      fetchProgressList(true);
+    } catch (err) {
+      let errorMessage = '删除进度失败';
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查您的连接';
+      } else {
+        errorMessage = err.message;
       }
-      if (message.type === 'VDITOR_SUBMIT') {
-        setVditorMarkdownContent(message.content);
-        setDescription(message.content);
-        setShowVditorModal(false);
-      }
-    } catch (e) {
-      console.warn('无法解析 WebView 消息:', event.nativeEvent.data);
+      showToast(`删除失败: ${errorMessage}`, "error");
+    } finally {
+      setIsDeleteAlertVisible(false);
+      setProgressToDeleteId(null);
     }
   };
 
-  const injectInitialContent = () => {
-    if (webViewRef.current && showVditorModal) {
-      webViewRef.current.injectJavaScript(`
-        if (typeof vditorInstance !== 'undefined' && vditorInstance) {
-          vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent)});
-        } else {
-          document.addEventListener('VDITOR_READY', () => {
-            vditorInstance.setValue(${JSON.stringify(vditorMarkdownContent)});
-          }, { once: true });
-        }
-        true;
-      `);
-    }
-  };
 
   if (error) {
     return (
@@ -464,7 +376,7 @@ const UploadProgress = () => {
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
-      <View className="absolute bottom-6 right-6 bg-[#409eff] rounded-full justify-center items-center border border-gray-600">
+      <View className="absolute bottom-6 right-6 bg-[#409eff] rounded-full justify-center items-center border border-gray-600 overflow-hidden">
         <TouchableOpacity
           onPress={() => openProgressModal()}
           className='p-2 self-center justify-center'
@@ -492,12 +404,6 @@ const UploadProgress = () => {
             right: 0,
             bottom: 0,
             zIndex: 1000,
-          }}
-          // 点击遮罩关闭
-          onTouchEnd={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowAddModal(false);
-            }
           }}
         >
         <ScrollView className="flex-1 p-5 dark:bg-gray-900">
@@ -551,25 +457,6 @@ const UploadProgress = () => {
             )}
           </View>
 
-          {/* <TextInput
-            placeholder="进度内容 *"
-            placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={5}
-            className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-          <TouchableOpacity
-            className="bg-[#409eff] py-4 px-4 rounded-lg mb-3"
-            onPress={() => {
-              setVditorMarkdownContent(description);
-              setShowVditorModal(true);
-            }}
-          >
-            <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
-          </TouchableOpacity>
-          <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text> */}
           <MarkdownInput
             value={description}
             onChange={setDescription}
@@ -579,7 +466,7 @@ const UploadProgress = () => {
           <TouchableOpacity
             onPress={handleSubmitProgress}
             disabled={isSubmitting || !description.trim() || !title.trim()}
-            className={`p-4 rounded-lg items-center mb-5 ${
+            className={`p-4 rounded-lg items-center mt-5 mb-5 ${
               isSubmitting || !description.trim() || !title.trim()
                 ? 'bg-gray-300'
                 : 'bg-[#409eff]'
@@ -588,7 +475,7 @@ const UploadProgress = () => {
             {isSubmitting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-white font-bold">
+              <Text className="text-gray-600 dark:text-gray-300 font-bold">
                 {currentProgressId ? '更新进度' : '提交进度'}
               </Text>
             )}
@@ -597,12 +484,23 @@ const UploadProgress = () => {
             onPress={closeProgressModal}
             className="p-4 rounded-lg items-center bg-gray-300 mb-10"
           >
-            <Text className="text-white font-bold">取消</Text>
+            <Text className="text-gray-600 dark:text-gray-300 font-bold">取消</Text>
           </TouchableOpacity>
         </ScrollView>
         </View>
       }
 
+      {/* CustomAlert for deletion */}
+      <CustomAlert
+        visible={isDeleteAlertVisible}
+        title="确认删除"
+        message="你确定要删除这个进度报告吗？"
+        buttons={[
+          { text: "取消", style: "cancel", onPress: () => setIsDeleteAlertVisible(false) },
+          { text: "删除", style: "destructive", onPress: confirmDelete }
+        ]}
+        onClose={() => setIsDeleteAlertVisible(false)}
+      />
     </View>
   );
 };
