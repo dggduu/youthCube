@@ -7,6 +7,8 @@ import { BASE_INFO } from "../../constant/base";
 import { navigate } from "../../navigation/NavigatorRef";
 import { colors } from 'react-native-keyboard-controller/lib/typescript/components/KeyboardToolbar/colors';
 import { setupAuthInterceptors } from "../../utils/axios/AuthInterceptors";
+import InspirationCarousel from "../../components/chart/InspirationCarousel";
+import CarouselStart from "../../components/custom/CarouselStart";
 import axios from "axios";
 const screenWidth = Dimensions.get('window').width;
 
@@ -142,7 +144,19 @@ export default function IeaMarketScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
+      <View className='flex-1 flex-row px-5'>
+        <CarouselStart
+          onItemPress={(url) => navigate('RootIdea', { 
+            screen: 'webview', 
+            params: { url } 
+          })}
+        />
+          <InspirationCarousel 
+            onMenuPress={() =>navigate('RootIdea', { screen: 'menu', params: { user_id:user.id, user_name: user.name } })}
+            onItemPress={(userId) => navigate('RootIdea', { screen: 'profile', params: { user_id:user.id, user_name: user.name } })}
+          />
+      </View>
+      
 
       <TeamFeed />
     </SafeAreaView>

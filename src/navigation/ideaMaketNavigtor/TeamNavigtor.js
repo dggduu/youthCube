@@ -8,8 +8,8 @@ import PostNavigator from "./PostNavigtor";
 import ProgressNavigtor from "./ProgressNavigtor";
 import CreactTeamNavigtor from "./CreactTeamNavigtor";
 import { HeaderBackButton } from "@react-navigation/elements";
-
-
+import InspirationMenu from "../../screens/ideaScreen/InspirationMenu";
+import ShowWebview from "../../components/custom/ShowWebview";
 const Stack = createNativeStackNavigator();
 
 const TeamNavigator = () => {
@@ -64,6 +64,24 @@ const TeamNavigator = () => {
         options={{
           headerShown: true,
           title: '',
+          headerBackTitle: '返回'
+        }}  
+      />
+      <Stack.Screen
+        name="webview"
+        component={ShowWebview}
+        options={{
+          headerShown: true,
+          title: '',
+          headerBackTitle: '返回'
+        }}  
+      />
+      <Stack.Screen
+        name="menu"
+        component={InspirationMenu}
+        options={{
+          headerShown: true,
+          title: '想法胶囊',
           headerBackTitle: '返回'
         }}  
       />

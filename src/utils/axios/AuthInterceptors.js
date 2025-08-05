@@ -21,6 +21,19 @@ const processQueue = (error, token = null) => {
 };
 
 export default function setupAuthInterceptors(instance) {
+  instance.interceptors.request.use(
+    async (config) => {
+      const token = await getItemFromAsyncStorage("accessToken");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
   instance.interceptors.response.use(
     (response) => {
       return response;
@@ -28,7 +41,6 @@ export default function setupAuthInterceptors(instance) {
     async (error) => {
       const { config: originalRequest, response } = error;
 
-      // 支持 401 和 403，防止某些后端用 401 表示 token 失效
       if (response && (response.status === 401 || response.status === 403)) {
         if (originalRequest._retry) {
           return Promise.reject(error);
@@ -54,7 +66,7 @@ export default function setupAuthInterceptors(instance) {
           const { refreshToken, accessToken } = await refreshAccessToken(oldRefreshToken);
 
           await setItemToAsyncStorage("accessToken", accessToken);
-          // await setItemToAsyncStorage("refreshToken", refreshToken);
+          await setItemToAsyncStorage("refreshToken", refreshToken);
 
           originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
           originalRequest._retry = true;
