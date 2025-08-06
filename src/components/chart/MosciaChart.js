@@ -14,6 +14,7 @@ import { BASE_INFO } from '../../constant/base';
 import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 import { WhiteSpace } from '@ant-design/react-native';
+import Icon from '@react-native-vector-icons/material-icons';
 
 const api = axios.create();
 setupAuthInterceptors(api);

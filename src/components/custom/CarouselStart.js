@@ -20,6 +20,14 @@ const CarouselStart = ({ onItemPress }) => {
     );
   };
 
+  if (!CarouselStartData || CarouselStartData.length === 0) {
+    return (
+      <View style={[styles.container, { width: itemWidth, height:itemHeight }]} className=' bg-white dark:bg-gray-800 justify-center items-center border border-gray-300 rounded-lg dark:border-gray-600'>
+        <Text className='text-black dark:text-gray-300'>不存在数据</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { width: itemWidth }]}>
       <Carousel

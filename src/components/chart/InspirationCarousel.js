@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Modal, ActivityIndicator, ScrollView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -7,6 +7,7 @@ import setupAuthInterceptors from '../../utils/axios/AuthInterceptors';
 import { BASE_INFO } from '../../constant/base';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { navigate } from "../../navigation/NavigatorRef";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -23,7 +24,6 @@ const fetchThoughtBullets = async (page = 0) => {
       size: PAGE_SIZE,
     },
   });
-  console.log(response.data);
   return response.data;
 };
 
@@ -31,16 +31,19 @@ const InspirationCarousel = ({ onMenuPress }) => {
   const [page, setPage] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayItems, setDisplayItems] = useState([]);
+  const [selectedMoral, setSelectedMoral] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['thoughtBullets', page],
     queryFn: () => fetchThoughtBullets(page),
     keepPreviousData: true,
   });
+
   const width = Dimensions.get('window').width;
   const containerWidth = (width / 2) - 20;
   const containerHeight = (containerWidth / 3) * 4;
-  // 初始化显示数据
+
   useEffect(() => {
     if (data?.items?.length > 0) {
       const initialItems = data.items.slice(0, ITEMS_PER_PAGE);
@@ -48,7 +51,6 @@ const InspirationCarousel = ({ onMenuPress }) => {
     }
   }, [data]);
 
-  // 自动切换逻辑
   useEffect(() => {
     const timer = setInterval(() => {
       if (!data?.items) return;
@@ -71,6 +73,15 @@ const InspirationCarousel = ({ onMenuPress }) => {
 
     return () => clearInterval(timer);
   }, [currentIndex, data, page]);
+
+  const handleLongPress = (item) => {
+    setSelectedMoral(item.moral || item.message);
+    setModalVisible(true);
+  };
+
+  const handlePress = (userId, userName) => {
+    navigate('RootIdea', { screen: 'profile', params: { user_id: userId, user_name: userName } });
+  };
 
   if (isLoading && displayItems.length === 0) {
     return (
@@ -100,7 +111,7 @@ const InspirationCarousel = ({ onMenuPress }) => {
 
   return (
     <View style={[styles.container, { width: containerWidth, height: containerHeight }]} className='bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600'>
-      {/* 标题 */}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title} className='text-black dark:text-gray-300'>实时灵感</Text>
         <TouchableOpacity onPress={onMenuPress}>
@@ -108,18 +119,20 @@ const InspirationCarousel = ({ onMenuPress }) => {
         </TouchableOpacity>
       </View>
         
-      {/* 弹幕内容区 */}
+      {/* Content area */}
       <View style={styles.contentContainer}>
-        {displayItems.map((item, index) => (
+        {displayItems.map((item) => (
           <Animated.View
-            key={`${item.id}-${index}`}
+            key={item.id}
             entering={FadeIn.duration(800)}
             exiting={FadeOut.duration(800)}
             style={styles.itemContainer}
           >
             <TouchableOpacity 
-              activeOpacity={0.8} 
-              onPress={(userId) => navigate('RootIdea', { screen: 'profile', params: { user_id:item.author?.id, user_name: item.author?.name } })}
+              activeOpacity={0.8}
+              onPress={() => handlePress(item.author?.id, item.author?.name)}
+              onLongPress={() => handleLongPress(item)}
+              delayLongPress={300}
             >
               <View style={styles.messageContainer} className='bg-gray-50 dark:bg-gray-600'>
                 <Text
@@ -138,6 +151,31 @@ const InspirationCarousel = ({ onMenuPress }) => {
           </Animated.View>
         ))}
       </View>
+
+      {/* Moral Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent} className='bg-white dark:bg-gray-700'>
+            <Text style={styles.modalTitle}>灵感详情</Text>
+            <ScrollView className='h-96 mb-2'>
+              <Text style={styles.modalText} className='text-black dark:text-white'>
+                {selectedMoral}
+              </Text>
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>关闭</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -178,6 +216,39 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'right',
     fontStyle: 'italic',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  modalText: {
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#3B82F6',
+    padding: 10,
+    borderRadius: 5,
+    alignSelf: 'flex-end',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

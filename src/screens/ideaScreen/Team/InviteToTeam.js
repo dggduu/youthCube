@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import { useToast } from '../../../components/tip/ToastHooks';
-import { getItemFromAsyncStorage } from '../../../utils/LocalStorage';
+import { getItemFromAsyncStorage, setItemToAsyncStorage } from '../../../utils/LocalStorage';
 import { BASE_INFO } from '../../../constant/base';
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -45,6 +45,38 @@ const InviteToTeam = () => {
       }
     };
     init();
+  }, []);
+  // 刷新team_id
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userString = await getItemFromAsyncStorage("user");
+        if (!userString) {
+          setLoading(false);
+          return;
+        }
+
+        const userObj = userString;
+        const userId = userObj.id;
+
+        const response = await axios.get(
+          `${BASE_INFO.BASE_URL}api/users/${userId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
+            }
+          }
+        );
+
+        await setItemToAsyncStorage("user",response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   useEffect(() => {

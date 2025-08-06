@@ -9,6 +9,7 @@ import { GRADES } from "../../../constant/user";
 import { useToast } from "../../../components/tip/ToastHooks";
 import CustomAlert from "../../../components/custom/CustomAlert";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+import InputBox from '../../../components/inputBox'
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -30,13 +31,34 @@ const ChatGroupSetting = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [transferOwnerModalVisible, setTransferOwnerModalVisible] = useState(false);
+  const [subTeamModalVisible, setSubTeamModalVisible] = useState(false);
+  const [newSubTeamName, setNewSubTeamName] = useState('');
+  const [inviteToSubTeamModalVisible, setInviteToSubTeamModalVisible] = useState(false);
+  const [selectedUserForSubTeam, setSelectedUserForSubTeam] = useState(null);
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
     message: '',
     buttons: []
   });
+  const [announcement, setAnnouncement] = useState(null);
 
+  const fetchAnnouncement = async () => {
+    try {
+      const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}/announcements`, {
+        params: {
+          page: 0,
+          size: 1
+        }
+      });
+      if (response.data.items.length > 0) {
+        setAnnouncement(response.data.items[0]);
+        console.log(announcement);
+      }
+    } catch (error) {
+      console.error('获取公告失败:', error);
+    }
+  };
   const refreshTeamData = async () => {
     try {
       const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${team_id}`);
@@ -49,6 +71,7 @@ const ChatGroupSetting = () => {
       }
 
       setTeamData(response.data);
+      await fetchAnnouncement();
     } catch (error) {
       showToast('刷新团队数据出错', 'error');
     }
@@ -74,6 +97,7 @@ const ChatGroupSetting = () => {
         }
 
         setTeamData(response.data);
+        await fetchAnnouncement();
       } catch (error) {
         showToast("错误！加载团队数据失败", 'error');
       } finally {
@@ -96,16 +120,27 @@ const ChatGroupSetting = () => {
 
   const saveChanges = async () => {
     try {
+      const updateData = {};
+
+      if (editField === 'team_name') {
+        updateData.team_name = editValue;
+      } else if (editField === 'description') {
+        updateData.description = editValue;
+      } else if (editField === 'is_public') {
+        updateData.is_public = editValue === '公开' ? 1 : 0;
+      } else if (editField === 'grade') {
+        updateData.grade = editValue;
+      }
+
       if (editField === 'team_name' || editField === 'description' || editField === 'is_public' || editField === 'grade') {
-        await api.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, {
-          [editField]: editField === 'is_public' ? (editValue === '公开' ? 1 : 0) : editValue
-        }, {
+        await api.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, updateData, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           }
         });
-      } else if (editField === 'chatroom_name') {
+      }
+      else if (editField === 'chatroom_name') {
         await api.put(`${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/update`, {
           name: editValue
         }, {
@@ -115,13 +150,78 @@ const ChatGroupSetting = () => {
           }
         });
       }
+
       showToast("更新成功", "success");
       await refreshTeamData();
       setEditModalVisible(false);
+
     } catch (error) {
       console.error('更新出错:', error);
       showToast("更新失败", "error");
     }
+  };
+
+  const createSubTeam = async () => {
+    try {
+      if (!newSubTeamName.trim()) {
+        showToast("请输入子团队名称", "warning");
+        return;
+      }
+
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/teams/${team_id}/subteam`,
+        { team_name: newSubTeamName },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      showToast("子团队创建成功", "success");
+      setNewSubTeamName('');
+      setSubTeamModalVisible(false);
+      await refreshTeamData();
+    } catch (error) {
+      console.error('创建子团队出错:', error);
+      showToast("创建子团队失败", "error");
+    }
+  };
+
+  const deleteSubTeam = (subTeamId) => {
+    showAlert(
+      "删除子团队",
+      "确定要永久删除这个子团队吗？此操作不可撤销！",
+      [
+        {
+          text: "取消",
+          style: "cancel"
+        },
+        {
+          text: "确认删除",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.delete(
+                `${BASE_INFO.BASE_URL}api/teams/${team_id}/subteam/${subTeamId}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                  }
+                }
+              );
+
+              showToast("子团队已删除", "success");
+              await refreshTeamData();
+            } catch (error) {
+              console.error('删除子团队出错:', error);
+              showToast("删除子团队失败", "error");
+            }
+          }
+        }
+      ]
+    );
   };
 
   const updateMemberRole = async (userId, newRole) => {
@@ -190,6 +290,27 @@ const ChatGroupSetting = () => {
         }
       ]
     );
+  };
+
+  const inviteToSubTeamDirect = async (subTeamId) => {
+    try {
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/teams/${subTeamId}/members/${selectedUserForSubTeam.user_id}/invite-direct`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          }
+        }
+      );
+
+      showToast(`${selectedUserForSubTeam.name} 已邀请到子团队`, "success");
+      setInviteToSubTeamModalVisible(false);
+      setSelectedUserForSubTeam(null);
+    } catch (error) {
+      console.error('邀请到子团队出错:', error);
+      showToast("邀请到子团队失败", "error");
+    }
   };
 
   const handleRemoveMember = (userId, userName) => {
@@ -318,6 +439,8 @@ const ChatGroupSetting = () => {
 
   const currentUserRole = teamData?.chatRoom?.members.find(m => m.user_id === currentUser?.id)?.role;
   const potentialNewOwners = teamData?.chatRoom?.members.filter(m => m.user_id !== currentUser?.userId) || [];
+  const isParentTeam = teamData?.parent_team_id === null;
+  const isSubTeam = !isParentTeam;
 
   if (loading) {
     return (
@@ -337,9 +460,44 @@ const ChatGroupSetting = () => {
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900 p-4">
+
+      {/* 群公告部分 */}
+      {announcement && (
+        <TouchableOpacity 
+          className="bg-yellow-50 dark:bg-blue-900 rounded-lg p-4 mb-4 border border-yellow-300"
+          onPress={() => navigation.navigate('AnnouncementDetail', { 
+            teamId: team_id,
+            role: currentUserRole
+          })}
+        >
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-lg font-bold text-gray-800 dark:text-gray-200">
+              置顶公告
+            </Text>
+            <Icon name="chevron-right" size={20} color={isDarkMode ? '#93c5fd' : '#888'} />
+          </View>
+
+            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              {announcement.title}
+            </Text>
+          <Text 
+            className="text-gray-800 dark:text-gray-200"
+            numberOfLines={4}
+            ellipsizeMode="tail"
+          >
+            {announcement.content}
+          </Text>
+          <Text className="text-xs text-gray-800 dark:text-gray-200 mt-2">
+            发布者: {announcement.author.name} • {new Date(announcement.created_at).toLocaleString()}
+          </Text>
+        </TouchableOpacity>
+      )}
+
       {/* 群组信息部分 */}
       <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-sm">
-        <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">群组信息</Text>
+        <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {isSubTeam ? '子群组信息' : '群组信息'}
+        </Text>
         
         {/* 团队名称 */}
         <View className="flex-row justify-between items-center mb-3">
@@ -417,15 +575,17 @@ const ChatGroupSetting = () => {
           </Text>
         </View>
         
-        <View className="flex-row justify-between items-center">
-          <Text className="text-base text-gray-600 dark:text-gray-300">可见性:</Text>
-          <TouchableOpacity 
-            className="flex-row items-center"
-            onPress={() => handleEditField('is_public', teamData.is_public)}
-          >
-            <Text className="text-blue-500 dark:text-blue-400">{teamData.is_public == 1 ? "公开" : "私有"}</Text>
-          </TouchableOpacity>
-        </View>
+        {isParentTeam && (
+          <View className="flex-row justify-between items-center">
+            <Text className="text-base text-gray-600 dark:text-gray-300">可见性:</Text>
+            <TouchableOpacity 
+              className="flex-row items-center"
+              onPress={() => handleEditField('is_public', teamData.is_public)}
+            >
+              <Text className="text-blue-500 dark:text-blue-400">{teamData.is_public == 1 ? "公开" : "私有"}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* 成员部分 */}
@@ -434,16 +594,18 @@ const ChatGroupSetting = () => {
           <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             成员 ({teamData.chatRoom.members.length})
           </Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("Invite", {
-                chatRoom_id: teamData.chatRoom.room_id,
-                team_id: teamData.team_id
-              });
-            }}  
-          >
-            <Icon name="add" size={24} color={isDarkMode ? '#a0aec0' : '#718096'}/>
-          </TouchableOpacity>
+          {!isSubTeam && (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Invite", {
+                  chatRoom_id: teamData.chatRoom.room_id,
+                  team_id: teamData.team_id
+                });
+              }}  
+            >
+              <Icon name="add" size={24} color={isDarkMode ? '#a0aec0' : '#718096'}/>
+            </TouchableOpacity>
+          )}
         </View>
         
         {teamData.chatRoom.members.map(member => (
@@ -479,47 +641,119 @@ const ChatGroupSetting = () => {
         ))}
       </View>
 
+      {/* 子团队部分 - 仅显示给父团队 */}
+      {isParentTeam && teamData.subTeams && (
+        <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-sm">
+          <View className='flex-row mb-3 justify-between items-center'>
+            <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              子团队 ({teamData.subTeams.length})
+            </Text>
+            {currentUserRole === 'owner' && (
+              <TouchableOpacity
+                onPress={() => setSubTeamModalVisible(true)}
+              >
+                <Icon name="add" size={24} color={isDarkMode ? '#a0aec0' : '#718096'}/>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {teamData.subTeams.map(subTeam => (
+            <View 
+              key={subTeam.team_id} 
+              className="flex-row justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+            >
+              <View className="flex-row items-center">
+                <Text className="text-base mr-2 text-gray-900 dark:text-gray-100">
+                  {subTeam.team_name}
+                </Text>
+                <Text className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                  子团队
+                </Text>
+              </View>
+              
+              {currentUserRole === 'owner' && (
+                <TouchableOpacity 
+                  onPress={() => deleteSubTeam(subTeam.team_id)}
+                >
+                  <Icon name="delete" size={24} color="#f56565" />
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+
       {/* 管理员操作部分 */}
       {['owner', 'co_owner'].includes(currentUserRole) && (
-        <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-sm">
+        <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
           <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
             管理员操作
           </Text>
 
-          <View className="space-y-3">
-            {/* 转移组长权限 - 仅群主可见 */}
+          <View className="space-y-0">
+            {/* 转移组长权限*/}
             {currentUserRole === 'owner' && (
               <TouchableOpacity
-                className="flex-row items-center p-3 rounded-lg border border-gray-200 dark:border-gray-700 active:bg-gray-100 dark:active:bg-gray-700"
+                className="flex-row items-center p-3 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
                 onPress={() => setTransferOwnerModalVisible(true)}
               >
-                <Icon name="swap-horiz" size={20} color={isDarkMode ? '#a0aec0' : '#718096'} />
-                <Text className="ml-3 text-gray-800 dark:text-gray-200">转移组长权限</Text>
+                <Icon name="swap-horiz" size={20} color={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                <Text className="ml-3 text-gray-700 dark:text-gray-200 font-medium">转移组长权限</Text>
               </TouchableOpacity>
             )}
 
-            {/* 查看入群申请 */}
+            {/* 分割线 */}
+            {(currentUserRole === 'owner' && isParentTeam) || 
+            (currentUserRole === 'owner' && !isParentTeam) ? (
+              <View className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+            ) : null}
+
+            {/* 添加群公告 */}
             <TouchableOpacity
-              className="flex-row items-center p-3 rounded-lg border mt-1 border-gray-200 dark:border-gray-700 active:bg-gray-100 dark:active:bg-gray-700"
+              className="flex-row items-center p-3 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
               onPress={() =>
-                navigation.navigate('InviteRedux', {
-                  team_id: teamData.team_id,
-                  room_id: teamData.chatRoom.room_id,
-                  inviter: currentUser.id,
+                navigation.navigate('CreateAnnouncement', {
+                  teamId: teamId,
+                  role: currentUserRole,
                 })
               }
             >
-              <Icon name="group-add" size={20} color={isDarkMode ? '#a0aec0' : '#718096'} />
-              <Text className="ml-3 text-gray-800 dark:text-gray-200">查看入群申请</Text>
+              <Icon name="add" size={20} color={isDarkMode ? '#60a5fa' : '#2563eb'} />
+              <Text className="ml-3 text-gray-700 dark:text-gray-200 font-medium">添加群公告</Text>
             </TouchableOpacity>
+
+            {/* 分割线 */}
+            {isParentTeam && (
+              <View className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+            )}
+
+            {/* 查看入群申请 */}
+            {isParentTeam && (
+              <TouchableOpacity
+                className="flex-row items-center p-3 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
+                onPress={() =>
+                  navigation.navigate('InviteRedux', {
+                    team_id: teamData.team_id,
+                    room_id: teamData.chatRoom.room_id,
+                    inviter: currentUser.id,
+                  })
+                }
+              >
+                <Icon name="group-add" size={20} color={isDarkMode ? '#4ade80' : '#16a34a'} />
+                <Text className="ml-3 text-gray-700 dark:text-gray-200 font-medium">查看入群申请</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* 分割线：在“查看入群申请”和“删除队伍”之间 */}
+            <View className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
             {/* 删除队伍 - 危险操作 */}
             <TouchableOpacity
-              className="flex-row items-center p-3 rounded-lg border mt-1 border-red-200 dark:border-red-900 active:bg-red-50 dark:active:bg-red-900/20"
+              className="flex-row items-center p-3 rounded-lg bg-white dark:bg-gray-800 active:bg-red-50 dark:active:bg-red-900/20"
               onPress={handleDelTeam}
             >
-              <Icon name="delete" size={20} color="#f56565" />
-              <Text className="ml-3 text-red-600 dark:text-red-400">删除队伍</Text>
+              <Icon name="delete" size={20} color="#ef4444" />
+              <Text className="ml-3 text-red-600 dark:text-red-400 font-medium">删除队伍</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -534,7 +768,7 @@ const ChatGroupSetting = () => {
         <View className="space-y-3">
           {/* 退出群组 */}
           <TouchableOpacity
-            className="flex-row items-center p-3 rounded-lg border border-red-200 dark:border-red-900 active:bg-red-50 dark:active:bg-red-900/20"
+            className="flex-row items-center p-3 rounded-lg"
             onPress={() => handleLeaveGroup(currentUser.id)}
           >
             <Icon name="exit-to-app" size={20} color="#f56565" />
@@ -665,10 +899,24 @@ const ChatGroupSetting = () => {
               </TouchableOpacity>
             )}
             
+            {/* Add this new option for parent teams */}
+            {isParentTeam && teamData.subTeams && teamData.subTeams.length > 0 && (
+              <TouchableOpacity 
+                className="p-4 border-b border-gray-200 dark:border-gray-700"
+                onPress={() => {
+                  setSelectedUserForSubTeam(selectedMember);
+                  setRoleModalVisible(false);
+                  setInviteToSubTeamModalVisible(true);
+                }}
+              >
+                <Text className="text-blue-500 dark:text-blue-400">添加到子团队</Text>
+              </TouchableOpacity>
+            )}
+            
             {['owner', 'co_owner'].includes(currentUserRole) && 
-             selectedMember?.user_id !== currentUser?.userId && 
-             selectedMember?.role !== 'owner' && 
-             !(currentUserRole === 'co_owner' && selectedMember?.role === 'co_owner') && (
+            selectedMember?.user_id !== currentUser?.userId && 
+            selectedMember?.role !== 'owner' && 
+            !(currentUserRole === 'co_owner' && selectedMember?.role === 'co_owner') && (
               <TouchableOpacity 
                 className="p-4 border-b border-gray-200 dark:border-gray-700"
                 onPress={() => handleRemoveMember(selectedMember.user_id, selectedMember.name)}
@@ -737,6 +985,81 @@ const ChatGroupSetting = () => {
           </View>
         </View>
       </Modal>
+
+      {/* 创建子团队模态框 */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={subTeamModalVisible}
+        onRequestClose={() => setSubTeamModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white dark:bg-gray-800 rounded-lg p-5 w-4/5">
+            <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              创建子团队
+            </Text>
+            
+            <InputBox
+              value={newSubTeamName}
+              onChangeText={setNewSubTeamName}
+              placeholder="输入子团队名称"
+            />
+            
+            <View className="flex-row justify-end">
+              <TouchableOpacity 
+                className="px-4 py-2 rounded-lg mr-2"
+                onPress={() => setSubTeamModalVisible(false)}
+              >
+                <Text className="text-gray-600 dark:text-gray-300">取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="bg-blue-500 px-4 py-2 rounded-lg"
+                onPress={createSubTeam}
+              >
+                <Text className="text-white">创建</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {inviteToSubTeamModalVisible && (
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={inviteToSubTeamModalVisible}
+          onRequestClose={() => setInviteToSubTeamModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white dark:bg-gray-800 rounded-lg p-5 w-4/5">
+              <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                添加 {selectedUserForSubTeam?.name} 到子团队
+              </Text>
+              
+              <ScrollView className="max-h-60">
+                {teamData.subTeams.map(subTeam => (
+                  <TouchableOpacity
+                    key={subTeam.team_id}
+                    className="p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                    onPress={() => inviteToSubTeamDirect(subTeam.team_id)}
+                  >
+                    <Text className="text-gray-900 dark:text-gray-100">
+                      {subTeam.team_name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              
+              <TouchableOpacity 
+                className="mt-4 p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
+                onPress={() => setInviteToSubTeamModalVisible(false)}
+              >
+                <Text className="text-center text-gray-900 dark:text-gray-100">取消</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* 自定义弹窗 */}
       <CustomAlert

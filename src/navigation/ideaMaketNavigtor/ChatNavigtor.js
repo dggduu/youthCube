@@ -10,7 +10,7 @@ import InviteRedux from "../../screens/ideaScreen/Chat/InviteRedux";
 
 import FriendInvitationSolve from "../../screens/ideaScreen/Chat/FriendInvitationSolve";
 import TeamInviteationSolve from "../../screens/ideaScreen/Chat/TeamInviteationSolve";
-
+import AnnouncementDetail from "../../screens/ideaScreen/Chat/AnnouncementDetail";
 import { TouchableOpacity } from "react-native";
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { HeaderBackButton } from "@react-navigation/elements";
@@ -117,6 +117,15 @@ const ChatNavigator = () => {
         options={{
           headerShown: true,
           title: '邀请好友',
+          headerBackTitle: '返回'
+        }}
+      />
+      <Stack.Screen 
+        name="AnnouncementDetail"
+        component={AnnouncementDetail}
+        options={{
+          headerShown: true,
+          title: '公告',
           headerBackTitle: '返回'
         }}
       />

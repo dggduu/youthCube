@@ -5,7 +5,7 @@ export const CarouselStartData = [
     },
     {
         img: require("./2.png"),
-        url: "http://192.168.5.3:3166/v1/static/test"
+        url: "http://192.168.5.3:3166/v1/static/sec"
     },
     {
         img: require("./3.png"),

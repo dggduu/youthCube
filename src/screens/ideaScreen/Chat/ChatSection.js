@@ -12,7 +12,7 @@ const api = axios.create();
 setupAuthInterceptors(api);
 
 const ChatSection = () => {
-    const [teamChat, setTeamChat] = useState(null);
+    const [teams, setTeams] = useState([]); // Will contain parent team + sub-teams
     const [privateChats, setPrivateChats] = useState([]);
     const [allPrivateChats, setAllPrivateChats] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,6 +20,7 @@ const ChatSection = () => {
     const [hasMore, setHasMore] = useState(true);
     const [filterFollowing, setFilterFollowing] = useState(false);
     const [privateChatError, setPrivateChatError] = useState(null);
+    const [teamError, setTeamError] = useState(null);
 
     const navigation = useNavigation();
     const showToast = useToast();
@@ -56,26 +57,51 @@ const ChatSection = () => {
         fetchUserData();
     }, []);
 
-    const fetchTeamChat = async (teamId) => {
+    const fetchTeamData = async (teamId) => {
         try {
+            setLoading(true);
+            setTeamError(null);
+            
             const accessToken = await getItemFromAsyncStorage('accessToken');
-            const response = await api.get(`${BASE_INFO.BASE_URL}api/chatrooms/team/${teamId}`, {
+            const response = await api.get(`${BASE_INFO.BASE_URL}api/teams/${teamId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
 
             const data = response.data;
-
-            if (data.message === "未找到该团队的聊天室") {
-                setTeamChat(null);
-                return;
+            
+            const teamsArray = [];
+            
+            if (data.chatRoom) {
+                teamsArray.push({
+                    ...data,
+                    isParent: true
+                });
             }
-
-            setTeamChat(data);
+            
+            if (data.subTeams && data.subTeams.length > 0) {
+                data.subTeams.forEach(subTeam => {
+                    if (subTeam.chatRoom) {
+                        teamsArray.push({
+                            ...subTeam,
+                            isParent: false
+                        });
+                    }
+                });
+            }
+            
+            setTeams(teamsArray);
+            
+            if (teamsArray.length === 0) {
+                setTeamError('暂无团队聊天室');
+            }
         } catch (error) {
-            console.error('Error fetching team chat:', error);
-            setTeamChat(null);
+            console.error('Error fetching team data:', error);
+            setTeamError('加载团队信息失败');
+            showToast('error', '加载团队信息失败');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -151,7 +177,11 @@ const ChatSection = () => {
         const init = async () => {
             try {
                 const user = await getItemFromAsyncStorage("user");
-                if (user?.team_id) await fetchTeamChat(user.team_id);
+                if (user?.team_id) {
+                    await fetchTeamData(user.team_id);
+                } else {
+                    setTeamError('您当前未加入任何团队');
+                }
                 await fetchPrivateChats(0);
             } catch (error) {
                 console.error('Initialization error:', error);
@@ -164,6 +194,54 @@ const ChatSection = () => {
     useEffect(() => {
         setPrivateChats(filterFollowing ? allPrivateChats.filter(chat => chat.other_user.is_following) : allPrivateChats);
     }, [filterFollowing]);
+
+    const renderTeamChat = ({ item }) => (
+        <TouchableOpacity
+            className={`p-4 mb-3 rounded-lg shadow-sm 
+                bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                ${item.isParent ? 'border-l-4 border-blue-500' : ''}`}
+            activeOpacity={0.8}
+            onPress={() => 
+                navigation.navigate('group', { 
+                    chatId: item.chatRoom.room_id, 
+                    team_id: item.team_id, 
+                    name: item.chatRoom.name 
+                })
+        }
+        >
+            <View className="flex-row items-center">
+                <View className={`p-2 rounded-full mr-3 ${item.isParent ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                    <MaterialIcons
+                        name={item.isParent ? 'groups' : 'group'}
+                        size={20}
+                        color={item.isParent ? '#409eff' : '#909399'}
+                    />
+                </View>
+                <View className="flex-1">
+                    <View className="flex-row justify-between items-center">
+                        <Text
+                            numberOfLines={1}
+                            className={`text-base font-medium 
+                                ${item.isParent 
+                                    ? 'text-blue-600 dark:text-blue-300' 
+                                    : 'text-gray-800 dark:text-gray-200'
+                                }`}
+                        >
+                            {item.chatRoom.name}
+                        </Text>
+                        {item.unreadCount > 0 && (
+                            <View className="bg-red-500 rounded-full w-5 h-5 justify-center items-center">
+                                <Text className="text-white text-xs">{item.unreadCount}</Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text className="text-gray-500 text-sm mt-1 dark:text-gray-400">
+                        {item.isParent ? '主团队' : '子团队'} · {item.team_name}
+                    </Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 
     const renderPrivateChat = ({ item }) => (
         <TouchableOpacity
@@ -240,38 +318,33 @@ const ChatSection = () => {
             </View>
 
             {/* Team Chat Section */}
-            {teamChat && (
+            {teams.length > 0 ? (
                 <View className="px-4 mb-4">
                     <Text className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">团队聊天</Text>
-                    <TouchableOpacity
-                        className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                            shadow-sm active:bg-gray-50 dark:active:bg-gray-700/50"
-                        activeOpacity={0.8}
-                        onPress={() => navigation.navigate('group', { 
-                            chatId: teamChat.chatRoomId, 
-                            team_id: teamChat.teamId, 
-                            name: teamChat.name 
-                        })}
-                    >
-                        <View className="flex-row items-center">
-                            <View className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30 mr-3">
-                                <MaterialIcons name="groups" size={22} color="#409eff" />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-base font-medium text-gray-800 dark:text-gray-200">
-                                    {teamChat.name}
-                                </Text>
-                                <Text className="text-gray-500 text-sm mt-1 dark:text-gray-400">
-                                    团队 ID: {teamChat.teamId}
+                    <FlatList
+                        data={teams}
+                        renderItem={renderTeamChat}
+                        keyExtractor={(item) => `team-${item.team_id}`}
+                        scrollEnabled={false}
+                        ListEmptyComponent={() => (
+                            <View className="py-4 items-center justify-center">
+                                <MaterialIcons name="error-outline" size={40} color="#c0c4cc" />
+                                <Text className="mt-3 text-lg text-gray-500 dark:text-gray-400">
+                                    {teamError || '暂无团队聊天室'}
                                 </Text>
                             </View>
-                            <MaterialIcons 
-                                name="chevron-right" 
-                                size={24} 
-                                color="#c0c4cc" 
-                            />
-                        </View>
-                    </TouchableOpacity>
+                        )}
+                    />
+                </View>
+            ) : teamError && (
+                <View className="px-4 mb-4">
+                    <Text className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">团队聊天</Text>
+                    <View className="p-4 rounded-lg bg-white dark:bg-gray-800 items-center justify-center">
+                        <MaterialIcons name="error-outline" size={40} color="#c0c4cc" />
+                        <Text className="mt-3 text-lg text-gray-500 dark:text-gray-400">
+                            {teamError}
+                        </Text>
+                    </View>
                 </View>
             )}
 
