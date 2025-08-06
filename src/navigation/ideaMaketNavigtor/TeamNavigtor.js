@@ -35,7 +35,7 @@ const TeamNavigator = () => {
             <HeaderBackButton
               {...props}
               onPress={() => {
-                navigation.goBack();
+                navigation.popToTop();
               }}
             />
           ),

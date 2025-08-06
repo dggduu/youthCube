@@ -10,6 +10,7 @@ import { setupAuthInterceptors } from "../../utils/axios/AuthInterceptors";
 import InspirationCarousel from "../../components/chart/InspirationCarousel";
 import CarouselStart from "../../components/custom/CarouselStart";
 import axios from "axios";
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 const screenWidth = Dimensions.get('window').width;
 
 export default function IeaMarketScreen() {
@@ -60,90 +61,67 @@ export default function IeaMarketScreen() {
       </View>
     );
   }
+  
   return (
-    <SafeAreaView style={{ flex: 1 }} className='bg-white dark:bg-gray-600'>
-      <View className='mt-10 px-5 mb-3 '
-      style={{
-        flexDirection: 'column',
-        gap: 10,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 10,
-        }}>
+    <SafeAreaView style={{ flex: 1 }} className='bg-white dark:bg-gray-900'>
+      <View className="mt-14 px-5 mb-3 space-y-4">
+        <View className="flex-row justify-between items-center mb-4">
           <Text
-            className='text-4xl text-black dark:text-gray-200'
             style={{
-              fontFamily: "NotoSerifSC",
-              flex: 1,
-            }}
+                fontFamily: "NotoSerifSC",
+                flex: 1,
+              }}
+            className="text-4xl text-black dark:text-white mb-1"
           >
             想法市场
           </Text>
-
-          <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600'
-            onPress={() => {
-              navigate('RootIdea', { screen: 'CreateFlow', params: { screen: 'Create' } });
-            }}
-          >
-            <View style={{
-              // backgroundColor: '#eee2bc',
-              padding: 15,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 8,
-              width: screenWidth / 2 - 35,
-            }}>
-              <Text className='text-dark dark:text-gray-300'>创建团队</Text>
-            </View>
-          </TouchableOpacity>
         </View>
 
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: 10,
-        }}>
+        <View className="flex-row gap-3">
+          {/* 项目进度*/}
           <TouchableOpacity
-          className='border border-gray-300 rounded-xl dark:border-gray-400 bg-white dark:bg-gray-600'
+            className="flex-1 rounded-lg bg-blue-500 dark:bg-blue-800 shadow-lg"
             onPress={() => {
-              navigate('RootIdea', { screen: 'Progress', params: { screen: 'TimeLine', params: { screen: "TimeLine" } } });
+              navigate('RootIdea', { 
+                screen: 'Progress', 
+                params: { screen: 'TimeLine', params: { screen: "TimeLine" } } 
+              });
             }}
           >
-            <View style={{
-              // backgroundColor: '#fae287',
-              padding: 15,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 8,
-              width: screenWidth / 2 - 15,
-            }}>
-              <Text className='text-dark dark:text-gray-300'>项目进度</Text>
+            <View className="py-4 items-center justify-center gap-2">
+              <MaterialIcons name="timeline" size={24} color="white" />
+              <Text className="text-white font-medium">项目进度</Text>
             </View>
           </TouchableOpacity>
 
+          {/* 聊天服务*/}
           <TouchableOpacity
-          className='border border-gray-300 dark:border-gray-400 rounded-xl bg-white dark:bg-gray-600'
+            className="flex-1 rounded-lg bg-emerald-500 dark:bg-emerald-800 shadow-lg"
             onPress={() => {
               navigate('RootIdea', { screen: 'Chat', params: { screen: 'section' } });
             }}
           >
-            <View style={{
-              // backgroundColor: '#c5eccd',
-              padding: 15,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 8,
-              width: screenWidth / 2 - 35,
-            }}>
-              <Text className='text-dark dark:text-gray-300'>聊天服务</Text>
+            <View className="py-4 items-center justify-center gap-2">
+              <MaterialIcons name="chat" size={24} color="white" />
+              <Text className="text-white font-medium">聊天服务</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* 创建团队*/}
+          <TouchableOpacity
+            className="flex-1 rounded-lg bg-purple-500 dark:bg-purple-800 shadow-lg"
+            onPress={() => {
+              navigate('RootIdea', { screen: 'CreateFlow', params: { screen: 'Create' } });
+            }}
+          >
+            <View className="py-4 items-center justify-center gap-2">
+              <MaterialIcons name="groups" size={20} color="white" />
+              <Text className="text-white font-medium">创建团队</Text>
             </View>
           </TouchableOpacity>
         </View>
       </View>
+
       <View className='flex-1 flex-row px-5'>
         <CarouselStart
           onItemPress={(url) => navigate('RootIdea', { 
@@ -153,11 +131,9 @@ export default function IeaMarketScreen() {
         />
           <InspirationCarousel 
             onMenuPress={() =>navigate('RootIdea', { screen: 'menu', params: { user_id:user.id, user_name: user.name } })}
-            onItemPress={(userId) => navigate('RootIdea', { screen: 'profile', params: { user_id:user.id, user_name: user.name } })}
           />
       </View>
       
-
       <TeamFeed />
     </SafeAreaView>
   );

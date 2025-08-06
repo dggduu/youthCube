@@ -6,7 +6,7 @@ import { navigate } from '../../navigation/NavigatorRef';
 const TeamCard = ({ title, tags, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <View className="mx-4 my-2 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-200 dark:border-gray-700 flex-row items-center">
+      <View className="mx-4 my-2 bg-white dark:bg-gray-600 rounded-xl p-5 shadow-md border border-gray-200 dark:border-gray-700 flex-row items-center">
         <View className="flex-1 mr-2">
           <Text
             numberOfLines={1}

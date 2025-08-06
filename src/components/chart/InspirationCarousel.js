@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import setupAuthInterceptors from '../../utils/axios/AuthInterceptors';
 import { BASE_INFO } from '../../constant/base';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-
+import { navigate } from "../../navigation/NavigatorRef";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -23,10 +23,11 @@ const fetchThoughtBullets = async (page = 0) => {
       size: PAGE_SIZE,
     },
   });
+  console.log(response.data);
   return response.data;
 };
 
-const InspirationCarousel = ({ onMenuPress, onItemPress }) => {
+const InspirationCarousel = ({ onMenuPress }) => {
   const [page, setPage] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayItems, setDisplayItems] = useState([]);
@@ -118,7 +119,7 @@ const InspirationCarousel = ({ onMenuPress, onItemPress }) => {
           >
             <TouchableOpacity 
               activeOpacity={0.8} 
-              onPress={() => onItemPress(item.author?.id)}
+              onPress={(userId) => navigate('RootIdea', { screen: 'profile', params: { user_id:item.author?.id, user_name: item.author?.name } })}
             >
               <View style={styles.messageContainer} className='bg-gray-50 dark:bg-gray-600'>
                 <Text

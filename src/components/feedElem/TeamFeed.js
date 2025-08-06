@@ -163,7 +163,7 @@ const TeamFeed = () => {
   };
 
   return (
-    <View className='flex-1 bg-gray-50 dark:bg-gray-900 rounded-t-lg'>
+    <View className='flex-1 bg-gray-100 dark:bg-gray-800 rounded-t-lg pt-2'>
       <WaterfallFlow
         ref={scrollViewRef}
         data={data}
@@ -209,7 +209,6 @@ const TeamFeed = () => {
             borderRadius: 24,
             justifyContent: 'center',
             alignItems: 'center',
-            elevation: 4,
           }}
         >
           <MatrialIcons name="arrow-upward" size={20} color={IsDark ? '#ccc' : '#fff'} />
