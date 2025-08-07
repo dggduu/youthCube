@@ -17,10 +17,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install npm dependencies
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Install dependencies using yarn
         run: |
-          npm install --legacy-peer-deps
-          npm install lightningcss-linux-x64-gnu
+          yarn install
+          yarn add lightningcss-linux-x64-gnu
 
       - name: Generate JS Bundle for Android
         run: |
