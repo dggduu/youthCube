@@ -275,106 +275,122 @@ const PersonalProfile = () => {
         initialNumToRender={10}
         onEndReachedThreshold={0.3}
         ListHeaderComponent={
-   <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
-      {/* 用户头像与基本信息 */}
-      <View className="items-center mb-4">
-        {currentUser.avatar_key ? (
-          <Image
-            source={{ uri: currentUser.avatar_key }}
-            className="w-24 h-24 rounded-full border-2 border-blue-100 dark:border-gray-600"
-          />
-        ) : (
-          <Image
-            source={require('../assets/logo/ava.png')}
-            className="w-24 h-24 rounded-full border-2 border-blue-100 dark:border-gray-600"
-          />
-        )}
-        <Text className="text-xl font-semibold text-gray-800 dark:text-white mt-3">
-          {currentUser.name}
-        </Text>
-        <Text className="text-sm text-blue-500 dark:text-blue-400 mt-1 font-medium">
-          {currentUser.is_member ? '高级会员' : '普通用户'}
-        </Text>
+          <View className="bg-white dark:bg-gray-800 my-3 p-6 rounded-xl shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
+            {/* 用户头像与基本信息 */}
+            <View className="items-center mb-4">
+              {currentUser.avatar_key ? (
+                <Image
+                  source={{ uri: currentUser.avatar_key }}
+                  className="w-24 h-24 rounded-full border-2 border-blue-100 dark:border-gray-600"
+                />
+              ) : (
+                <Image
+                  source={require('../assets/logo/ava.png')}
+                  className="w-24 h-24 rounded-full border-2 border-blue-100 dark:border-gray-600"
+                />
+              )}
+              <Text className="text-xl font-semibold text-gray-800 dark:text-white mt-3">
+                {currentUser.name}
+              </Text>
+              <Text className="text-sm text-blue-500 dark:text-blue-400 mt-1 font-medium">
+                {currentUser.is_member ? '高级会员' : '普通用户'}
+              </Text>
 
-        {/* 当前用户不是自己时，显示操作按钮 */}
-        {localId.id !== currentUser.id && (
-          <View className="flex-row gap-3 mt-4">
-            {!isFriendRequestSent ? (
-              <TouchableOpacity
-                onPress={openFriendRequestModal}
-                disabled={!canSendRequest}
-                className="bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded-full flex-row items-center active:bg-blue-600 dark:active:bg-blue-700"
-              >
-                <MaterialIcons name="person-add" size={18} color="white" />
-                <Text className="text-white ml-1 text-sm font-medium">
-                  {canSendRequest ? '添加好友' : '请稍后再试'}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <View className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full">
-                <Text className="text-gray-600 dark:text-gray-300 text-sm">
-                  {currentUser.friend_status === 'accepted' ? '已是好友' : '申请已发送'}
-                </Text>
+              {/* 关注和粉丝统计 */}
+              <View className="flex-row justify-around w-full mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <View className="items-center px-4">
+                  <Text className="text-2xl font-bold text-gray-900 dark:text-white">{posts.length}</Text>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">文章</Text>
+                </View>
+                <View className="items-center px- border-gray-200 dark:border-gray-700">
+                  <Text className="text-2xl font-bold text-gray-900 dark:text-white">{currentUser.followerCount}</Text>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">粉丝</Text>
+                </View>
+                <View className="items-center px-4">
+                  <Text className="text-2xl font-bold text-gray-900 dark:text-white">{currentUser.followingCount}</Text>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">关注</Text>
+                </View>
               </View>
-            )}
 
-            <TouchableOpacity
-              onPress={handlePrivateChat}
-              className="bg-emerald-500 dark:bg-emerald-600 px-4 py-2 rounded-full flex-row items-center active:bg-emerald-600 dark:active:bg-emerald-700"
-            >
-              <MaterialIcons name="chat" size={18} color="white" />
-              <Text className="text-white ml-1 text-sm font-medium">私聊</Text>
-            </TouchableOpacity>
+              {/* 当前用户不是自己时，显示操作按钮 */}
+              {localId.id !== currentUser.id && (
+                <View className="flex-row gap-3 mt-4">
+                  {!isFriendRequestSent ? (
+                    <TouchableOpacity
+                      onPress={openFriendRequestModal}
+                      disabled={!canSendRequest}
+                      className="bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded-full flex-row items-center active:bg-blue-600 dark:active:bg-blue-700"
+                    >
+                      <MaterialIcons name="person-add" size={18} color="white" />
+                      <Text className="text-white ml-1 text-sm font-medium">
+                        {canSendRequest ? '添加好友' : '请稍后再试'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full">
+                      <Text className="text-gray-600 dark:text-gray-300 text-sm">
+                        {currentUser.friend_status === 'accepted' ? '已是好友' : '申请已发送'}
+                      </Text>
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    onPress={handlePrivateChat}
+                    className="bg-emerald-500 dark:bg-emerald-600 px-4 py-2 rounded-full flex-row items-center active:bg-emerald-600 dark:active:bg-emerald-700"
+                  >
+                    <MaterialIcons name="chat" size={18} color="white" />
+                    <Text className="text-white ml-1 text-sm font-medium">私聊</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            {/* 详细信息 */}
+            <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <View className="flex-row justify-between items-center py-2">
+                <Text className="text-sm text-gray-500 dark:text-gray-400">用户ID</Text>
+                <Text className="text-sm text-gray-800 dark:text-gray-200 font-medium">{currentUser.id}</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2">
+                <Text className="text-sm text-gray-500 dark:text-gray-400">联系邮箱</Text>
+                <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2">
+                <Text className="text-sm text-gray-500 dark:text-gray-400">性别</Text>
+                <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.sex || '未设置'}</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2">
+                <Text className="text-sm text-gray-500 dark:text-gray-400">出生日期</Text>
+                <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.birth_date || '未设置'}</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2">
+                <Text className="text-sm text-gray-500 dark:text-gray-400">学习阶段</Text>
+                <Text className="text-sm text-gray-800 dark:text-gray-200">{getLearnStageLabel(currentUser.learn_stage)}</Text>
+              </View>
+
+              {currentUser.bio && (
+                <View className="mt-3">
+                  <Text className="text-sm text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
+                  <Text className="text-sm text-gray-800 dark:text-gray-200 leading-5">{currentUser.bio}</Text>
+                </View>
+              )}
+
+              {/* 团队信息 - 可点击 */}
+              {currentUser.team && (
+                <TouchableOpacity
+                  onPress={()=>{
+                    navigation.navigate("TeamDetail", {teamId: currentUser.team_id, teamName: currentUser.team.team_name});
+                  }}
+                  activeOpacity={0.7}
+                  className="mt-4 p-3 bg-blue-50 dark:bg-gray-700/50 rounded-xl border border-blue-100 dark:border-gray-600"
+                >
+                  <Text className="text-xs text-blue-500 dark:text-blue-400 font-medium mb-1">所属团队</Text>
+                  <Text className="text-base font-semibold text-blue-700 dark:text-blue-400">{currentUser.team.team_name}</Text>
+                  <Text className="text-sm text-gray-600 dark:text-gray-300 mt-1">{currentUser.team.description}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        )}
-      </View>
-
-      {/* 详细信息 */}
-      <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <View className="flex-row justify-between items-center py-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">用户ID</Text>
-          <Text className="text-sm text-gray-800 dark:text-gray-200 font-medium">{currentUser.id}</Text>
-        </View>
-        <View className="flex-row justify-between items-center py-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">联系邮箱</Text>
-          <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
-        </View>
-        <View className="flex-row justify-between items-center py-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">性别</Text>
-          <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.sex || '未设置'}</Text>
-        </View>
-        <View className="flex-row justify-between items-center py-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">出生日期</Text>
-          <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.birth_date || '未设置'}</Text>
-        </View>
-        <View className="flex-row justify-between items-center py-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">学习阶段</Text>
-          <Text className="text-sm text-gray-800 dark:text-gray-200">{getLearnStageLabel(currentUser.learn_stage)}</Text>
-        </View>
-
-        {currentUser.bio && (
-          <View className="mt-3">
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mb-1">个人简介</Text>
-            <Text className="text-sm text-gray-800 dark:text-gray-200 leading-5">{currentUser.bio}</Text>
-          </View>
-        )}
-
-        {/* 团队信息 - 可点击 */}
-        {currentUser.team && (
-          <TouchableOpacity
-            onPress={()=>{
-              navigation.navigate("TeamDetail", {teamId: currentUser.team_id, teamName: currentUser.team.team_name});
-            }}
-            activeOpacity={0.7}
-            className="mt-4 p-3 bg-blue-50 dark:bg-gray-700/50 rounded-xl border border-blue-100 dark:border-gray-600"
-          >
-            <Text className="text-xs text-blue-500 dark:text-blue-400 font-medium mb-1">所属团队</Text>
-            <Text className="text-base font-semibold text-blue-700 dark:text-blue-400">{currentUser.team.team_name}</Text>
-            <Text className="text-sm text-gray-600 dark:text-gray-300 mt-1">{currentUser.team.description}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
         }
         ListEmptyComponent={
           <View className="py-8 items-center">

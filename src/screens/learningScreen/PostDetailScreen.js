@@ -25,6 +25,8 @@ import { navigate } from "../../navigation/NavigatorRef";
 import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
 import axios from 'axios'
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
+import RNFS from 'react-native-fs';
+import FileViewer from 'react-native-file-viewer';
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -47,6 +49,96 @@ const PostDetailScreen = () => {
   const { showToast } = useToast();
   const [authToken, setAuthToken] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadedFileUri, setDownloadedFileUri] = useState(null);
+
+  const handleDownload = useCallback(async (mediaUrl) => {
+    if (!mediaUrl) return;
+    
+    try {
+      setDownloading(true);
+      setDownloadProgress(0);
+      
+      const fileName = mediaUrl.split('/').pop();
+      const downloadDest = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+      
+      const options = {
+        fromUrl: mediaUrl,
+        toFile: downloadDest,
+        background: true,
+        begin: (res) => {
+          console.log('Download began:', res);
+        },
+        progress: (res) => {
+          const progress = (res.bytesWritten / res.contentLength);
+          setDownloadProgress(progress);
+        },
+        headers: authToken ? {
+          Authorization: `Bearer ${authToken}`,
+        } : {},
+      };
+      
+      const download = await RNFS.downloadFile(options).promise;
+      
+      if (download.statusCode === 200) {
+        setDownloadedFileUri(downloadDest);
+        showToast("下载完成", "success");
+      } else {
+        throw new Error(`Download failed with status ${download.statusCode}`);
+      }
+    } catch (err) {
+      console.error('Download error:', err);
+      showToast("下载失败", "error");
+    } finally {
+      setDownloading(false);
+      setDownloadProgress(0);
+    }
+  }, [authToken, showToast]);
+
+  const handleOpenFile = useCallback(async () => {
+    if (!downloadedFileUri) return;
+    
+    try {
+      const fileExists = await RNFS.exists(downloadedFileUri);
+      if (!fileExists) {
+        throw new Error('File not found');
+      }
+      
+      await FileViewer.open(downloadedFileUri, { 
+        showOpenWithDialog: true,
+        onDismiss: () => console.log('File viewer dismissed') 
+      });
+    } catch (err) {
+      console.error('Error opening file:', err);
+      showToast("无法打开文件", "error");
+      
+      try {
+        if (Platform.OS === 'android') {
+          await Linking.openURL(`file://${downloadedFileUri}`);
+        } else {
+          await Linking.openURL(downloadedFileUri);
+        }
+      } catch (linkErr) {
+        console.error('Error opening with Linking:', linkErr);
+      }
+    }
+  }, [downloadedFileUri, showToast]);
+
+  useEffect(() => {
+    const checkExistingFile = async () => {
+      if (post?.media?.[0]?.media_url) {
+        const fileName = post.media[0].media_url.split('/').pop();
+        const filePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        const fileExists = await RNFS.exists(filePath);
+        if (fileExists) {
+          setDownloadedFileUri(filePath);
+        }
+      }
+    };
+    
+    checkExistingFile();
+  }, [post]);
 
   // 处理生成嵌套问题，但嵌套深度为复数个时显示跳转主页按钮
   const state = navigation.getState();
@@ -71,7 +163,7 @@ const PostDetailScreen = () => {
       setLoading(true);
       const response = await api.get(`${BASE_INFO.BASE_URL}api/posts/${postId}`);
       const data = response.data;
-
+      console.log("postData",data);
       setPost(data);
       setLikeCount(data.likes_count);
 
@@ -297,6 +389,66 @@ const PostDetailScreen = () => {
               />
             </TouchableOpacity>
           )}
+
+        {post?.media?.length > 0 && (
+            <View className="mb-4">
+              {post.media.map((media) => {
+                const fileName = media.media_url.split('/').pop();
+                const isDownloaded = !!downloadedFileUri;
+                
+                return (
+                  <View key={media.media_id} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex-row justify-between items-center">
+                    <View className="flex-row items-center flex-1 mr-2">
+                      <Icon 
+                        name="insert-drive-file" 
+                        size={24} 
+                        color={isDark ? "#9CA3AF" : "#6B7280"} 
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text 
+                        className="text-gray-800 dark:text-gray-200"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {fileName}
+                      </Text>
+                    </View>
+                    
+                    {isDownloaded ? (
+                      <TouchableOpacity
+                        onPress={handleOpenFile}
+                        className="bg-blue-500 px-4 py-2 rounded-full"
+                      >
+                        <Text className="text-white">打开</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => handleDownload(media.media_url)}
+                        disabled={downloading}
+                        className="bg-blue-500 px-3 py-1 rounded-full min-w-[70px] items-center"
+                      >
+                        {downloading ? (
+                          <View className="flex-row items-center">
+                            <ActivityIndicator 
+                              color="white" 
+                              size="small" 
+                              style={{ marginRight: 4 }}
+                            />
+                            <Text className="text-white">
+                              {Math.round(downloadProgress * 100)}%
+                            </Text>
+                          </View>
+                        ) : (
+                          <Text className="text-white">下载</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
           <Markdown
             value={post.content}
             flatListProps={{
@@ -305,7 +457,7 @@ const PostDetailScreen = () => {
           />
 
           {tags.length > 0 && (
-            <View className="flex-row flex-wrap mb-4">
+            <View className="flex-row flex-wrap mb-4 mt-2">
               {tags.map(tag => (
                 <TouchableOpacity
                   key={tag.tag_id}

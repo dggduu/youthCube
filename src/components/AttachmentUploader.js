@@ -1,142 +1,230 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { View, Text, TouchableOpacity, ToastAndroid, Alert } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
-import { uploadFile } from "../utils/uploadUtils";
+import { pick } from '@react-native-documents/picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useColorScheme } from 'nativewind';
 import RNFetchBlob from 'rn-fetch-blob';
-
+import { uploadFile } from "../utils/uploadUtils";
+import { useToast } from "../components/tip/ToastHooks";
+import RNFS from 'react-native-fs';
+import { sanitizeFileName } from "../utils/utils";
 const AttachmentUploader = ({ AccessToken, fileUrl, setFileUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [fileType, setFileType] = useState('');
   const { colorScheme } = useColorScheme();
-
+  const { showToast } = useToast();
   const config = {
     authToken: AccessToken,
-    bucketName: 'files',
+    bucketName: 'posts',
   };
 
-  // 100MB in bytes
+  // 150MB
   const MAX_FILE_SIZE = 150 * 1024 * 1024;
 
-  const handleFileUpload = async () => {
+const handleFileUpload = async () => {
+  try {
+    const [file] = await pick({
+      types: ['application/zip', 'application/x-7z-compressed', 'text/plain', '*/*'],
+      allowMultiSelection: false,
+      mode: 'open',
+    });
+
+    if (!file || !file.uri) return;
+    console.log('Picked file:', file);
+
+    const fileSize = file.size;
+    if (typeof fileSize !== 'number' || isNaN(fileSize)) {
+      showToast('无法获取文件大小', "warning");
+      return;
+    }
+
+    if (fileSize > MAX_FILE_SIZE) {
+      showToast('文件大小不能超过150MB', "warning");
+      return;
+    }
+
+    // 原始信息
+    const rawName = file.name || file.uri.split('/').pop() || 'unknown';
+    const rawType = file.type || 'application/octet-stream';
+
+    // 扩展名处理
+    const ext = rawName.includes('.') ? rawName.split('.').pop()?.toLowerCase() : '';
+    const allowedExtensions = ['7z', 'zip'];
+
+    // 文件类型容错判断
+    const isMimeAcceptable = [
+      'application/zip',
+      'application/x-7z-compressed'
+    ].includes(rawType);
+
+    const isExtAcceptable = allowedExtensions.includes(ext);
+
+    if (!isMimeAcceptable && !isExtAcceptable) {
+      showToast('仅支持 7z, zip 格式的文件', 'warning');
+      return;
+    }
+
+    // 统一安全文件名
+    const safeName = sanitizeFileName(rawName, ext || rawType.split('/').pop() || '');
+
+    // 确认上传
+    Alert.alert(
+      '确认上传',
+      `您确定要上传 ${safeName} 吗?`,
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '确认',
+          onPress: async () => {
+            await startFileUpload({
+              uri: file.uri,
+              name: safeName,
+              type: rawType,
+              size: fileSize
+            });
+          },
+        },
+      ]
+    );
+  } catch (err) {
+    if (err?.code === 'E_PICKER_CANCELLED') {
+      // 用户取消
+    } else {
+      showToast('选择文件时出错', "error");
+      console.error(err);
+    }
+  }
+};
+
+
+
+const getMimeTypeByExtension = (filename) => {
+  const ext = filename.split('.').pop().toLowerCase();
+  switch (ext) {
+    case 'zip': return 'application/zip';
+    case '7z': return 'application/x-7z-compressed';
+    default: return 'application/octet-stream';
+  }
+};
+
+  const startFileUpload = async (file) => {
+    let tempFilePath = null;
+
     try {
-      const res = await DocumentPicker.pick({
-        type: [
-          DocumentPicker.types.zip,
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.allFiles,
-        ],
-      });
-
-      const file = res[0];
-      const fileSize = file.size || (await RNFetchBlob.fs.stat(file.uri)).size;
-
-      // Check file size
-      if (fileSize > MAX_FILE_SIZE) {
-        showToast('文件大小不能超过100MB');
-        return;
-      }
-
-      // Check file extension
-      const fileExtension = file.name.split('.').pop().toLowerCase();
-      const allowedExtensions = ['7z', 'zip', 'pdf'];
-      if (!allowedExtensions.includes(fileExtension)) {
-        showToast('仅支持 7z, zip, pdf 格式的文件');
-        return;
-      }
-
       setIsUploading(true);
       setFileName(file.name);
 
+      const ext = file.name.split('.').pop().toLowerCase();
+      const mimeType = (file.type && file.type !== 'application/octet-stream') 
+                        ? file.type 
+                        : getMimeTypeByExtension(file.name);
+      setFileType(mimeType);
+
+      let finalUri = file.uri;
+      if (!finalUri.startsWith('file://')) {
+        finalUri = `file://${finalUri}`;
+      }
+
       const uploadConfig = {
         ...config,
-        contentType: file.type || 'application/octet-stream',
+        contentType: mimeType,
+        fileName: file.name,
       };
 
-      const uploadResult = await uploadFile(file.uri, uploadConfig);
+      if (file.uri.startsWith('content://')) {
+        const destPath = `${RNFS.CachesDirectoryPath}/upload_${Date.now()}.${ext}`;
+        await RNFS.copyFile(file.uri, destPath);
+        finalUri = `file://${destPath}`;
+        tempFilePath = destPath;
+      }
+      console.log(uploadConfig,"upload");
+      const uploadResult = await uploadFile(finalUri, uploadConfig);
 
       if (uploadResult.success) {
-        setFileUrl(uploadResult.fileUrl);
-        showToast('文件上传成功');
+        setFileUrl({
+          url: uploadResult.fileUrl,
+          name: file.name,
+          type: mimeType
+        });
+        showToast('文件上传成功', "success");
       } else {
-        showToast(`上传失败: ${uploadResult.error}`);
-        setFileName('');
+        showToast(`上传失败`, "error");
       }
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker
-      } else {
-        showToast('选择文件时出错');
-        console.error(err);
-      }
+    } catch (error) {
+      showToast('上传失败', "error");
+      console.error('Upload error:', {
+        uri: file.uri,
+        finalUri,
+        error: error.message
+      });
     } finally {
       setIsUploading(false);
+      if (tempFilePath) {
+        RNFS.unlink(tempFilePath).catch(() => {});
+      }
     }
-  };
-
-  const showToast = (message) => {
-    ToastAndroid.show(message, ToastAndroid.SHORT);
   };
 
   const handleRemoveFile = () => {
     Alert.alert(
-      "删除文件",
-      "您确定要删除当前文件吗？",
+      '删除文件',
+      '您确定要删除当前文件吗？',
       [
+        { text: '取消', style: 'cancel' },
         {
-          text: "取消",
-          style: "cancel"
-        },
-        {
-          text: "删除",
+          text: '删除',
           onPress: () => {
-            setFileUrl('');
-            setFileName('');
-            showToast('文件已删除');
-          }
-        }
+            resetFile();
+            showToast('文件已删除', "success");
+          },
+        },
       ]
     );
+  };
+
+  const resetFile = () => {
+    setFileUrl('');
+    setFileName('');
+    setFileType('');
   };
 
   const getFileIcon = (name) => {
     if (!name) return 'insert-drive-file';
     const ext = name.split('.').pop().toLowerCase();
     if (ext === 'pdf') return 'picture-as-pdf';
-    if (ext === 'zip' || ext === '7z') return 'folder-zip';
+    if (['zip', '7z'].includes(ext)) return 'folder-zip';
     return 'insert-drive-file';
   };
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-700 dark:text-gray-300 mb-2 text-sm">文件上传 (仅支持7z, zip, pdf格式，最大100MB)</Text>
-      
+      <Text className="text-gray-500 dark:text-gray-300 mb-2 text-sm">
+        附件上传 (仅支持7z, zip最大150MB，仅支持上传一个文件)
+      </Text>
+
       {fileUrl ? (
-        <View className="flex-row items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+        <View className="flex-row items-center justify-between bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
           <View className="flex-row items-center flex-1">
-            <MaterialIcons 
-              name={getFileIcon(fileName)} 
-              size={24} 
+            <MaterialIcons
+              name={getFileIcon(fileName)}
+              size={24}
               color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'}
               className="mr-3"
             />
-            <Text 
-              className="text-gray-800 dark:text-gray-200 flex-1" 
-              numberOfLines={1} 
+            <Text
+              className="text-gray-800 dark:text-gray-200 flex-1"
+              numberOfLines={1}
               ellipsizeMode="middle"
             >
               {fileName}
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={handleRemoveFile}
-            className="ml-2"
-          >
-            <MaterialIcons 
-              name="close" 
-              size={20} 
-              color={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'} 
+          <TouchableOpacity onPress={handleRemoveFile} className="ml-2">
+            <MaterialIcons
+              name="close"
+              size={20}
+              color={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'}
             />
           </TouchableOpacity>
         </View>
@@ -149,15 +237,8 @@ const AttachmentUploader = ({ AccessToken, fileUrl, setFileUrl }) => {
           disabled={isUploading}
         >
           <View className="flex-row items-center">
-            <MaterialIcons 
-              name="cloud-upload" 
-              size={20} 
-              color="white"
-              className="mr-2"
-            />
-            <Text className="text-white font-bold">
-              {isUploading ? '上传中...' : '选择文件上传'}
-            </Text>
+            <MaterialIcons name="cloud-upload" size={20} color="white" className="mr-2" />
+            <Text className="text-white font-bold">{isUploading ? '上传中...' : '选择文件上传'}</Text>
           </View>
         </TouchableOpacity>
       )}

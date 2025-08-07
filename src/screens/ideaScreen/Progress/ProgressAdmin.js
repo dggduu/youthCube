@@ -1,4 +1,3 @@
-//... (文件开头部分保持不变)
 import {
   View,
   Text,
@@ -20,11 +19,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import MarkdownInput from '../../../components/MarkdownInput';
 import setupAuthInterceptors from '../../../utils/axios/AuthInterceptors';
+import AttachmentUploader from "../../../components/AttachmentUploader";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
 const ProgressAdmin = () => {
-  // ... (状态和函数保持不变)
   const route = useRoute();
   const navigation = useNavigation();
   const { showToast } = useToast();
@@ -39,14 +39,12 @@ const ProgressAdmin = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [timelineType, setTimelineType] = useState('meeting');
+  const [timelineType, setTimelineType] = useState('progress_report');
   const [eventTime, setEventTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [showVditorModal, setShowVditorModal] = useState(false);
-  const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
-  const webViewRef = React.useRef(null);
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaType, setMediaType] = useState('');
 
   const fetchProgress = async () => {
     try {
@@ -54,7 +52,7 @@ const ProgressAdmin = () => {
       const token = await getItemFromAsyncStorage('accessToken');
       setAccessToken(token);
 
-      const response = await api(
+      const response = await api.get(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         {
           headers: {
@@ -68,8 +66,7 @@ const ProgressAdmin = () => {
       }
 
       const data = response.data;
-      setProgressList(data.items);
-      console.log('progress', teamId);
+      setProgressList(data.items || data);
     } catch (error) {
       showToast(error.message, 'error');
     } finally {
@@ -80,7 +77,7 @@ const ProgressAdmin = () => {
 
   const handleStatusUpdate = async (progressId, newStatus) => {
     try {
-      await axios.put(
+      await api.put(
         `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
         {
           status: newStatus,
@@ -112,7 +109,7 @@ const ProgressAdmin = () => {
 
   const handleDelete = async progressId => {
     try {
-      await axios.delete(
+      await api.delete(
         `${BASE_INFO.BASE_URL}api/progress/${progressId}`,
         {
           headers: {
@@ -157,8 +154,12 @@ const ProgressAdmin = () => {
         {
           title,
           description,
+          content: description,
           timeline_type: timelineType,
           event_time: eventTime.toISOString(),
+          status: 'pending',
+          media_url: mediaUrl,
+          media_type: mediaType
         },
         {
           headers: {
@@ -192,8 +193,10 @@ const ProgressAdmin = () => {
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setTimelineType('meeting');
+    setTimelineType('progress_report');
     setEventTime(new Date());
+    setMediaUrl('');
+    setMediaType('');
   };
 
   const onDateChange = (event, selectedDate) => {
@@ -201,6 +204,11 @@ const ProgressAdmin = () => {
     if (selectedDate) {
       setEventTime(selectedDate);
     }
+  };
+
+  const handleFileUpload = (fileInfo) => {
+    setMediaUrl(fileInfo.url);
+    setMediaType(fileInfo.type);
   };
 
   useEffect(() => {
@@ -268,8 +276,22 @@ const ProgressAdmin = () => {
           {new Date(item.event_time).toLocaleString()}
         </Text>
         <Text className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          提交者: {item.submitter.name}
+          提交者: {item.submitter?.name || '未知'}
         </Text>
+        
+        {item.media?.length > 0 && (
+          <View className="mb-3">
+            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              附件:
+            </Text>
+            {item.media.map(media => (
+              <Text key={media.media_url} className="text-sm text-blue-500 dark:text-blue-400">
+                {media.media_url.split('/').pop()}
+              </Text>
+            ))}
+          </View>
+        )}
+
         <View className="flex-row items-center justify-end">
           <TouchableOpacity
             onPress={() => handleDelete(item.progress_id)}
@@ -325,16 +347,7 @@ const ProgressAdmin = () => {
           contentContainerStyle={{ paddingBottom: 120, paddingTop: 16 }}
         />
       )}
-      {/* 添加汇报 */}
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('TeamUploader');
-        }}
-        className="absolute bottom-28 right-6 rounded-full bg-[#409eff] p-4 shadow-lg"
-      >
-        <MaterialIcons name="task" size={24} color="white" />
-      </TouchableOpacity>
-      {/* 添加进度 */}
+
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
         className="absolute bottom-10 right-6 rounded-full bg-[#409eff] p-4 shadow-lg"
@@ -350,7 +363,7 @@ const ProgressAdmin = () => {
         <View className="flex-1 bg-white p-6 dark:bg-gray-900">
           <View className="mb-6 flex-row items-center justify-between">
             <Text className="text-2xl font-bold text-gray-900 dark:text-white">
-              添加进度
+              添加进度报告
             </Text>
             <TouchableOpacity onPress={() => setShowAddModal(false)}>
               <MaterialIcons
@@ -361,12 +374,10 @@ const ProgressAdmin = () => {
             </TouchableOpacity>
           </View>
           <ScrollView className="flex-1">
-            <Text className="mb-4 font-semibold text-red-500">
-              [注]：此窗口不用于添加贡献进度
-            </Text>
             {/* Title*/}
             <TextInput
               placeholder="标题 *"
+              style={{height:50}}
               placeholderTextColor={
                 colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'
               }
@@ -374,44 +385,19 @@ const ProgressAdmin = () => {
               onChangeText={setTitle}
               className="mb-4 h-12 rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
+            
             <MarkdownInput
               value={description}
               onChange={setDescription}
               placeholder="请输入进度内容..."
             />
-            {/* Timeline Type*/}
-            <View className="mb-4">
-              <Text className="mb-2 mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
-                类型
-              </Text>
-              <View className="flex-row">
-                {['meeting', 'deadline', 'competition'].map(type => (
-                  <TouchableOpacity
-                    key={type}
-                    className={`mr-2 h-9 items-center justify-center rounded-lg px-4 ${
-                      timelineType === type
-                        ? 'bg-[#409eff]'
-                        : 'bg-gray-200 dark:bg-gray-700'
-                    }`}
-                    onPress={() => setTimelineType(type)}
-                  >
-                    <Text
-                      className={`text-sm ${
-                        timelineType === type
-                          ? 'text-white'
-                          : 'text-gray-800 dark:text-gray-200'
-                      }`}
-                    >
-                      {type === 'meeting'
-                        ? '会议'
-                        : type === 'deadline'
-                        ? '截止日期'
-                        : '比赛'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            
+            {/* Attachment Upload */}
+            <AttachmentUploader 
+              AccessToken={accessToken}
+              fileUrl={mediaUrl}
+              setFileUrl={handleFileUpload}
+            />
 
             {/* Event Time */}
             <View className="mb-5">
@@ -419,6 +405,7 @@ const ProgressAdmin = () => {
                 事件时间
               </Text>
               <TouchableOpacity
+                style={{minHeight:40}}
                 className="h-9 items-center justify-start rounded-lg border border-gray-300 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
                 onPress={() => setShowDatePicker(true)}
               >

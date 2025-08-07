@@ -1,13 +1,15 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
+import RNFS from 'react-native-fs';
 import RNFetchBlob from 'rn-fetch-blob';
-import { DocumentDirectoryPath, writeFile } from 'react-native-fs'; // Import writeFile
 import { BASE_INFO } from "../constant/base";
+import setupAuthInterceptors from '../utils/axios/AuthInterceptors'
 
+const api = axios.create();
+setupAuthInterceptors(api);
 // 配置项
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024; // 默认5MB
 const DEFAULT_MAX_RETRIES = 3; // 默认重试3次
-
 /**
  * 分片上传主函数
  * @param {string} filePath - 文件路径
@@ -27,13 +29,12 @@ export const uploadFile = async (filePath, config) => {
       chunkSize = DEFAULT_CHUNK_SIZE,
       maxRetries = DEFAULT_MAX_RETRIES,
       contentType,
+      fileName = "_",
     } = config;
     const baseUrl = BASE_INFO.BASE_URL;
-
     // 获取文件信息
     const fileInfo = await RNFetchBlob.fs.stat(filePath);
     const fileSize = fileInfo.size;
-    const fileName = '_';
 
     if (fileSize <= chunkSize) {
       return await quickUpload(filePath, fileName, {
@@ -77,7 +78,7 @@ const multipartUpload = async (filePath, fileName, fileSize, config) => {
 
   try {
     const initiateResponse = await retryableRequest(
-      () => axios.post(
+      () => api.post(
         `${baseUrl}upload/initiate`,
         {
           fileName,
@@ -136,7 +137,7 @@ const multipartUpload = async (filePath, fileName, fileSize, config) => {
     await Promise.all(chunkPromises);
 
     const completeResponse = await retryableRequest(
-      () => axios.post(
+      () => api.post(
         `${baseUrl}upload/complete`,
         {
           uploadId: uploadSession.uploadId,
@@ -155,7 +156,7 @@ const multipartUpload = async (filePath, fileName, fileSize, config) => {
     );
 
     if (completeResponse.status !== 200) {
-      await axios.post(
+      await api.post(
         `${baseUrl}upload/abort`,
         {
           uploadId: uploadSession.uploadId,
@@ -202,49 +203,21 @@ const uploadChunkWithRetry = async (
   let lastError;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Read file chunk
-      const chunkData = await RNFetchBlob.fs.readStream(
-        filePath,
-        'base64',
-        Math.floor(4096 / 3) * 3,
-        start,
-        end - start
-      );
+      const chunkSize = end - start;
+      const chunkPath = `${RNFS.CachesDirectoryPath}/chunk_${partNumber}_${Date.now()}.tmp`;
 
-      let base64Data = '';
-      await new Promise((resolve, reject) => {
-        chunkData.open();
-        chunkData.onData((chunk) => {
-          base64Data += chunk;
-        });
-        chunkData.onError((err) => {
-          reject(err);
-        });
-        chunkData.onEnd(() => {
-          resolve();
-        });
-      });
+      // 使用 react-native-fs 分片读取写入临时文件
+      const fileData = await RNFS.read(filePath.replace('file://', ''), chunkSize, start, 'base64');
+      await RNFS.writeFile(chunkPath, fileData, 'base64');
 
       const formData = new FormData();
-      if (Platform.OS === 'ios') {
-        const tempPath = `${DocumentDirectoryPath}/chunk_${partNumber}.tmp`;
-        await writeFile(tempPath, base64Data, 'base64');
-        formData.append('file', {
-          uri: `file://${tempPath}`,
-          type: contentType || 'application/octet-stream',
-          name: `chunk_${partNumber}`,
-        });
-      } else {
-        // Android can use base64 directly
-        formData.append('file', {
-          uri: `data:${contentType || 'application/octet-stream'};base64,${base64Data}`,
-          type: contentType || 'application/octet-stream',
-          name: `chunk_${partNumber}`,
-        });
-      }
+      formData.append('file', {
+        uri: Platform.OS === 'android' ? `file://${chunkPath}` : chunkPath,
+        type: contentType || 'application/octet-stream',
+        name: `chunk_${partNumber}`,
+      });
 
-      // Upload chunk
-      const response = await axios.post(
+      const response = await api.post(
         `${baseUrl}upload/part?uploadId=${uploadSession.uploadId}&partNumber=${partNumber}`,
         formData,
         {
@@ -254,6 +227,9 @@ const uploadChunkWithRetry = async (
           },
         }
       );
+
+      // 清理临时文件
+      await RNFS.unlink(chunkPath).catch(() => {});
 
       if (response.data.etag) {
         uploadSession.uploadedParts.push({
@@ -271,7 +247,6 @@ const uploadChunkWithRetry = async (
         error.message
       );
       if (attempt < maxRetries - 1) {
-        // Wait before retrying
         await new Promise((resolve) =>
           setTimeout(resolve, 1000 * Math.pow(2, attempt))
         );
@@ -296,9 +271,8 @@ const quickUpload = async (filePath, fileName, config) => {
       name: fileName,
     });
     formData.append('bucketName', bucketName);
-
     const response = await retryableRequest(
-      () => axios.post(`${baseUrl}upload/quick`, formData, {
+      () => api.post(`${baseUrl}upload/quick`, formData, {
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'multipart/form-data',

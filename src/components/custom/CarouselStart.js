@@ -5,7 +5,7 @@ import { Dimensions } from 'react-native';
 import { CarouselStartData } from "../../assets/CarouselStart/data";
 const CarouselStart = ({ onItemPress }) => {
   const width = Dimensions.get('window').width;
-  const itemWidth = (width / 2) - 20;
+  const itemWidth = (width / 2) - 25;
   const itemHeight = (itemWidth / 3) * 4;
 
   const renderItem = ({ item }) => {
@@ -47,7 +47,6 @@ const CarouselStart = ({ onItemPress }) => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
-    marginRight: 10,
   },
   slide: {
     flex: 1,

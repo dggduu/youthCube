@@ -464,7 +464,7 @@ const ChatGroupSetting = () => {
       {/* 群公告部分 */}
       {announcement && (
         <TouchableOpacity 
-          className="bg-yellow-50 dark:bg-blue-900 rounded-lg p-4 mb-4 border border-yellow-300"
+          className="bg-yellow-50 dark:bg-yellow-950 rounded-lg p-4 mb-4 border border-yellow-300 dark:border-yellow-900"
           onPress={() => navigation.navigate('AnnouncementDetail', { 
             teamId: team_id,
             role: currentUserRole
@@ -712,8 +712,8 @@ const ChatGroupSetting = () => {
             <TouchableOpacity
               className="flex-row items-center p-3 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
               onPress={() =>
-                navigation.navigate('CreateAnnouncement', {
-                  teamId: teamId,
+                navigation.navigate('AnnouncementDetail', {
+                  teamId: teamData.team_id,
                   role: currentUserRole,
                 })
               }

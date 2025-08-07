@@ -101,7 +101,7 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
             </TouchableOpacity>
 
             <Text className="text-sm text-gray-600 dark:text-gray-200 mb-5">
-                - 支持 Markdown 语法，点击上方按钮使用富文本编辑
+                - 支持 Markdown 语法
             </Text>
 
             <Modal

@@ -7,7 +7,7 @@ import setupAuthInterceptors from '../../utils/axios/AuthInterceptors';
 import { BASE_INFO } from '../../constant/base';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { navigate } from "../../navigation/NavigatorRef";
-
+import { formatTimeToChinese } from "../../utils/utils";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -41,7 +41,7 @@ const InspirationCarousel = ({ onMenuPress }) => {
   });
 
   const width = Dimensions.get('window').width;
-  const containerWidth = (width / 2) - 20;
+  const containerWidth = (width / 2) -25;
   const containerHeight = (containerWidth / 3) * 4;
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const InspirationCarousel = ({ onMenuPress }) => {
   }, [currentIndex, data, page]);
 
   const handleLongPress = (item) => {
-    setSelectedMoral(item.moral || item.message);
+    setSelectedMoral(item);
     setModalVisible(true);
   };
 
@@ -161,10 +161,20 @@ const InspirationCarousel = ({ onMenuPress }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent} className='bg-white dark:bg-gray-700'>
-            <Text style={styles.modalTitle}>灵感详情</Text>
+            <Text style={styles.modalTitle} className='text-black dark:text-gray-300'>灵感详情</Text>
+            <View className='mb-1 border-b border-gray-200 pb-2 dark:border-gray-400'>
+              <Text 
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className='text-black dark:text-gray-300'
+              >
+                发布者：{selectedMoral?.author?.name}
+              </Text>
+              <Text className='mt-1 text-black dark:text-gray-300'>更新时间：{formatTimeToChinese(selectedMoral?.updated_at)}</Text>
+            </View>
             <ScrollView className='h-96 mb-2'>
-              <Text style={styles.modalText} className='text-black dark:text-white'>
-                {selectedMoral}
+              <Text style={styles.modalText} className='text-black dark:text-gray-200'>
+                {selectedMoral?.message}
               </Text>
             </ScrollView>
             <TouchableOpacity
@@ -233,7 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
   },
   modalText: {
     fontSize: 16,

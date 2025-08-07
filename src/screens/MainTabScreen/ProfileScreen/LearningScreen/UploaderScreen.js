@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator, Image, ScrollView, Modal, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator, Image, ScrollView, Modal, TextInput } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { getItemFromAsyncStorage, setItemToAsyncStorage, removeItemFromAsyncStorage } from '../../../../utils/LocalStorage';
+import { getItemFromAsyncStorage } from '../../../../utils/LocalStorage';
 import axios from 'axios';
 import { BASE_INFO } from '../../../../constant/base';
 import { useColorScheme } from 'nativewind';
-import { WebView } from 'react-native-webview';
 import BackIcon from "../../../../components/backIcon/backIcon";
 import InputBox from "../../../../components/inputBox/inputBox";
 import TagSelectionToast from "../../../../components/TagSelectionToast";
@@ -13,7 +12,7 @@ import FileUploader from "../../../../components/FileUploader";
 import setupAuthInterceptors from "../../../../utils/axios/AuthInterceptors";
 import { useToast } from "../../../../components/tip/ToastHooks";
 import MarkdownInput from "../../../../components/MarkdownInput";
-const VDITOR_CACHE_KEY = 'vditor_draft_content';
+import AttachmentUploader from "../../../../components/AttachmentUploader";
 
 const api = axios.create();
 setupAuthInterceptors(api);
@@ -30,12 +29,12 @@ const UploaderScreen = () => {
     const [coverImage, setCoverImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [authKey, setAuthKey] = useState(null);
-    const [userData, setUserData] = useState(null);
     const [error, setError] = useState(null);
     const [showAddTagModal, setShowAddTagModal] = useState(false);
     const [newTagName, setNewTagName] = useState('');
     const [showTagSelection, setShowTagSelection] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [attachments, setAttachments] = useState([]);
     const lastSubmitTimeRef = useRef(0);
     const { showToast } = useToast();
 
@@ -44,6 +43,24 @@ const UploaderScreen = () => {
             tagIds: tagData.tagIds || [],
             tags: tagData.tags || []
         });
+    };
+    const getMimeTypeFromUrl = (url) => {
+    const ext = url.split('.').pop().toLowerCase();
+    return {
+        pdf: 'application/pdf',
+        zip: 'application/zip',
+    }[ext] || 'application/octet-stream';
+    };
+    const handleAttachmentUpload = (fileInfo) => {
+        if (fileInfo?.url) {
+            setAttachments([{
+            url: fileInfo.url,
+            type: fileInfo.type || getMimeTypeFromUrl(fileInfo.url),
+            name: fileInfo.name || fileInfo.url.split('/').pop()
+            }]);
+        } else {
+            setAttachments([]);
+        }
     };
 
     useEffect(() => {
@@ -58,7 +75,6 @@ const UploaderScreen = () => {
                     throw new Error('用户未登录');
                 }
                 setAuthKey(token);
-                setUserData(user);
             } catch (e) {
                 setError(e.message);
             }
@@ -74,7 +90,7 @@ const UploaderScreen = () => {
 
         try {
             setIsUploading(true);
-            const response = await api.post(
+            await api.post(
                 `${BASE_INFO.BASE_URL}api/tags`,
                 { tag_name: newTagName },
                 { headers: { Authorization: `Bearer ${authKey}` } }
@@ -114,7 +130,7 @@ const UploaderScreen = () => {
                 setCoverImage(result.assets[0].uri);
             }
         } catch (error) {
-            showToast( '选择图片失败', "error");
+            showToast('选择图片失败', "error");
         }
     };
 
@@ -184,6 +200,10 @@ const UploaderScreen = () => {
                     content: vditorMarkdownContent,
                     cover_image_url: coverImageUrl,
                     tagIds: selectedTags.tagIds,
+                    attachments: attachments.map(att => ({
+                        url: att.url,
+                        type: att.type
+                    }))
                 },
                 {
                     headers: { Authorization: `Bearer ${authKey}` },
@@ -222,6 +242,7 @@ const UploaderScreen = () => {
             tags: []
         });
         setCoverImage(null);
+        setAttachments([]);
         setUploadProgress(0);
     };
 
@@ -269,6 +290,8 @@ const UploaderScreen = () => {
 
                 <FileUploader AccessToken={accessToken} />
 
+
+
                 <TouchableOpacity
                     onPress={selectCoverImage}
                     className="border border-gray-300 dark:border-gray-600 p-4 mb-3 rounded-lg items-center bg-gray-300 dark:bg-gray-700"
@@ -277,7 +300,6 @@ const UploaderScreen = () => {
                         {coverImage ? '更换封面图片' : '选择封面图片'}
                     </Text>
                 </TouchableOpacity>
-
                 {coverImage && (
                     <Image
                         source={{ uri: coverImage }}
@@ -285,7 +307,11 @@ const UploaderScreen = () => {
                         resizeMode="cover"
                     />
                 )}
-                
+                 <AttachmentUploader 
+                    AccessToken={accessToken}
+                    fileUrl={attachments[0]?.url}
+                    setFileUrl={(fileInfo) => handleAttachmentUpload(fileInfo)} 
+                />               
                 <View className="mb-4">
                     <View className="flex-row justify-between items-center mb-3">
                         <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">标签</Text>

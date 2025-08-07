@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Modal, TextInput, useColorScheme } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Modal, TextInput, useColorScheme, Dimensions } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { BASE_INFO } from '../../constant/base';
@@ -7,11 +7,16 @@ import { GRADES, PartyGrade } from '../../constant/user';
 import { getItemFromAsyncStorage, setItemToAsyncStorage } from "../../utils/LocalStorage";
 import { navigate } from "../../navigation/NavigatorRef";
 import { useToast } from "../../components/tip/ToastHooks";
+import FastImage from 'react-native-fast-image';
 import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 
 const api = axios.create();
 setupAuthInterceptors(api);
+
+const { width } = Dimensions.get('window');
+const IMAGE_WIDTH = width - 32;
+const IMAGE_HEIGHT = (IMAGE_WIDTH * 3) / 4;
 
 const TeamDetailScreen = () => {
   const route = useRoute();
@@ -111,92 +116,84 @@ const TeamDetailScreen = () => {
     }
   };
 
-const handleApplyToJoin = async () => {
-  const now = Date.now();
-  
-  // 检查5分钟冷却时间
-  if (lastApplicationTime && (now - lastApplicationTime) < 5 * 60 * 1000) {
-    const remainingMinutes = Math.ceil((5 * 60 * 1000 - (now - lastApplicationTime)) / (60 * 1000));
-    showToast(`请等待 ${remainingMinutes} 分钟后再提交申请`, "warning");
-    return;
-  }
-
-  // 验证输入
-  if (!applicationData.email.trim()) {
-    showToast('请输入邮箱', "warning");
-    return;
-  }
-  if (!applicationData.description.trim()) {
-    showToast('请输入申请描述', "warning");
-    return;
-  }
-
-  setIsApplying(true);
-  
-  try {
-    const accessToken = await getItemFromAsyncStorage("accessToken");
-
-    const response = await api.post(
-      `${BASE_INFO.BASE_URL}api/invite/team`,
-      {
-        team_id: teamId,
-        email: applicationData.email,
-        description: applicationData.description,
-        user_id:userId
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        validateStatus: (status) => status >= 200 && status < 300 || status === 201
-      }
-    );
-
-    // 申请成功处理
-    const successTime = Date.now();
+  const handleApplyToJoin = async () => {
+    const now = Date.now();
     
-    // 更新状态
-    setShowApplyModal(false);
-    setApplicationData({ email: '', description: '' });
-    setLastApplicationTime(successTime);
+    if (lastApplicationTime && (now - lastApplicationTime) < 5 * 60 * 1000) {
+      const remainingMinutes = Math.ceil((5 * 60 * 1000 - (now - lastApplicationTime)) / (60 * 1000));
+      showToast(`请等待 ${remainingMinutes} 分钟后再提交申请`, "warning");
+      return;
+    }
+
+    if (!applicationData.email.trim()) {
+      showToast('请输入邮箱', "warning");
+      return;
+    }
+    if (!applicationData.description.trim()) {
+      showToast('请输入申请描述', "warning");
+      return;
+    }
+
+    setIsApplying(true);
     
-    // 存储申请时间
     try {
-      await setItemToAsyncStorage(`lastApply_${teamId}`, successTime.toString());
-    } catch (storageError) {
-      console.error('存储申请时间失败:', storageError);
-    }
-    
-    // 显示成功提示
-    showToast("申请发送成功", "success");
-    
-    // 设置5分钟冷却定时器
-    const timer = setTimeout(() => {
-      setLastApplicationTime(null);
-      setItemToAsyncStorage(`lastApply_${teamId}`, ' ');
-    }, 5 * 60 * 1000);
+      const accessToken = await getItemFromAsyncStorage("accessToken");
 
-    // 清理定时器
-    return () => clearTimeout(timer);
+      const response = await api.post(
+        `${BASE_INFO.BASE_URL}api/invite/team`,
+        {
+          team_id: teamId,
+          email: applicationData.email,
+          description: applicationData.description,
+          user_id:userId
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          validateStatus: (status) => status >= 200 && status < 300 || status === 201
+        }
+      );
 
-  } catch (err) {
-    console.error('申请请求失败:', err);
-    
-    let errorMessage = '申请发送失败';
-    if (err.response) {
-      errorMessage = err.response.data?.message || `服务器错误: ${err.response.status}`;
-    } else if (err.request) {
-      errorMessage = '网络错误，请检查连接';
-    } else {
-      errorMessage = err.message || '未知错误';
+      const successTime = Date.now();
+      
+      setShowApplyModal(false);
+      setApplicationData({ email: '', description: '' });
+      setLastApplicationTime(successTime);
+      
+      try {
+        await setItemToAsyncStorage(`lastApply_${teamId}`, successTime.toString());
+      } catch (storageError) {
+        console.error('存储申请时间失败:', storageError);
+      }
+      
+      showToast("申请发送成功", "success");
+      
+      const timer = setTimeout(() => {
+        setLastApplicationTime(null);
+        setItemToAsyncStorage(`lastApply_${teamId}`, ' ');
+      }, 5 * 60 * 1000);
+
+      return () => clearTimeout(timer);
+
+    } catch (err) {
+      console.error('申请请求失败:', err);
+      
+      let errorMessage = '申请发送失败';
+      if (err.response) {
+        errorMessage = err.response.data?.message || `服务器错误: ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = '网络错误，请检查连接';
+      } else {
+        errorMessage = err.message || '未知错误';
+      }
+      
+      showToast(errorMessage, "error");
+    } finally {
+      setIsApplying(false);
     }
-    
-    showToast(errorMessage, "error");
-  } finally {
-    setIsApplying(false);
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -223,6 +220,16 @@ const handleApplyToJoin = async () => {
       {/* Main Team Card */}
       <View className="m-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
         <View className="p-5">
+          {teamData?.img_url && (
+            <View className="mb-4 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+              <FastImage
+                source={{ uri: teamData.img_url }}
+                style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}
+                resizeMode={FastImage.resizeMode.cover}
+              />
+            </View>
+          )}
+          
           <View className="flex-row justify-between items-start mb-4">
             <View className="flex-1 mr-3">
               <Text 
@@ -240,7 +247,7 @@ const handleApplyToJoin = async () => {
               </View>
             </View>
             
-            <View className="flex-col ">
+            <View className="flex-col">
               <View className="bg-blue-100 dark:bg-blue-900 px-3 py-1.5 rounded-t-lg flex-row">
                 <MaterialIcons name="grade" size={16} color="#1d4ed8"  />
                 <Text className="text-blue-800 dark:text-blue-100 text-sm font-medium ml-1">
@@ -293,10 +300,10 @@ const handleApplyToJoin = async () => {
         <View className="h-px bg-gray-200 dark:bg-gray-700 mx-5" />
         
         {teamData.tags?.length > 0 && (
-          <View className="px-5 mt-2">
+          <View className="px-5 py-4">
             <View className="flex-row items-center mb-3">
               <MaterialIcons name="tag" size={20} color="#3b82f6" className="mr-2" />
-              <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队标签</Text>
+              <Text className="text-lg font-semibold text-gray-800 dark:text-white"> 团队标签</Text>
             </View>
             <View className="flex-row flex-wrap">
               {teamData.tags.map((tag) => (
@@ -313,15 +320,17 @@ const handleApplyToJoin = async () => {
             </View>
           </View>
         )}
+        
         {/* Description Card */}
-          <View className="px-5 py-4">
-            <View className="flex-row items-center mb-3">
-              <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队描述</Text>
-            </View>
-            <Text className="text-gray-700 dark:text-gray-300 leading-6">
-              {teamData.description || "暂无描述"}
-            </Text>
+        <View className="px-5 py-4">
+          <View className="flex-row items-center mb-3">
+            <MaterialIcons name="description" size={20} color="#3b82f6" className="mr-2" />
+            <Text className="text-lg font-semibold text-gray-800 dark:text-white"> 团队描述</Text>
           </View>
+          <Text className="text-gray-700 dark:text-gray-300 leading-6">
+            {teamData.description || "暂无描述"}
+          </Text>
+        </View>
       </View>
 
       {/* Members Card */}
@@ -329,14 +338,22 @@ const handleApplyToJoin = async () => {
         <View className="p-5">
           <View className="flex-row items-center mb-3">
             <MaterialIcons name="people" size={20} color="#3b82f6" className="mr-2" />
-            <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队成员</Text>
+            <Text className="text-lg font-semibold text-gray-800 dark:text-white"> 团队成员</Text>
+            <Text className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+              （{teamData.chatRoom.members.length}人）
+            </Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
-            <View className="flex-row">
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            className="pb-2"
+            contentContainerStyle={{ paddingRight: 16 }}
+          >
+            <View className="flex-row space-x-3">
               {teamData.chatRoom.members.map((member, index) => (
                 <TouchableOpacity
                   key={index}
-                  className="mr-3 py-2 px-4 items-center rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                  className="py-2 px-4 items-center rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 min-w-[120px]"
                   onPress={() => navigation.navigate("profile", {
                     team_id: teamData.team_id,
                     user_id: member.user_id,
@@ -369,6 +386,7 @@ const handleApplyToJoin = async () => {
       {articlesLoading ? (
         <View className="mx-4 my-6 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 items-center">
           <ActivityIndicator size="small" color="#3b82f6" />
+          <Text className="mt-2 text-gray-500 dark:text-gray-400">加载文章中...</Text>
         </View>
       ) : associatedArticles.length > 0 && (
         <View className="mx-4 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -376,6 +394,9 @@ const handleApplyToJoin = async () => {
             <View className="flex-row items-center mb-3">
               <MaterialIcons name="article" size={20} color="#3b82f6" className="mr-2" />
               <Text className="text-lg font-semibold text-gray-800 dark:text-white">团队文章</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                ({associatedArticles.length}篇)
+              </Text>
             </View>
             {associatedArticles.map((article) => (
               <TouchableOpacity
@@ -392,6 +413,10 @@ const handleApplyToJoin = async () => {
                   <MaterialIcons name="person" size={14} color="#6b7280" className="mr-1" />
                   <Text className="text-sm text-gray-500 dark:text-gray-400">
                     作者: {article.author?.name || '未知'}
+                  </Text>
+                  <MaterialIcons name="schedule" size={14} color="#6b7280" className="ml-3 mr-1" />
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(article.create_at).toLocaleDateString()}
                   </Text>
                 </View>
                 <Text className="text-gray-600 dark:text-gray-300" numberOfLines={2}>
@@ -429,6 +454,7 @@ const handleApplyToJoin = async () => {
                     value={applicationData.email}
                     onChangeText={(text) => setApplicationData({...applicationData, email: text})}
                     keyboardType="email-address"
+                    autoCapitalize="none"
                   />
                 </View>
               </View>
@@ -443,6 +469,7 @@ const handleApplyToJoin = async () => {
                     value={applicationData.description}
                     onChangeText={(text) => setApplicationData({...applicationData, description: text})}
                     multiline
+                    textAlignVertical="top"
                   />
                 </View>
               </View>

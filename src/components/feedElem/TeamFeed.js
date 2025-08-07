@@ -61,10 +61,12 @@ const TeamFeed = () => {
         const url = `${BASE_INFO.BASE_URL}api/teams?page=${pageNum}&size=15`;
         const response = await api.get(url);
         const result = response.data;
-
+        console.log(response.data);
         const newData = result.items.map((item) => ({
           id: item.team_id,
           title: item.team_name,
+          img_url: item.img_url,
+          grade: item.grade,
           subtitle: new Date(item.create_at).toLocaleDateString(),
           tags: item.tags || [],
           height: 250,
@@ -163,7 +165,7 @@ const TeamFeed = () => {
   const [scrollY, setScrollY] = useState(0);
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900 pt-2 rounded-t-lg">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-800 pt-2 rounded-t-lg">
       {/* 标题 */}
       <Text className="font-semibold text-2xl text-gray-800 dark:text-gray-100 ml-5 mt-3 mb-4">
         队伍：
@@ -179,6 +181,8 @@ const TeamFeed = () => {
             title={item.title}
             subtitle={item.subtitle}
             tags={item.tags.slice(0, 4)}
+            img_url={item.img_url}
+            grade={item.grade}
             onPress={() => onTeamPress(item)}
           />
         )}

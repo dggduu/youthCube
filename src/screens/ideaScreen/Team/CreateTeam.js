@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, Modal,TextInput } from 'react-native';
-import { getItemFromAsyncStorage,setItemToAsyncStorage } from "../../../utils/LocalStorage";
+import { View, ScrollView, TouchableOpacity, Text, Modal, TextInput } from 'react-native';
+import { getItemFromAsyncStorage, setItemToAsyncStorage } from "../../../utils/LocalStorage";
 import { BASE_INFO } from "../../../constant/base";
 import axios from "axios";
 import InputBox from "../../../components/inputBox/inputBox";
@@ -12,6 +12,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import TagSelectionToast from "../../../components/TagSelectionToast";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 import Custompicker from "../../../components/custom/Custompicker";
+import SingleImageUploader from "../../../components/SingleImageUploader";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -33,14 +35,19 @@ const CreateTeam = () => {
   const [showTagSelection, setShowTagSelection] = useState(false);
   const [showCreateTagModal, setShowCreateTagModal] = useState(false);
   const [newTagName, setNewTagName] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+
   useEffect(() => {
     const checkUserTeam = async () => {
       const userData = await getItemFromAsyncStorage("user");
-      // if (userData?.team_id) {
-      //   showToast("您已加入一个队伍，无法创建新队伍", "warning");
-      //   navigation.goBack();
-      // }
+      const token = await getItemFromAsyncStorage("accessToken");
+      if (userData?.team_id) {
+        showToast("您已加入一个队伍，无法创建新队伍", "warning");
+        navigation.goBack();
+      }
       setUser(userData);
+      setAccessToken(token);
     };
     checkUserTeam();
   }, []);
@@ -52,7 +59,6 @@ const CreateTeam = () => {
     }
 
     try {
-      const accessToken = await getItemFromAsyncStorage("accessToken");
       const response = await api.post(
         `${BASE_INFO.BASE_URL}api/tags`,
         { tag_name: newTagName },
@@ -69,7 +75,6 @@ const CreateTeam = () => {
 
     } catch (error) {
       console.error('创建标签失败:', error);
-
       const status = error.response?.status;
       const message = error.response?.data?.message || '创建标签失败';
 
@@ -86,59 +91,6 @@ const CreateTeam = () => {
       }
     }
   };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userString = await getItemFromAsyncStorage("user");
-        if (!userString) {
-          setIsLoading(false);
-          return;
-        }
-
-        const userObj = userString;
-        const userId = userObj.id;
-
-        const response = await api.get(
-          `${BASE_INFO.BASE_URL}api/users/${userId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${await getItemFromAsyncStorage("accessToken")}`
-            }
-          }
-        );
-
-        await setItemToAsyncStorage("user",response.data);
-        // if (response.data.team_id) {
-        //   showToast("您已加入一个队伍，无法创建新队伍", "warning");
-        //   navigation.popToTop();
-        // }
-        setUser(response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  // if (user?.team_id) {
-  //   return (
-  //     <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
-  //       <Text className="text-lg text-gray-900 dark:text-white mb-4">
-  //         您已加入一个队伍，无法创建新队伍
-  //       </Text>
-  //       <TouchableOpacity
-  //         className="bg-[#409eff] px-6 py-3 rounded-lg"
-  //         onPress={() => navigation.goBack()}
-  //       >
-  //         <Text className="text-white font-medium">返回</Text>
-  //       </TouchableOpacity>
-  //     </View>
-  //   );
-  // }
 
   const handleTagSelection = (tagData) => {
     setSelectedTags({
@@ -163,7 +115,6 @@ const CreateTeam = () => {
 
     setIsLoading(true);
     try {
-      const accessToken = await getItemFromAsyncStorage("accessToken");
       const response = await api.post(
         `${BASE_INFO.BASE_URL}api/teams`,
         {
@@ -171,7 +122,8 @@ const CreateTeam = () => {
           description,
           tagIds: selectedTags.tagIds,
           is_public: isPublic,
-          grade: selectedGrade
+          grade: selectedGrade,
+          img_url: imgUrl
         },
         {
           headers: {
@@ -185,7 +137,6 @@ const CreateTeam = () => {
       });
     } catch (error) {
       console.error('创建队伍失败:', error);
-
       const status = error.response?.status;
       const message = error.response?.data?.message || '创建队伍失败';
 
@@ -205,6 +156,22 @@ const CreateTeam = () => {
     }
   };
 
+  if (user?.team_id) {
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 p-5">
+        <Text className="text-lg text-gray-900 dark:text-white mb-4">
+          您已加入一个队伍，无法创建新队伍
+        </Text>
+        <TouchableOpacity
+          className="bg-[#409eff] px-6 py-3 rounded-lg"
+          onPress={() => navigation.goBack()}
+        >
+          <Text className="text-white font-medium">返回</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 p-5 bg-white dark:bg-gray-900">
       {/* 帮助AI */}
@@ -216,7 +183,7 @@ const CreateTeam = () => {
         <Icon name="help" size={20} color="#fff" />
       </TouchableOpacity>
       
-      <ScrollView>
+      <ScrollView>       
         {/* 队伍名称 */}
         <InputBox
           label="队伍名称"
@@ -237,17 +204,17 @@ const CreateTeam = () => {
           className="mb-4"
         />
         
-      {/* 适龄段选择 */}
-      <View className="mb-5">
-        <Custompicker
-          label="适龄段"
-          options={GRADES}
-          selectedValue={selectedGrade}
-          onValueChange={setSelectedGrade}
-          placeholder="请选择适龄段"
-          key="grade-picker"
-        />
-      </View>
+        {/* 适龄段选择 */}
+        <View className="mb-5">
+          <Custompicker
+            label="适龄段"
+            options={GRADES}
+            selectedValue={selectedGrade}
+            onValueChange={setSelectedGrade}
+            placeholder="请选择适龄段"
+            key="grade-picker"
+          />
+        </View>
         
         {/* 公开/私有设置 */}
         <View className="mb-5">
@@ -308,6 +275,13 @@ const CreateTeam = () => {
           )}
         </View>
         
+        {/* 队伍封面图片上传 */}
+        <SingleImageUploader 
+          AccessToken={accessToken}
+          imgUrl={imgUrl}
+          setImgUrl={setImgUrl}
+        />
+
         {/* 用户协议确认 */}
         <View className="flex-row items-center mt-4 mb-6">
           <TouchableOpacity
@@ -337,6 +311,7 @@ const CreateTeam = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+      
       {/* 创建标签模态框 */}
       <Modal
         visible={showCreateTagModal}
@@ -375,6 +350,7 @@ const CreateTeam = () => {
           </View>
         </View>
       </Modal>
+      
       {/* 标签选择弹窗 */}
       <TagSelectionToast
         visible={showTagSelection}

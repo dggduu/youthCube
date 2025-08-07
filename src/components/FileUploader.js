@@ -129,7 +129,7 @@ const FileUploader = ({ AccessToken }) => {
   }))
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <View className="flex-1 bg-gray-100 dark:bg-gray-900">
       {/* Upload button */}
       <TouchableOpacity
         className={`p-4 rounded-lg items-center justify-center mb-4 
@@ -143,8 +143,8 @@ const FileUploader = ({ AccessToken }) => {
         </Text>
       </TouchableOpacity>
 
-      <Text className="text-gray-500 dark:text-gray-300 mb-4 text-sm">
-        已上传 {uploadedFiles.length}/5 个图片
+      <Text className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+        - 已上传 {uploadedFiles.length}/5 个图片
       </Text>
 
       <ScrollView className="flex-1">

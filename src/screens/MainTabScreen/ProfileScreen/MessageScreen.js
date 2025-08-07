@@ -159,7 +159,7 @@ const MessageScreen = ({ navigation }) => {
           <FeedElem
             imgUrl={item.cover_image_url}
             title={item.title}
-            subtitle={item.subtitle}
+            subtitle={item.content.slice(0,40)}
             onPress={() => navigation.navigate('PostDetail', {
               postId: item.post_id,
               title: item.title,
@@ -211,11 +211,11 @@ const MessageScreen = ({ navigation }) => {
                     <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">总投稿数</Text>
                   </View>
                   <View className="items-center flex-1 border-x border-gray-200 dark:border-gray-700">
-                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">0</Text>
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">{currentUser.followerCount}</Text>
                     <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">关注</Text>
                   </View>
                   <View className="items-center flex-1">
-                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">0</Text>
+                    <Text className="text-2xl font-bold text-gray-900 dark:text-white">{currentUser.followingCount}</Text>
                     <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">粉丝</Text>
                   </View>
                 </View>
@@ -303,7 +303,7 @@ const MessageScreen = ({ navigation }) => {
             tintColor="#3b82f6"
           />
         }
-        contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 40 }}
       />
     </SafeAreaView>
   );

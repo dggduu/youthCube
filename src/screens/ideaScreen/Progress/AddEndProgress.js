@@ -17,6 +17,8 @@ import { WebView } from 'react-native-webview';
 import MarkdownInput from "../../../components/MarkdownInput";
 import axios from "axios";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
+import AttachmentUploader from "../../../components/AttachmentUploader";
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -24,14 +26,15 @@ const AddProgress = () => {
   const route = useRoute();
   const { showToast } = useToast();
   const { colorScheme } = useColorScheme();
-//   const { teamId } = route.params;
-   const  teamId = 12;
+  const teamId = 12;
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [eventTime, setEventTime] = useState(new Date().toISOString().slice(0, 16));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState(null);
   const [error, setError] = useState(null);
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaType, setMediaType] = useState('');
 
   const [showVditorModal, setShowVditorModal] = useState(false);
   const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
@@ -66,11 +69,13 @@ const AddProgress = () => {
       timeline_type: 'progress_report',
       title: title || '未命名进度',
       event_time: eventTime,
+      media_url: mediaUrl,
+      media_type: mediaType
     };
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post(
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         newProgressData,
         {
@@ -88,6 +93,8 @@ const AddProgress = () => {
       setDescription('');
       setTitle('');
       setEventTime(new Date().toISOString().slice(0, 16));
+      setMediaUrl('');
+      setMediaType('');
     } catch (err) {
       let errorMessage = '回复失败';
       if (err.response && err.response.data) {
@@ -101,6 +108,12 @@ const AddProgress = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // 处理附件上传
+  const handleFileUpload = (fileInfo) => {
+    setMediaUrl(fileInfo.url);
+    setMediaType(fileInfo.type);
   };
 
   // 处理 VDITOR 的消息
@@ -174,11 +187,28 @@ const AddProgress = () => {
           style={{height:50}}
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-          <MarkdownInput
-            value={description}
-            onChange={setDescription}
-            placeholder="请输入进度内容..."
-          />
+        
+        {/* 时间选择 */}
+        <TextInput
+          placeholder="事件时间"
+          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          value={eventTime}
+          onChangeText={setEventTime}
+          className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+        />
+        
+        <MarkdownInput
+          value={description}
+          onChange={setDescription}
+          placeholder="请输入进度内容..."
+        />
+        
+        {/* 附件上传 */}
+        <AttachmentUploader 
+          AccessToken={authToken}
+          fileUrl={mediaUrl}
+          setFileUrl={handleFileUpload}
+        />
 
         {/* 提交按钮 */}
         <TouchableOpacity

@@ -17,6 +17,9 @@ import { WebView } from 'react-native-webview';
 import axios from "axios";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 import MarkdownInput from "../../../components/MarkdownInput";
+import AttachmentUploader from "../../../components/AttachmentUploader";
+// 移除了 DateTimePicker 的导入
+
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -24,26 +27,33 @@ const AddProgress = () => {
   const route = useRoute();
   const { showToast } = useToast();
   const { colorScheme } = useColorScheme();
-  const [ teamId, setTeamId ] = useState(0);
-
-  const [description, setDescription] = useState('');
-  const [title, setTitle] = useState('');
-  const [eventTime, setEventTime] = useState(new Date().toISOString().slice(0, 16));
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teamId, setTeamId] = useState(0);
   const [authToken, setAuthToken] = useState(null);
   const [error, setError] = useState(null);
 
+  // Form state
+  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
+  // 初始化为当前时间
+  const [eventTime, setEventTime] = useState(new Date()); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Media attachment state
+  const [mediaAttachment, setMediaAttachment] = useState(null);
+  const [mediaType, setMediaType] = useState('');
+
+  // Markdown editor state
   const [showVditorModal, setShowVditorModal] = useState(false);
   const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
   const webViewRef = useRef(null);
 
-  // 获取 token
+  // Load auth token and team ID
   useEffect(() => {
     const loadAuthToken = async () => {
       try {
         const userData = await getItemFromAsyncStorage("user");
         const token = await getItemFromAsyncStorage("accessToken");
-        if (!token || ! userData) throw new Error('用户未登录');
+        if (!token || !userData) throw new Error('用户未登录');
         setAuthToken(token);
         setTeamId(userData.team_id);
       } catch (err) {
@@ -54,7 +64,6 @@ const AddProgress = () => {
     loadAuthToken();
   }, []);
 
-  // 提交进度
   const submitProgress = async () => {
     if (!description.trim()) {
       showToast("进度内容不能为空", "warning");
@@ -67,12 +76,16 @@ const AddProgress = () => {
       status: 'pending',
       timeline_type: 'progress_report',
       title: title || '未命名进度',
-      event_time: eventTime,
+      // 使用当前时间
+      event_time: eventTime.toISOString(), 
+      media_url: mediaAttachment?.url || null,
+      media_type: mediaAttachment?.type || null
     };
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post(
+      
+      const response = await api.post(
         `${BASE_INFO.BASE_URL}api/team/${teamId}/progress`,
         newProgressData,
         {
@@ -82,30 +95,41 @@ const AddProgress = () => {
           }
         }
       );
+
       if (response.status < 200 || response.status >= 300) {
         throw new Error(`请求失败，状态码：${response.status}`);
       }
 
       showToast("进度提交成功", "success");
-      setDescription('');
-      setTitle('');
-      setEventTime(new Date().toISOString().slice(0, 16));
+      resetForm();
     } catch (err) {
-      let errorMessage = '回复失败';
-      if (err.response && err.response.data) {
-        errorMessage = err.response.data.message || errorMessage;
-      } else if (err.request) {
-        errorMessage = '网络错误，请检查您的连接';
-      } else {
-        errorMessage = err.message;
-      }
-      showToast(`回复失败: ${errorMessage}`, "error");
+      handleSubmissionError(err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 处理 VDITOR 的消息
+  const resetForm = () => {
+    setDescription('');
+    setTitle('');
+    setMediaAttachment(null);
+    setMediaType('image');
+    // 重置时也可以选择是否重置 eventTime 为当前时间
+    // setEventTime(new Date());
+  };
+
+  const handleSubmissionError = (err) => {
+    let errorMessage = '提交失败';
+    if (err.response && err.response.data) {
+      errorMessage = err.response.data.message || errorMessage;
+    } else if (err.request) {
+      errorMessage = '网络错误，请检查您的连接';
+    } else {
+      errorMessage = err.message;
+    }
+    showToast(`提交失败: ${errorMessage}`, "error");
+  };
+
   const onWebViewMessage = (event) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
@@ -123,7 +147,6 @@ const AddProgress = () => {
     }
   };
 
-  // 初始化 VDITOR 内容
   const injectInitialContent = () => {
     if (webViewRef.current && vditorMarkdownContent) {
       webViewRef.current.injectJavaScript(`
@@ -167,7 +190,7 @@ const AddProgress = () => {
       <ScrollView className="flex-1 p-5">
         <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text>
 
-        {/* 标题 */}
+        {/* Title Input */}
         <TextInput
           placeholder="标题 *"
           placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
@@ -176,33 +199,27 @@ const AddProgress = () => {
           style={{height:50}}
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
-        {/* 描述输入 */}
-        {/* <TextInput
-          placeholder="进度内容 *"
-          placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+
+        {/* Markdown Input */}
+        <MarkdownInput
           value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={5}
-          className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        /> */}
-        {/* Markdown 编辑按钮 */}
-        {/* <TouchableOpacity
-          className="bg-[#409eff] py-4 px-4 rounded-lg mb-3"
-          onPress={() => {
-            setVditorMarkdownContent(description);
-            setShowVditorModal(true);
-          }}
-        >
-          <Text className="text-white font-semibold">使用 Markdown 编辑器</Text>
-        </TouchableOpacity>
-        <Text className='text-sm text-gray-600 dark:text-gray-200 mb-5'>- 可以使用markdown编辑器编辑进度内容</Text> */}
-          <MarkdownInput
-            value={description}
-            onChange={setDescription}
-            placeholder="请输入进度内容..."
-          />
-        {/* 提交按钮 */}
+          onChange={setDescription}
+          placeholder="请输入进度内容..."
+        />
+
+        {/* Attachment Uploader */}
+        <AttachmentUploader 
+          AccessToken={authToken}
+          fileUrl={mediaAttachment}
+          setFileUrl={setMediaAttachment}
+        />
+
+        {/* 可以选择性地显示当前时间，但通常不需要，因为它是后台自动记录的
+        <View className="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <Text className="text-gray-700 dark:text-gray-300">事件时间: {eventTime.toLocaleString()}</Text>
+        </View> */}
+
+        {/* Submit Button */}
         <TouchableOpacity
           onPress={submitProgress}
           disabled={isSubmitting || !description.trim()}
@@ -219,6 +236,30 @@ const AddProgress = () => {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Markdown Editor Modal */}
+      <Modal
+        visible={showVditorModal}
+        animationType="slide"
+        onRequestClose={() => setShowVditorModal(false)}
+      >
+        <View className="flex-1 bg-white dark:bg-gray-900">
+          <WebView
+            ref={webViewRef}
+            source={{ uri: `${BASE_INFO.BASE_URL}markdown-editor` }}
+            onMessage={onWebViewMessage}
+            onLoadEnd={injectInitialContent}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+          <TouchableOpacity
+            className="absolute top-4 right-4 bg-red-500 p-2 rounded-full"
+            onPress={() => setShowVditorModal(false)}
+          >
+            <Text className="text-white">关闭</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
