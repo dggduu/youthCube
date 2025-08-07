@@ -51,8 +51,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           body: |
-            This is an auto-generated release for tag ${{ github.ref_name }}.
-            APK built successfully by GitHub Actions.
+            ${{ github.ref_name }}.
           files: |
             android/app/build/outputs/apk/release/*.apk
         env:
