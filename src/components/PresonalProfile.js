@@ -238,7 +238,7 @@ const PersonalProfile = () => {
   if (error) {
     return (
       <View className="flex-1 bg-white dark:bg-gray-900 justify-center items-center p-4">
-        <Text className="text-red-500 dark:text-red-400 text-lg mb-4">{error}</Text>
+        <Text className="text-[#f56c6c] dark:text-red-400 text-lg mb-4">{error}</Text>
         <TouchableOpacity
           onPress={loadData}
           className="bg-[#409eff] px-4 py-2 rounded"
@@ -319,7 +319,7 @@ const PersonalProfile = () => {
                     <TouchableOpacity
                       onPress={openFriendRequestModal}
                       disabled={!canSendRequest}
-                      className="bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded-full flex-row items-center active:bg-blue-600 dark:active:bg-blue-700"
+                      className="bg-[#409eff] dark:bg-blue-600 px-4 py-2 rounded-full flex-row items-center active:bg-blue-600 dark:active:bg-blue-700"
                     >
                       <MaterialIcons name="person-add" size={18} color="white" />
                       <Text className="text-white ml-1 text-sm font-medium">

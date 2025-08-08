@@ -10,10 +10,18 @@ const styles = StyleSheet.create({
     width: 128,
     height: 96,
   },
+  tagText: {
+    maxWidth: 80, // 限制标签文本最大宽度
+  },
 });
 
 const TeamCard = ({ title, tags, onPress, img_url, grade }) => {
   const isDark = useColorScheme() === 'dark';
+
+  // 截断过长的标签名称
+  const truncateTagName = (name) => {
+    return name.length > 10 ? `${name.substring(0, 10)}...` : name;
+  };
 
   return (
     <TouchableOpacity
@@ -26,18 +34,13 @@ const TeamCard = ({ title, tags, onPress, img_url, grade }) => {
       <View className="flex-row bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-600">
         
         {/* 左侧图片*/}
-        {img_url ? (
+        {img_url &&
           <FastImage
             source={{ uri: img_url }}
             style={styles.image}
             resizeMode={FastImage.resizeMode.cover}
             accessibilityLabel={`团队封面：${title}`}
-          />
-        ) : (
-          <View className="bg-gray-100 dark:bg-gray-600 justify-center items-center" style={styles.image}>
-            <Icon name="image" size={24} color="#999" />
-          </View>
-        )}
+          />}
 
         {/* 右侧内容 */}
         <View className="flex-1 p-3 justify-center">
@@ -50,8 +53,8 @@ const TeamCard = ({ title, tags, onPress, img_url, grade }) => {
             {title}
           </Text>
 
-          {/* 标签行 */}
-          <View className="flex-row flex-wrap mb-1">
+          {/* 标签行 - 修改后的部分 */}
+          <View className="flex-row flex-wrap items-center mb-1">
             {tags?.slice(0, 3).map((tag) => (
               <TouchableOpacity
                 key={tag.tag_id}
@@ -63,8 +66,13 @@ const TeamCard = ({ title, tags, onPress, img_url, grade }) => {
                 }
                 className="bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mr-1 mb-1 border border-blue-100 dark:border-blue-800"
               >
-                <Text className="text-blue-600 dark:text-blue-300 text-xs font-medium">
-                  {tag.tag_name}
+                <Text 
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={styles.tagText}
+                  className="text-blue-600 dark:text-blue-300 text-xs font-medium"
+                >
+                  {truncateTagName(tag.tag_name)}
                 </Text>
               </TouchableOpacity>
             ))}

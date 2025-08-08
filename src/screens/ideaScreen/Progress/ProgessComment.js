@@ -560,7 +560,7 @@ const submitComment = useCallback(async () => {
       {!!downloadedFileUri ? (
         <TouchableOpacity
           onPress={handleOpenFile}
-          className="bg-blue-500 px-4 py-2 rounded-full"
+          className="bg-[#409eff] px-4 py-2 rounded-full"
         >
           <Text className="text-white">打开</Text>
         </TouchableOpacity>
@@ -568,7 +568,7 @@ const submitComment = useCallback(async () => {
         <TouchableOpacity
           onPress={() => handleDownload(progressData.media.media_url)} 
           disabled={downloading}
-          className="bg-blue-500 px-3 py-1 rounded-full min-w-[70px] items-center"
+          className="bg-[#409eff] px-3 py-1 rounded-full min-w-[70px] items-center"
         >
           {downloading ? (
             <View className="flex-row items-center">

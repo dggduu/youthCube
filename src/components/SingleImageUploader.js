@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ToastAndroid, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ToastAndroid } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { uploadFile } from "../utils/uploadUtils";
+import { uploadFile } from '../utils/uploadUtils';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useColorScheme } from 'nativewind';
 import RNFetchBlob from 'rn-fetch-blob';
+import CustomAlert from '../components/custom/CustomAlert';
 
 const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [localUri, setLocalUri] = useState(null);
   const { colorScheme } = useColorScheme();
 
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertButtons, setAlertButtons] = useState([]);
+
   const config = {
     authToken: AccessToken,
     bucketName: 'posts',
   };
 
-  // 10MB in bytes
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
   const handleImageUpload = async () => {
     const options = {
@@ -40,20 +45,18 @@ const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
       try {
         const asset = response.assets[0];
         const uri = asset.uri;
-        
-        // Check file size
+
+        // 检查文件大小
         const fileInfo = await RNFetchBlob.fs.stat(uri);
         if (fileInfo.size > MAX_FILE_SIZE) {
           showToast('图片大小不能超过10MB');
           return;
         }
 
-        const fileExtension = asset.fileName ? asset.fileName.split('.').pop() : asset.type.split('/')[1];
         const type = asset.type;
-
         const allowedTypes = ['image/jpeg', 'image/png'];
         if (!allowedTypes.includes(type)) {
-          showToast('不支持的文件类型。请选择 JPEG, PNG格式。');
+          showToast('不支持的文件类型。请选择 JPEG, PNG 格式。');
           return;
         }
 
@@ -86,30 +89,32 @@ const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
   };
 
   const handleRemoveImage = () => {
-    Alert.alert(
-      "删除封面",
-      "您确定要删除当前封面图片吗？",
-      [
-        {
-          text: "取消",
-          style: "cancel"
+    setAlertTitle('删除封面');
+    setAlertMessage('您确定要删除当前封面图片吗？');
+    setAlertButtons([
+      {
+        text: '取消',
+        style: 'cancel',
+        onPress: () => setAlertVisible(false),
+      },
+      {
+        text: '删除',
+        style: 'destructive',
+        onPress: () => {
+          setAlertVisible(false);
+          setImgUrl('');
+          setLocalUri(null);
+          showToast('封面图片已删除');
         },
-        {
-          text: "删除",
-          onPress: () => {
-            setImgUrl('');
-            setLocalUri(null);
-            showToast('封面图片已删除');
-          }
-        }
-      ]
-    );
+      },
+    ]);
+    setAlertVisible(true);
   };
 
   return (
     <View className="mb-4">
       <Text className="text-gray-700 dark:text-gray-300 mb-2 text-sm">封面图片 (最大10MB)</Text>
-      
+
       {imgUrl ? (
         <View className="relative">
           <Image
@@ -121,11 +126,7 @@ const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
             onPress={handleRemoveImage}
             className="absolute top-2 right-2 bg-black/50 rounded-full p-1"
           >
-            <MaterialIcons 
-              name="close" 
-              size={20} 
-              color="white"
-            />
+            <MaterialIcons name="close" size={20} color="white" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -137,18 +138,20 @@ const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
           disabled={isUploading}
         >
           <View className="flex-row items-center">
-            <MaterialIcons 
-              name="add-photo-alternate" 
-              size={20} 
-              color="white"
-              className="mr-2"
-            />
-            <Text className="text-white font-bold">
-              {isUploading ? '上传中...' : '上传封面图片'}
-            </Text>
+            <MaterialIcons name="add-photo-alternate" size={20} color="white" className="mr-2" />
+            <Text className="text-white font-bold">{isUploading ? '上传中...' : '上传封面图片'}</Text>
           </View>
         </TouchableOpacity>
       )}
+
+      {/* 自定义弹窗 */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        buttons={alertButtons}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };

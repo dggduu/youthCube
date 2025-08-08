@@ -187,7 +187,7 @@ const FriendInvitationSolve = () => {
             {isLoading ? (
                 <ActivityIndicator className="my-4" size="large" />
             ) : isError ? (
-                <Text className="text-red-500 dark:text-red-400">加载失败，请重试</Text>
+                <Text className="text-[#f56c6c] dark:text-red-400">加载失败，请重试</Text>
             ) : (
                 <>
                     {data?.items?.length > 0 ? (

@@ -256,7 +256,7 @@ const InspirationMenu = () => {
           setModalVisible(true);
         }}
         className={`absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg ${
-          isDark ? 'bg-blue-600' : 'bg-blue-500'
+          isDark ? 'bg-blue-600' : 'bg-[#409eff]'
         }`}
       >
         <MaterialIcons name="add" size={24} color="white" />
@@ -294,7 +294,7 @@ const InspirationMenu = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleBulletSubmit}
-                className={`px-4 py-2 rounded-lg ${isDark ? 'bg-blue-600' : 'bg-blue-500'}`}
+                className={`px-4 py-2 rounded-lg ${isDark ? 'bg-blue-600' : 'bg-[#409eff]'}`}
                 disabled={!newMessage.trim()}
               >
                 <Text className="text-white">{editingBullet ? '更新' : '创建'}</Text>

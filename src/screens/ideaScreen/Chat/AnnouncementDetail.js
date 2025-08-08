@@ -281,7 +281,7 @@ const AnnouncementDetail = () => {
       {/* Create Button */}
       {isAdmin && (
         <TouchableOpacity
-          className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 dark:bg-blue-600 rounded-full shadow-lg items-center justify-center"
+          className="absolute bottom-6 right-6 w-14 h-14 bg-[#409eff] dark:bg-blue-600 rounded-full shadow-lg items-center justify-center"
           onPress={() => setModalVisible(true)}
         >
           <Icon name="add" size={28} color="white" />
@@ -328,7 +328,7 @@ const AnnouncementDetail = () => {
                 <Text className="text-gray-800 dark:text-gray-200">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-5 py-2 rounded-md bg-blue-500 dark:bg-blue-600 items-center ml-2"
+                className="px-5 py-2 rounded-md bg-[#409eff] dark:bg-blue-600 items-center ml-2"
                 onPress={handleUpdate}
               >
                 <Text className="text-white">保存</Text>
@@ -378,7 +378,7 @@ const AnnouncementDetail = () => {
                 <Text className="text-gray-800 dark:text-gray-200">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-5 py-2 rounded-md bg-blue-500 dark:bg-blue-600 items-center ml-2"
+                className="px-5 py-2 rounded-md bg-[#409eff] dark:bg-blue-600 items-center ml-2"
                 onPress={handleCreate}
               >
                 <Text className="text-white">发布</Text>

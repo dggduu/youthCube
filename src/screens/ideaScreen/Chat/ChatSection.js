@@ -405,7 +405,7 @@ const ChatSection = () => {
                                 />
                                 <Text className={`mt-3 text-lg 
                                     ${privateChatError?.includes('失败') 
-                                        ? 'text-red-500' 
+                                        ? 'text-[#f56c6c]' 
                                         : 'text-gray-500 dark:text-gray-400'
                                     }`}
                                 >
@@ -414,7 +414,7 @@ const ChatSection = () => {
                                 {privateChatError?.includes('失败') && (
                                     <TouchableOpacity 
                                         onPress={() => fetchPrivateChats(0)}
-                                        className="mt-4 px-6 py-2 bg-blue-500 rounded-lg 
+                                        className="mt-4 px-6 py-2 bg-[#409eff] rounded-lg 
                                             active:bg-blue-600"
                                         activeOpacity={0.7}
                                     >

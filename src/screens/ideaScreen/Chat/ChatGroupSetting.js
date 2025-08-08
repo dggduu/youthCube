@@ -10,6 +10,8 @@ import { useToast } from "../../../components/tip/ToastHooks";
 import CustomAlert from "../../../components/custom/CustomAlert";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 import InputBox from '../../../components/inputBox'
+import TagSelectionToast from "../../../components/TagSelectionToast";
+import SingleImageUploader from "../../../components/SingleImageUploader";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -42,6 +44,10 @@ const ChatGroupSetting = () => {
     buttons: []
   });
   const [announcement, setAnnouncement] = useState(null);
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [teamTags, setTeamTags] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [coverModalVisible, setCoverModalVisible] = useState(false);
 
   const fetchAnnouncement = async () => {
     try {
@@ -71,6 +77,8 @@ const ChatGroupSetting = () => {
       }
 
       setTeamData(response.data);
+      setTeamTags(response.data.tags || []);
+      setSelectedTagIds(response.data.tags.map(tag => tag.tag_id) || []);
       await fetchAnnouncement();
     } catch (error) {
       showToast('刷新团队数据出错', 'error');
@@ -97,6 +105,8 @@ const ChatGroupSetting = () => {
         }
 
         setTeamData(response.data);
+        setTeamTags(response.data.tags || []);
+        setSelectedTagIds(response.data.tags.map(tag => tag.tag_id) || []);
         await fetchAnnouncement();
       } catch (error) {
         showToast("错误！加载团队数据失败", 'error');
@@ -110,56 +120,114 @@ const ChatGroupSetting = () => {
 
   const handleEditField = (field, currentValue) => {
     setEditField(field);
-    if (field === 'is_public') {
-      setEditValue(currentValue === 1 ? '公开' : '私有');
+    
+    const fieldHandlers = {
+      'is_public': () => setEditValue(currentValue === 1 ? '公开' : '私有'),
+      'grade': () => {
+        const foundGrade = GRADES.find(grade => grade.value === currentValue);
+        setEditValue(currentValue);
+        setGradeLabel(foundGrade?.label || '未知');
+      },
+      'default': () => setEditValue(currentValue)
+    };
+
+    (fieldHandlers[field] || fieldHandlers['default'])();
+    
+    if (field === 'img_url') {
+      setCoverModalVisible(true);
     } else {
-      setEditValue(currentValue);
+      setEditModalVisible(true);
     }
-    setEditModalVisible(true);
+  };
+
+  const handleUpdateTeamCover = async (imgUrl) => {
+    try {
+      if (!imgUrl) {
+        showToast("请选择有效的图片", "warning");
+        return;
+      }
+
+      setLoading(true);
+      
+      const response = await api.put(
+        `${BASE_INFO.BASE_URL}api/teams/${team_id}`,
+        { img_url: imgUrl },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      showToast("封面更新成功", "success");
+      await refreshTeamData();
+    } catch (error) {
+      console.error('更新封面出错:', error);
+      showToast("封面更新失败: " + (error.response?.data?.message || error.message), "error");
+    } finally {
+      setLoading(false);
+      setCoverModalVisible(false);
+    }
   };
 
   const saveChanges = async () => {
     try {
-      const updateData = {};
+      const fieldMap = {
+        team_name: { team_name: editValue },
+        description: { description: editValue },
+        is_public: { is_public: editValue === '公开' ? 1 : 0 },
+        grade: { grade: editValue },
+        img_url: { img_url: editValue },
+        chatroom_name: null
+      };
 
-      if (editField === 'team_name') {
-        updateData.team_name = editValue;
-      } else if (editField === 'description') {
-        updateData.description = editValue;
-      } else if (editField === 'is_public') {
-        updateData.is_public = editValue === '公开' ? 1 : 0;
-      } else if (editField === 'grade') {
-        updateData.grade = editValue;
-      }
-
-      if (editField === 'team_name' || editField === 'description' || editField === 'is_public' || editField === 'grade') {
-        await api.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, updateData, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-      }
-      else if (editField === 'chatroom_name') {
-        await api.put(`${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/update`, {
-          name: editValue
-        }, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
+      if (editField === 'chatroom_name') {
+        await api.put(
+          `${BASE_INFO.BASE_URL}api/chatrooms/${teamData.chatRoom.room_id}/update`,
+          { name: editValue },
+          { headers: { 'Authorization': `Bearer ${accessToken}` } }
+        );
+      } else if (fieldMap[editField]) {
+        await api.put(
+          `${BASE_INFO.BASE_URL}api/teams/${team_id}`,
+          fieldMap[editField],
+          { headers: { 'Authorization': `Bearer ${accessToken}` } }
+        );
       }
 
       showToast("更新成功", "success");
       await refreshTeamData();
       setEditModalVisible(false);
-
     } catch (error) {
       console.error('更新出错:', error);
-      showToast("更新失败", "error");
+      showToast(`更新失败: ${error.response?.data?.message || error.message}`, "error");
     }
   };
+  const saveTagChanges = async (tagIds) => {
+    try {
+      await api.put(`${BASE_INFO.BASE_URL}api/teams/${team_id}`, 
+        { tag_ids: tagIds },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      showToast("标签更新成功", "success");
+      await refreshTeamData();
+      setTagModalVisible(false);
+    } catch (error) {
+      console.error('更新标签出错:', error);
+      showToast("标签更新失败", "error");
+    }
+  }; 
+
+  const handleTagSelection = (selected) => {
+    setSelectedTagIds(selected.tagIds);
+    saveTagChanges(selected.tagIds);
+  }
 
   const createSubTeam = async () => {
     try {
@@ -237,6 +305,7 @@ const ChatGroupSetting = () => {
       );
 
       await refreshTeamData();
+      showToast("权限更新成功", "success");
       setRoleModalVisible(false);
     } catch (error) {
       console.error('更新角色出错:', error);
@@ -500,11 +569,11 @@ const ChatGroupSetting = () => {
         </Text>
         
         {/* 团队名称 */}
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300">团队名称:</Text>
-          <View className="flex-row items-center">
+        <View className="flex-row items-center mb-3">
+          <Text className="text-base text-gray-600 dark:text-gray-300 w-24">团队名称:</Text>
+          <View className="flex-1 flex-row items-center min-w-0">
             <Text 
-              className="text-base text-gray-900 dark:text-gray-100 mr-2"
+              className="flex-1 text-base text-gray-900 dark:text-gray-100"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -519,11 +588,11 @@ const ChatGroupSetting = () => {
         </View>
 
         {/* 描述 */}
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300">描述:</Text>
-          <View className="flex-row items-center">
+        <View className="flex-row items-center mb-3">
+          <Text className="text-base text-gray-600 dark:text-gray-300 w-24">描述:</Text>
+          <View className="flex-1 flex-row items-center min-w-0">
             <Text 
-              className="text-base text-gray-900 dark:text-gray-100 mr-2"
+              className="flex-1 text-base text-gray-900 dark:text-gray-100"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -576,7 +645,7 @@ const ChatGroupSetting = () => {
         </View>
         
         {isParentTeam && (
-          <View className="flex-row justify-between items-center">
+          <View className="flex-row justify-between items-center mb-3">
             <Text className="text-base text-gray-600 dark:text-gray-300">可见性:</Text>
             <TouchableOpacity 
               className="flex-row items-center"
@@ -586,6 +655,45 @@ const ChatGroupSetting = () => {
             </TouchableOpacity>
           </View>
         )}
+       {/* 标签 */}
+        <View className="flex-col">
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className="text-base text-gray-600 dark:text-gray-300">标签:</Text>
+            {['owner', 'co_owner'].includes(currentUserRole) && (
+              <TouchableOpacity onPress={() => setTagModalVisible(true)}>
+                <Icon name="edit" size={20} color={isDarkMode ? '#a0aec0' : '#718096'} />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <View className="flex-row flex-wrap items-center">
+            {teamTags.length > 0 ? (
+              <>
+                {teamTags.slice(0, 3).map(tag => (
+                  <View 
+                    key={tag.tag_id} 
+                    className="bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mr-1 mb-1 border border-blue-100 dark:border-blue-800"
+                  >
+                    <Text className="text-blue-800 dark:text-blue-200 text-xs">
+                      {tag.tag_name}
+                    </Text>
+                  </View>
+                ))}
+                {teamTags.length > 3 && (
+                  <View className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full mr-2 mb-2">
+                    <Text className="text-blue-800 dark:text-blue-200 text-xs">
+                      +{teamTags.length - 3}
+                    </Text>
+                  </View>
+                )}
+              </>
+            ) : (
+              <Text className="text-base text-gray-500 dark:text-gray-400">
+                暂无标签
+              </Text>
+            )}
+          </View>
+        </View>
       </View>
 
       {/* 成员部分 */}
@@ -744,10 +852,24 @@ const ChatGroupSetting = () => {
               </TouchableOpacity>
             )}
 
-            {/* 分割线：在“查看入群申请”和“删除队伍”之间 */}
+            {currentUserRole == 'owner' &&
+              <View className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+            }
+
+            {['owner'].includes(currentUserRole) && (
+              <TouchableOpacity
+              className="flex-row items-center p-3 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700"
+                onPress={()=>{
+                  setCoverModalVisible(true);
+                }}
+              >
+                <Icon name="image" size={20} color={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                <Text className="ml-3 text-gray-700 dark:text-gray-200 font-medium">上传队伍头图</Text>
+              </TouchableOpacity>
+            )}
+
             <View className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
-            {/* 删除队伍 - 危险操作 */}
             <TouchableOpacity
               className="flex-row items-center p-3 rounded-lg bg-white dark:bg-gray-800 active:bg-red-50 dark:active:bg-red-900/20"
               onPress={handleDelTeam}
@@ -760,7 +882,7 @@ const ChatGroupSetting = () => {
       )}
 
       {/* 常规操作部分 */}
-      <View className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 rounded-lg p-4">
         <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
           常规操作
         </Text>
@@ -858,7 +980,7 @@ const ChatGroupSetting = () => {
                 <Text className="text-gray-600 dark:text-gray-300">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="bg-blue-500 px-4 py-2 rounded-lg"
+                className="bg-[#409eff] px-4 py-2 rounded-lg"
                 onPress={saveChanges}
               >
                 <Text className="text-white">保存</Text>
@@ -921,7 +1043,7 @@ const ChatGroupSetting = () => {
                 className="p-4 border-b border-gray-200 dark:border-gray-700"
                 onPress={() => handleRemoveMember(selectedMember.user_id, selectedMember.name)}
               >
-                <Text className="text-red-500 dark:text-red-400">移除成员</Text>
+                <Text className="text-[#f56c6c] dark:text-red-400">移除成员</Text>
               </TouchableOpacity>
             )}
 
@@ -1013,7 +1135,7 @@ const ChatGroupSetting = () => {
                 <Text className="text-gray-600 dark:text-gray-300">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="bg-blue-500 px-4 py-2 rounded-lg"
+                className="bg-[#409eff] px-4 py-2 rounded-lg"
                 onPress={createSubTeam}
               >
                 <Text className="text-white">创建</Text>
@@ -1060,6 +1182,82 @@ const ChatGroupSetting = () => {
           </View>
         </Modal>
       )}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={coverModalVisible}
+        onRequestClose={() => setCoverModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white dark:bg-gray-800 rounded-lg p-5 w-4/5">
+            <Text className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              修改团队封面
+            </Text>
+            
+            <SingleImageUploader 
+              AccessToken={accessToken}
+              imgUrl={""}
+              setImgUrl={handleUpdateTeamCover}
+            />
+            
+            <View className="flex-row justify-end mt-4">
+              <TouchableOpacity 
+                className="px-4 py-2 rounded-lg mr-2"
+                onPress={() => {
+                  setAlertConfig({
+                    visible: true,
+                    title: "清除头图",
+                    message: "确定要清除团队封面图片吗？",
+                    buttons: [
+                      {
+                        text: "取消",
+                        style: "cancel"
+                      },
+                      {
+                        text: "确认清除",
+                        style: "destructive",
+                        onPress: async () => {
+                          try {
+                            await api.put(
+                              `${BASE_INFO.BASE_URL}api/teams/${team_id}`,
+                              { img_url: null },
+                              {
+                                headers: {
+                                  'Authorization': `Bearer ${accessToken}`,
+                                  'Content-Type': 'application/json'
+                                }
+                              }
+                            );
+                            showToast("封面已清除", "success");
+                            await refreshTeamData();
+                          } catch (error) {
+                            console.error('清除封面出错:', error);
+                            showToast("清除封面失败", "error");
+                          }
+                        }
+                      }
+                    ]
+                  });
+                }}
+              >
+                <Text className="text-red-600 dark:text-red-300">清除头图</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="px-4 py-2 rounded-lg mr-2"
+                onPress={() => setCoverModalVisible(false)}
+              >
+                <Text className="text-gray-600 dark:text-gray-300">取消</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <TagSelectionToast
+        visible={tagModalVisible}
+        onClose={() => setTagModalVisible(false)}
+        onConfirm={handleTagSelection}
+        initialSelectedTags={selectedTagIds}
+      />
 
       {/* 自定义弹窗 */}
       <CustomAlert

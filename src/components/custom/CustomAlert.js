@@ -64,7 +64,7 @@ const CustomAlert = ({
       textColor = 'text-white';
       fontWeight = 'font-semibold';
     } else {
-      bgColor = 'bg-blue-500';
+      bgColor = 'bg-[#409eff]';
       textColor = 'text-white';
       fontWeight = 'font-semibold';
     }

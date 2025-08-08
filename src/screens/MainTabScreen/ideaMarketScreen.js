@@ -143,7 +143,6 @@ export default function IeaMarketScreen() {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  // === Header Component ===
   const renderHeader = () => (
     <View className="mt-8 px-5 space-y-6">
      <View className="flex-row justify-between items-center mb-4 mt-5">
@@ -161,7 +160,7 @@ export default function IeaMarketScreen() {
       <View className="flex-row gap-3 mb-1">
         {/* 项目进度*/}
         <TouchableOpacity
-          className="flex-1 rounded-lg bg-blue-500 dark:bg-blue-800 shadow-lg"
+          className="flex-1 rounded-lg bg-[#409eff] dark:bg-blue-800 shadow-lg"
           onPress={() => {
             navigate('RootIdea', { 
               screen: 'Progress', 

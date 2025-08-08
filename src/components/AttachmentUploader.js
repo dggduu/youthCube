@@ -1,5 +1,5 @@
-import React, { use, useState } from 'react';
-import { View, Text, TouchableOpacity, ToastAndroid, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ToastAndroid } from 'react-native';
 import { pick } from '@react-native-documents/picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useColorScheme } from 'nativewind';
@@ -8,75 +8,77 @@ import { uploadFile } from "../utils/uploadUtils";
 import { useToast } from "../components/tip/ToastHooks";
 import RNFS from 'react-native-fs';
 import { sanitizeFileName } from "../utils/utils";
+import CustomAlert from "../components/custom/CustomAlert";
+
 const AttachmentUploader = ({ AccessToken, fileUrl, setFileUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [fileType, setFileType] = useState('');
   const { colorScheme } = useColorScheme();
   const { showToast } = useToast();
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertButtons, setAlertButtons] = useState([]);
+
   const config = {
     authToken: AccessToken,
     bucketName: 'posts',
   };
 
-  // 150MB
-  const MAX_FILE_SIZE = 150 * 1024 * 1024;
+  const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150MB
 
-const handleFileUpload = async () => {
-  try {
-    const [file] = await pick({
-      types: ['application/zip', 'application/x-7z-compressed', 'text/plain', '*/*'],
-      allowMultiSelection: false,
-      mode: 'open',
-    });
+  const handleFileUpload = async () => {
+    try {
+      const [file] = await pick({
+        types: ['application/zip', 'application/x-7z-compressed', 'text/plain', '*/*'],
+        allowMultiSelection: false,
+        mode: 'open',
+      });
 
-    if (!file || !file.uri) return;
-    console.log('Picked file:', file);
+      if (!file || !file.uri) return;
 
-    const fileSize = file.size;
-    if (typeof fileSize !== 'number' || isNaN(fileSize)) {
-      showToast('无法获取文件大小', "warning");
-      return;
-    }
+      const fileSize = file.size;
+      if (typeof fileSize !== 'number' || isNaN(fileSize)) {
+        showToast('无法获取文件大小', "warning");
+        return;
+      }
 
-    if (fileSize > MAX_FILE_SIZE) {
-      showToast('文件大小不能超过150MB', "warning");
-      return;
-    }
+      if (fileSize > MAX_FILE_SIZE) {
+        showToast('文件大小不能超过150MB', "warning");
+        return;
+      }
 
-    // 原始信息
-    const rawName = file.name || file.uri.split('/').pop() || 'unknown';
-    const rawType = file.type || 'application/octet-stream';
+      const rawName = file.name || file.uri.split('/').pop() || 'unknown';
+      const rawType = file.type || 'application/octet-stream';
+      const ext = rawName.includes('.') ? rawName.split('.').pop()?.toLowerCase() : '';
+      const allowedExtensions = ['7z', 'zip'];
 
-    // 扩展名处理
-    const ext = rawName.includes('.') ? rawName.split('.').pop()?.toLowerCase() : '';
-    const allowedExtensions = ['7z', 'zip'];
+      const isMimeAcceptable = [
+        'application/zip',
+        'application/x-7z-compressed'
+      ].includes(rawType);
 
-    // 文件类型容错判断
-    const isMimeAcceptable = [
-      'application/zip',
-      'application/x-7z-compressed'
-    ].includes(rawType);
+      const isExtAcceptable = allowedExtensions.includes(ext);
 
-    const isExtAcceptable = allowedExtensions.includes(ext);
+      if (!isMimeAcceptable && !isExtAcceptable) {
+        showToast('仅支持 7z, zip 格式的文件', 'warning');
+        return;
+      }
 
-    if (!isMimeAcceptable && !isExtAcceptable) {
-      showToast('仅支持 7z, zip 格式的文件', 'warning');
-      return;
-    }
+      const safeName = sanitizeFileName(rawName, ext || rawType.split('/').pop() || '');
 
-    // 统一安全文件名
-    const safeName = sanitizeFileName(rawName, ext || rawType.split('/').pop() || '');
-
-    // 确认上传
-    Alert.alert(
-      '确认上传',
-      `您确定要上传 ${safeName} 吗?`,
-      [
-        { text: '取消', style: 'cancel' },
+      // 显示自定义弹窗
+      setAlertTitle('确认上传');
+      setAlertMessage(`您确定要上传 ${safeName} 吗?`);
+      setAlertButtons([
+        { text: '取消', style: 'cancel', onPress: () => setAlertVisible(false) },
         {
           text: '确认',
+          style: 'default',
           onPress: async () => {
+            setAlertVisible(false);
             await startFileUpload({
               uri: file.uri,
               name: safeName,
@@ -85,28 +87,24 @@ const handleFileUpload = async () => {
             });
           },
         },
-      ]
-    );
-  } catch (err) {
-    if (err?.code === 'E_PICKER_CANCELLED') {
-      // 用户取消
-    } else {
-      showToast('选择文件时出错', "error");
-      console.error(err);
+      ]);
+      setAlertVisible(true);
+    } catch (err) {
+      if (err?.code !== 'E_PICKER_CANCELLED') {
+        showToast('选择文件时出错', "error");
+        console.error(err);
+      }
     }
-  }
-};
+  };
 
-
-
-const getMimeTypeByExtension = (filename) => {
-  const ext = filename.split('.').pop().toLowerCase();
-  switch (ext) {
-    case 'zip': return 'application/zip';
-    case '7z': return 'application/x-7z-compressed';
-    default: return 'application/octet-stream';
-  }
-};
+  const getMimeTypeByExtension = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase();
+    switch (ext) {
+      case 'zip': return 'application/zip';
+      case '7z': return 'application/x-7z-compressed';
+      default: return 'application/octet-stream';
+    }
+  };
 
   const startFileUpload = async (file) => {
     let tempFilePath = null;
@@ -116,9 +114,9 @@ const getMimeTypeByExtension = (filename) => {
       setFileName(file.name);
 
       const ext = file.name.split('.').pop().toLowerCase();
-      const mimeType = (file.type && file.type !== 'application/octet-stream') 
-                        ? file.type 
-                        : getMimeTypeByExtension(file.name);
+      const mimeType = (file.type && file.type !== 'application/octet-stream')
+        ? file.type
+        : getMimeTypeByExtension(file.name);
       setFileType(mimeType);
 
       let finalUri = file.uri;
@@ -138,7 +136,8 @@ const getMimeTypeByExtension = (filename) => {
         finalUri = `file://${destPath}`;
         tempFilePath = destPath;
       }
-      console.log(uploadConfig,"upload");
+
+      console.log(uploadConfig, "upload");
       const uploadResult = await uploadFile(finalUri, uploadConfig);
 
       if (uploadResult.success) {
@@ -167,20 +166,21 @@ const getMimeTypeByExtension = (filename) => {
   };
 
   const handleRemoveFile = () => {
-    Alert.alert(
-      '删除文件',
-      '您确定要删除当前文件吗？',
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '删除',
-          onPress: () => {
-            resetFile();
-            showToast('文件已删除', "success");
-          },
+    setAlertTitle('删除文件');
+    setAlertMessage('您确定要删除当前文件吗？');
+    setAlertButtons([
+      { text: '取消', style: 'cancel', onPress: () => setAlertVisible(false) },
+      {
+        text: '删除',
+        style: 'destructive',
+        onPress: () => {
+          setAlertVisible(false);
+          resetFile();
+          showToast('文件已删除', "success");
         },
-      ]
-    );
+      },
+    ]);
+    setAlertVisible(true);
   };
 
   const resetFile = () => {
@@ -242,6 +242,15 @@ const getMimeTypeByExtension = (filename) => {
           </View>
         </TouchableOpacity>
       )}
+
+      {/* 自定义弹窗 */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        buttons={alertButtons}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };

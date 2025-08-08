@@ -142,8 +142,8 @@ const MessageScreen = ({ navigation }) => {
   if (error) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center p-4">
-        <Text className="text-red-500 dark:text-red-400 text-lg mb-4 text-center">{error}</Text>
-        <TouchableOpacity onPress={handleRefresh} className="p-3 bg-blue-500 rounded-lg">
+        <Text className="text-[#f56c6c] dark:text-red-400 text-lg mb-4 text-center">{error}</Text>
+        <TouchableOpacity onPress={handleRefresh} className="p-3 bg-[#409eff] rounded-lg">
           <Text className="text-white font-semibold">重新加载</Text>
         </TouchableOpacity>
       </SafeAreaView>

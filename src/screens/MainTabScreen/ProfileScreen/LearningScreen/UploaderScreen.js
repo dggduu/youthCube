@@ -249,7 +249,7 @@ const UploaderScreen = () => {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
-                <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
+                <Text className="text-lg text-[#f56c6c] dark:text-red-400 mb-4">{error}</Text>
                 <TouchableOpacity
                     className="px-4 py-2 bg-[#409eff] rounded-lg"
                     onPress={() => setError(null)}
@@ -322,12 +322,6 @@ const UploaderScreen = () => {
                             >
                                 <Text className="text-white text-sm">选择标签</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => setShowAddTagModal(true)}
-                                className="px-3 py-1 ml-2 bg-green-600 rounded-full"
-                            >
-                                <Text className="text-white text-sm">+ 新建标签</Text>
-                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -339,18 +333,24 @@ const UploaderScreen = () => {
                         </Text>
 
                         {selectedTags.tagIds.length > 0 && (
-                            <View className="flex-row flex-wrap">
-                                {selectedTags.tags.map(tag => (
-                                    <View 
-                                        key={tag.tag_id}
-                                        className="px-2 py-1 m-1 rounded-full bg-[#409eff]"
-                                    >
-                                        <Text className="text-white text-xs">
-                                            {tag.tag_name}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </View>
+                            <ScrollView 
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                className="max-h-20 mb-2"
+                            >
+                                <View className="flex-row flex-wrap">
+                                    {selectedTags.tags.map(tag => (
+                                        <View 
+                                            key={tag.tag_id}
+                                            className="px-3 py-1 mx-1 my-1 rounded-full bg-[#409eff]"
+                                        >
+                                            <Text className="text-white text-sm">
+                                                {tag.tag_name}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </ScrollView>
                         )}
                     </View>
                 </View>

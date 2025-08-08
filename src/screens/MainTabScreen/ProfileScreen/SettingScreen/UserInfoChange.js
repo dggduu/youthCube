@@ -57,19 +57,19 @@ const PasswordStrengthIndicator = ({ password }) => {
   const check = isValidPassword(password);
   return (
     <View className="mb-4 ml-2">
-      <Text className={`text-xs mb-1 ${check.isLongEnough ? 'text-green-500' : 'text-red-500'}`}>
+      <Text className={`text-xs mb-1 ${check.isLongEnough ? 'text-green-500' : 'text-[#f56c6c]'}`}>
         • 长度至少8位
       </Text>
-      <Text className={`text-xs mb-1 ${check.hasUpperCase ? 'text-green-500' : 'text-red-500'}`}>
+      <Text className={`text-xs mb-1 ${check.hasUpperCase ? 'text-green-500' : 'text-[#f56c6c]'}`}>
         • 包含大写字母
       </Text>
-      <Text className={`text-xs mb-1 ${check.hasLowerCase ? 'text-green-500' : 'text-red-500'}`}>
+      <Text className={`text-xs mb-1 ${check.hasLowerCase ? 'text-green-500' : 'text-[#f56c6c]'}`}>
         • 包含小写字母
       </Text>
-      <Text className={`text-xs mb-1 ${check.hasNumber ? 'text-green-500' : 'text-red-500'}`}>
+      <Text className={`text-xs mb-1 ${check.hasNumber ? 'text-green-500' : 'text-[#f56c6c]'}`}>
         • 包含数字
       </Text>
-      <Text className={`text-xs mb-1 ${check.hasSpecialChar ? 'text-green-500' : 'text-red-500'}`}>
+      <Text className={`text-xs mb-1 ${check.hasSpecialChar ? 'text-green-500' : 'text-[#f56c6c]'}`}>
         • 包含特殊字符
       </Text>
     </View>
@@ -82,7 +82,7 @@ const PasswordMatchIndicator = ({ password, confirmPassword }) => {
   return (
     <View className="mb-4 ml-2">
       {password && confirmPassword ? (
-        <Text className={`text-xs ${match ? 'text-green-500' : 'text-red-500'}`}>
+        <Text className={`text-xs ${match ? 'text-green-500' : 'text-[#f56c6c]'}`}>
           • 两次输入的密码{match ? '一致' : '不一致'}
         </Text>
       ) : null}
@@ -263,7 +263,7 @@ const UserInfoChange = () => {
             修改个人信息
           </Text>
           {formError ?
-            <Text className="text-red-500 pl-1 font-normal text-lg self-center mb-4">
+            <Text className="text-[#f56c6c] pl-1 font-normal text-lg self-center mb-4">
               {formError}
             </Text> : null}
 

@@ -225,7 +225,7 @@ const UploaderScreen = () => {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
-                <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
+                <Text className="text-lg text-[#f56c6c] dark:text-red-400 mb-4">{error}</Text>
                 <TouchableOpacity
                     className="px-4 py-2 bg-[#409eff] rounded-lg"
                     onPress={() => setError(null)}
@@ -289,12 +289,6 @@ const UploaderScreen = () => {
                                 className="px-3 py-1 bg-[#409eff] rounded-full"
                             >
                                 <Text className="text-white text-sm">选择标签</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => setShowAddTagModal(true)}
-                                className="px-3 py-1 ml-2 bg-green-600 rounded-full"
-                            >
-                                <Text className="text-white text-sm">+ 新建标签</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

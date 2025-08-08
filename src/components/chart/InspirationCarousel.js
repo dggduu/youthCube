@@ -103,7 +103,7 @@ const InspirationCarousel = ({ onMenuPress }) => {
           实时灵感
         </Text>
         <View className="h-38 justify-center items-center">
-          <Text className="text-red-500 dark:text-red-400">加载失败: {error.message}</Text>
+          <Text className="text-[#f56c6c] dark:text-red-400">加载失败,请检查网络</Text>
         </View>
       </View>
     );

@@ -43,7 +43,7 @@ const PasswordStrengthIndicator = ({ password }) => {
   const check = isValidPassword(password);
   const getColor = (isValid) => {
     if (password.length === 0) return 'text-gray-400';
-    return isValid ? 'text-green-500' : 'text-red-500';
+    return isValid ? 'text-green-500' : 'text-[#f56c6c]';
   };
   const getIcon = (isValid) => {
     if (password.length === 0) return '•';
@@ -271,7 +271,7 @@ export default function InputProfile({ route }) {
                 className={`px-8 rounded-lg justify-center items-center ${
                   !isValidEmail(email) || countdown > 0
                     ? 'bg-gray-300 dark:bg-gray-700'
-                    : 'bg-blue-500'
+                    : 'bg-[#409eff]'
                 }`}
               >
                 <Text
@@ -294,7 +294,7 @@ export default function InputProfile({ route }) {
 
           <InputBox label="确认密码" placeholder="请再次输入密码" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry leftIconName="lock" />
           {passwordMatchError ? (
-            <Text className="text-red-500 text-xs ml-2">•{passwordMatchError}</Text>
+            <Text className="text-[#f56c6c] text-xs ml-2">•{passwordMatchError}</Text>
           ) : null}
 
           <TouchableOpacity

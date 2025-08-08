@@ -28,7 +28,7 @@ const TOAST_TYPES = {
   },
   info: {
     icon: 'info',
-    colorLight: 'bg-blue-500',
+    colorLight: 'bg-[#409eff]',
     colorDark: 'bg-blue-700',
   },
 };

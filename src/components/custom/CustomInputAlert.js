@@ -158,7 +158,7 @@ const CustomInputAlert = ({ visible, title, message, placeholder, onClose, onCon
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleConfirm}
-              className="bg-blue-500 px-4 py-2 rounded-lg min-w-[80px] items-center"
+              className="bg-[#409eff] px-4 py-2 rounded-lg min-w-[80px] items-center"
             >
               <Text className="text-white font-semibold text-base">确定</Text>
             </TouchableOpacity>

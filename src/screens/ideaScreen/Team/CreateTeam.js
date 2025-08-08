@@ -249,13 +249,6 @@ const CreateTeam = () => {
                   '选择标签'}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => setShowCreateTagModal(true)}
-              className="px-3 py-2 bg-green-500 rounded-full mb-2"
-            >
-              <Text className="text-white text-sm">新建标签</Text>
-            </TouchableOpacity>
           </View>
           
           {/* 显示已选标签 */}

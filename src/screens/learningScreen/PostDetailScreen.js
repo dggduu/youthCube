@@ -320,7 +320,7 @@ const PostDetailScreen = () => {
   if (error) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500 text-lg">{error}</Text>
+        <Text className="text-[#f56c6c] text-lg">{error}</Text>
       </View>
     );
   }
@@ -328,7 +328,7 @@ const PostDetailScreen = () => {
   if (!post) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-red-500 text-lg">Post does not exist</Text>
+        <Text className="text-[#f56c6c] text-lg">Post does not exist</Text>
       </View>
     );
   }
@@ -417,7 +417,7 @@ const PostDetailScreen = () => {
                     {isDownloaded ? (
                       <TouchableOpacity
                         onPress={handleOpenFile}
-                        className="bg-blue-500 px-4 py-2 rounded-full"
+                        className="bg-[#409eff] px-4 py-2 rounded-full"
                       >
                         <Text className="text-white">打开</Text>
                       </TouchableOpacity>
@@ -425,7 +425,7 @@ const PostDetailScreen = () => {
                       <TouchableOpacity
                         onPress={() => handleDownload(media.media_url)}
                         disabled={downloading}
-                        className="bg-blue-500 px-3 py-1 rounded-full min-w-[70px] items-center"
+                        className="bg-[#409eff] px-3 py-1 rounded-full min-w-[70px] items-center"
                       >
                         {downloading ? (
                           <View className="flex-row items-center">

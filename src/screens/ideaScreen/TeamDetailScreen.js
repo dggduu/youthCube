@@ -8,6 +8,7 @@ import { getItemFromAsyncStorage, setItemToAsyncStorage } from "../../utils/Loca
 import { navigate } from "../../navigation/NavigatorRef";
 import { useToast } from "../../components/tip/ToastHooks";
 import FastImage from 'react-native-fast-image';
+import InputBox from "../../components/inputBox/inputBox";
 import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 
@@ -208,7 +209,7 @@ const TeamDetailScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
         <MaterialIcons name="error-outline" size={48} color="#ef4444" />
-        <Text className="mt-4 text-red-500 dark:text-red-400 text-lg">加载失败: {error}</Text>
+        <Text className="mt-4 text-[#f56c6c] dark:text-red-400 text-lg">加载失败: {error}</Text>
       </View>
     );
   }
@@ -272,7 +273,7 @@ const TeamDetailScreen = () => {
             className={`mt-4 py-3 rounded-md flex-row justify-center items-center ${
               teamData.chatRoom.members?.some(member => member.user_id === userId)
                 ? 'bg-gray-200 dark:bg-gray-700'
-                : 'bg-blue-500 dark:bg-blue-600'
+                : 'bg-[#409eff] dark:bg-blue-600'
             }`}
             onPress={() => !teamData.chatRoom?.members?.some(member => member.user_id === userId) && setShowApplyModal(true)}
             disabled={teamData.chatRoom?.members?.some(member => member.user_id === userId)}
@@ -438,42 +439,26 @@ const TeamDetailScreen = () => {
         <View className="flex-1 justify-center items-center bg-black/50 p-4">
           <View className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <View className="p-5 border-b border-gray-200 dark:border-gray-700 flex-row items-center">
-              <MaterialIcons name="send" size={20} color="#3b82f6" className="mr-2" />
               <Text className="text-xl font-bold text-gray-800 dark:text-white">申请加入团队</Text>
             </View>
             
             <View className="p-5">
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">邮箱地址</Text>
-                <View className="flex-row items-center border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
-                  <MaterialIcons name="email" size={20} color="#6b7280" className="ml-2" />
-                  <TextInput
-                    className="flex-1 h-12 px-3 text-gray-800 dark:text-white dark:bg-gray-700"
+
+                  <InputBox
+                  label="邮箱"
                     placeholder="请输入您的邮箱"
-                    placeholderTextColor={isDark ? "#9ca3af" : "#6b7280"}
                     value={applicationData.email}
                     onChangeText={(text) => setApplicationData({...applicationData, email: text})}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
+                    leftIconName="email"
                   />
-                </View>
-              </View>
-              
-              <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">申请理由</Text>
-                <View className="border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
-                  <TextInput
-                    className="h-24 px-3 py-2 text-gray-800 dark:text-white dark:bg-gray-700"
+                  <InputBox
+                  label="申请理由"
                     placeholder="请说明您想加入的原因"
-                    placeholderTextColor={isDark ? "#9ca3af" : "#6b7280"}
                     value={applicationData.description}
                     onChangeText={(text) => setApplicationData({...applicationData, description: text})}
                     multiline
-                    textAlignVertical="top"
                   />
                 </View>
-              </View>
-            </View>
             
             <View className="p-4 border-t border-gray-200 dark:border-gray-700 flex-row justify-end space-x-3">
               <TouchableOpacity
@@ -481,11 +466,10 @@ const TeamDetailScreen = () => {
                 onPress={() => setShowApplyModal(false)}
                 activeOpacity={0.7}
               >
-                <MaterialIcons name="close" size={18} color="#6b7280" className="mr-1" />
                 <Text className="text-gray-700 dark:text-gray-300 font-medium">取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 bg-blue-500 dark:bg-blue-600 rounded-md flex-row items-center"
+                className="px-4 py-2 bg-[#409eff] dark:bg-blue-600 rounded-md flex-row items-center ml-3"
                 onPress={handleApplyToJoin}
                 disabled={isApplying}
                 activeOpacity={0.7}
@@ -494,7 +478,6 @@ const TeamDetailScreen = () => {
                   <ActivityIndicator color="white" />
                 ) : (
                   <>
-                    <MaterialIcons name="check" size={18} color="white" className="mr-1" />
                     <Text className="text-white font-medium">提交申请</Text>
                   </>
                 )}

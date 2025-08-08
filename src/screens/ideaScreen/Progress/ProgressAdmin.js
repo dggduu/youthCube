@@ -297,7 +297,7 @@ const ProgressAdmin = () => {
             onPress={() => handleDelete(item.progress_id)}
             className="h-9 items-center justify-center rounded-md border border-red-500 px-4"
           >
-            <Text className="text-sm font-semibold text-red-500">删除</Text>
+            <Text className="text-sm font-semibold text-[#f56c6c]">删除</Text>
           </TouchableOpacity>
           <View className="flex-row">
             {item.status !== 'accept' && (

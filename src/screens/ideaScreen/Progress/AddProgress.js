@@ -165,7 +165,7 @@ const AddProgress = () => {
   if (error) {
     return (
       <View className="flex-1 items-center justify-center p-5 dark:bg-gray-900">
-        <Text className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</Text>
+        <Text className="text-lg text-[#f56c6c] dark:text-red-400 mb-4">{error}</Text>
         <TouchableOpacity
           className="px-4 py-2 bg-[#409eff] rounded-lg"
           onPress={() => setError(null)}

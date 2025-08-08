@@ -64,7 +64,7 @@ const RootAppContent = () => {
   if (!hasPermissions) {
     return (
       <View className='flex-1 justify-center items-center bg-white dark:bg-gray-900 p-4'>
-        <Text className='text-xl text-red-500 text-center mb-4'>
+        <Text className='text-xl text-[#f56c6c] text-center mb-4'>
           需要启用所有权限才能使用本应用
         </Text>
         <Text className='text-center text-gray-700 dark:text-gray-300'>
