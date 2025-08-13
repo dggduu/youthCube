@@ -25,6 +25,24 @@ jobs:
           yarn install
           yarn add lightningcss-linux-x64-gnu
 
+      - name: Extract version and update build.gradle
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "Tag name: $TAG_NAME"
+
+          VERSION_NAME="${TAG_NAME#v}"
+          echo "Version name: $VERSION_NAME"
+
+          VERSION_CODE=${{ github.run_number }}
+          echo "Version code: $VERSION_CODE"
+
+          cd android/app || exit 1
+
+          sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" build.gradle
+
+          echo "更新 build.gradle 成功: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
+
       - name: Generate JS Bundle for Android
         run: |
           npx react-native bundle \
