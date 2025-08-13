@@ -16,15 +16,31 @@
 - [x] 网络库封装
 - [ ] 联动 AI（适配openai接口）(等待队友中)
 - [x] 相机权限query （仅安卓）
+- [x] SplashScreen 检查版本更新并使用 DeepLink 跳转 Release 页面
 ### 非核心组件
 - [ ] FCM推送（后台推送）
 - [ ] 懒加载策略
-- [ ] 优化内存占用（react-native-fast-image）
-- [ ] weblate
+- [ ] 请求 react-query 化
+- [x] 优化内存占用（react-native-fast-image）
 - [ ] 整理一下项目的readme文档
 ### 目前已知的问题
 - [x] 注册时未同步jwt
 - [x] 导航器未适配深色模式
 - [x] 部分未挂载拦截器
 - [ ] 兜底机制
-- [ ] 没做结题
+- [x] 没做结题
+## Usage
+**预构建 release 版的 API Endpoint指向10.0.2.2，意味着需要在 Android Studio 模拟器下运行软件**
+### Windows (由于长路径问题，经测试只能编译 Debug 版)
+```sh
+... 安装Android Studio
+https://developer.android.google.cn/studio
+... 部署后端与数据库
+
+scoop install nodejs
+npm install -g yarn
+git clone https://github.com/dggduu/youthCube.git 
+cd youthCube
+yarn install
+yarn android
+```

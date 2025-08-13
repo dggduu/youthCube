@@ -1,10 +1,10 @@
 export const BASE_INFO={
     chat:{
-        url: 'http://192.168.5.3:1234',
+        url: 'http:///10.0.2.2:1234',
         model: 'qwen2-vl-2b-instruct',
     },
-    BASE_URL: 'http://192.168.5.3:3166/v1/',
-    BASE_SOCKET_URL: 'http://192.168.5.3:3166',
+    BASE_URL: 'http://10.0.2.2:3166/v1/',
+    BASE_SOCKET_URL: 'http://10.0.2.2:3166',
     fakeUser: {
         id: '8',
         email: 'dev@example.com',
@@ -18,7 +18,4 @@ export const BASE_INFO={
         isSkipLoginPage: false,
         isSkipRegisterVerify: false,
     },
-    Version: "0.1.1",
-    LastUpdate:"2025 年 7 月 30 日",
-    Release: "测试版"
 };
