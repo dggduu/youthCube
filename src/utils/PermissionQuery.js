@@ -14,16 +14,12 @@ const checkAllPermissions = async () => {
 
   try {
     const results = await PermissionsAndroid.requestMultiple(REQUIRED_PERMISSIONS);
-
-    const allDenied = Object.values(results).every(
-      (result) => result === PermissionsAndroid.RESULTS.DENIED
+    
+    const hasDenied = Object.values(results).some(
+      result => result === PermissionsAndroid.RESULTS.DENIED
     );
-
-    if (allDenied) {
-      return false;
-    }
-
-    return true;
+    
+    return !hasDenied;
   } catch (error) {
     console.error('权限检查失败:', error);
     return false;

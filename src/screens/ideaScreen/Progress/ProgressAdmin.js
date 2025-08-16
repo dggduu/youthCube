@@ -350,7 +350,7 @@ const ProgressAdmin = () => {
 
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
-        className="absolute bottom-10 right-6 rounded-full bg-[#409eff] p-4 shadow-lg"
+        className="absolute bottom-10 right-6 rounded-full bg-[#409eff] p-4"
       >
         <MaterialIcons name="add" size={24} color="white" />
       </TouchableOpacity>

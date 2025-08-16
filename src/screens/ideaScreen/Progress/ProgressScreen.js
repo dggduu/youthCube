@@ -82,7 +82,7 @@ const ProgressScreen = () => {
 
         {isOwnerOrCoOwner && (
           <TouchableOpacity
-            className='p-3 bg-white rounded-full ml-3 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'
+            className='p-3 bg-white rounded-full ml-3 dark:bg-gray-800'
             onPress={() => {
               navigation.navigate('Admin', {
                 teamId: teamId,
@@ -105,7 +105,7 @@ const ProgressScreen = () => {
       
       {teamId && (
         <TouchableOpacity
-          className='absolute bottom-6 right-6 bg-[#409eff] dark:bg-blue-700 p-5 rounded-full shadow-lg dark:border-gray-600 border border-gray-300'
+          className='absolute bottom-10 right-6 bg-[#409eff] dark:bg-blue-700 p-5 rounded-full'
           onPress={() => {
             navigation.navigate("Add", { screen: "AddEnd", params: { teamId: teamId } });
           }}

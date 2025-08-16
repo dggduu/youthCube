@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, useColorScheme } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-
 const InputBox = ({
   label,
   placeholder,

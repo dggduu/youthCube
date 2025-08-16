@@ -594,6 +594,7 @@ const submitComment = useCallback(async () => {
             value={progressData.content}
             flatListProps={{
               initialNumToRender: 8,
+              scrollEnabled: false
             }}
           />
         </View>

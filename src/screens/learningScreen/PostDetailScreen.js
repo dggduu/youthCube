@@ -453,7 +453,8 @@ const PostDetailScreen = () => {
             value={post.content}
             flatListProps={{
               initialNumToRender: 8,
-            }}
+              scrollEnabled: false
+            }} 
           />
 
           {tags.length > 0 && (

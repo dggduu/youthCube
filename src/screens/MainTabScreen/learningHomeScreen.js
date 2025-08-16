@@ -239,7 +239,7 @@ const LearningHomeScreen = () => {
       {scrollY > 200 && (
         <TouchableOpacity
           onPress={scrollToTop}
-          className="absolute right-4 bottom-4 bg-purple-600 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg active:bg-blue-700"
+          className="absolute right-4 bottom-10 bg-[#409eff] dark:bg-blue-700 rounded-full flex items-center justify-center p-3"
         >
           <MaterialIcons name='arrow-upward' size={20} color={IsDark ? '#ccc' : '#fff'} />
         </TouchableOpacity>

@@ -75,7 +75,6 @@ const calculateMonthLabels = (weeks) => {
   weeks.forEach((week, weekIndex) => {
     if (!week.length) return;
     
-    // Find the first day of the month in this week
     const firstDayOfMonth = week.find(day => {
       const d = new Date(day);
       return d.getDate() === 1;
@@ -274,7 +273,7 @@ const MosciaChart = ({ team_id }) => {
 
   return (
     <View className="justify-center bg-white dark:bg-gray-700 py-5 px-3 mx-3 rounded-xl items-center border border-gray-300 dark:border-gray-600">
-      <View className="flex-row">
+      <View className="flex-row justify-center items-center">
         {/* 星期标签 */}
         <View style={styles.days}>
           <Text style={[styles.weekDay, { top: 0 }]} className="text-gray-800 dark:text-gray-300">日</Text>
