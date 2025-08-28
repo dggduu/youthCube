@@ -36,10 +36,10 @@ jobs:
           VERSION_CODE=${{ github.run_number }}
           echo "Version code: $VERSION_CODE"
 
-          cd android/app || exit 1
+          cd android || exit 1
 
-          sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" build.gradle
-          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" build.gradle
+          sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
 
           echo "更新 build.gradle 成功: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
 
@@ -56,24 +56,34 @@ jobs:
         run: |
           cd android && chmod +x gradlew
 
-      - name: Build Android Release APK
+      - name: Build Android Release (Unsigned APK)
         run: |
           cd android && ./gradlew assembleRelease
 
-      - name: Upload APK as artifact (optional)
+      - name: Sign app APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/*.apk
+          name: app-release-signed
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
-      - name: Create GitHub Release and Upload APK
+      - name: Create GitHub Release and Upload Signed APK
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
           body: |
-            ${{ github.ref_name }}.
+            Release ${{ github.ref_name }}
           files: |
-            android/app/build/outputs/apk/release/*.apk
+            ${{ steps.sign_app.outputs.signedReleaseFile }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
