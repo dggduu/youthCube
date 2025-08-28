@@ -1,32 +1,174 @@
-import { View, Text, SafeAreaView, ScrollView } from 'react-native';
-import React from 'react';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import React, { useState } from 'react';
 import BackIcon from "../../components/backIcon/backIcon";
+import Icon from "@react-native-vector-icons/material-icons";
+
 const data = [
   {
-    Q: "如何注册账号？",
-    A: "访问注册页面，填写所需信息并提交表单即可完成注册。",
+    title: "账号相关",
+    content: [
+      {
+        Q: "如何注册账号？",
+        A: "请访问注册页面，填写所需信息并提交表单即可完成注册。",
+      },
+      {
+        Q: "忘记密码怎么办？",
+        A: "未登录时，请点击登录页面的忘记密码链接，按照提示重置密码。\n已登录时，请进入个人中心，点击修改用户信息，按照提示重置密码。",
+      },
+      {
+        Q: "可以更改用户名吗？",
+        A: "可以。请进入个人中心，点击修改用户信息，按照提示更改用户名。",
+      },
+      {
+        Q: "如何换绑邮箱",
+        A: "请进入个人中心，点击修改用户信息，按照提示更换绑定邮箱。",
+      },
+      {
+        Q: "邮箱已被注册如何解决",
+        A: "请联系客服并提供相关有效证明进行处理。",
+      },
+      {
+        Q: "如何注销账号",
+        A: "目前暂不支持账号注销功能。",
+      },
+      {
+        Q: "未接收到邮件",
+        A: "请先检查网络环境是否正常。如果正常，可能是我们尚未支持该邮箱类型，建议尝试使用其他邮箱注册。",
+      },
+    ]
   },
   {
-    Q: "忘记密码怎么办？",
-    A: "请点击登录页面的“忘记密码”链接，按照提示重置您的密码。",
+    title: "聊天相关",
+    content: [
+      {
+        Q: "对方接收不到我的消息",
+        A: "请先检查网络连接是否正常。如果正常，可能是消息包含敏感词，系统不会在云端存储含有敏感信息的消息。",
+      },
+      {
+        Q: "无法上传附件",
+        A: "请检查网络连接是否正常，并确认文件是否符合要求（文件大小150MB以内，文件类型为7z或zip）。",
+      },
+      {
+        Q: "附件多次上传失败",
+        A: "可能是当前处于使用高峰期，请稍后再试。"
+      },
+      {
+        Q:"提示429错误",
+        A:"可能是授权信息未自动更新，请尝试退出后重新进入软件。如果问题仍然存在，请尝试重新登录。"
+      }
+    ],
   },
   {
-    Q: "可以更改用户名吗？",
-    A: "目前系统不支持直接更改用户名，请联系客服寻求帮助。",
+    title: "文章问题",
+    content: [
+      {
+        Q: "文章无法正常发送",
+        A: "请先检查网络连接是否正常。如果正常，可能是文章包含敏感词，请检查内容是否符合平台规范。",
+      },
+      {
+        Q: "无法发送评论",
+        A: "请先检查网络连接是否正常。如果正常，可能是评论包含敏感词，系统不会在云端存储含有敏感信息的评论。",
+      },
+    ],
+  },
+  {
+    title:"商业合作咨询",
+    content:[
+      {
+        Q: "联系方式",
+        A: "co-consult@mail.aoicube.dpdns.org，我们诚挚欢迎各类合作机会。",
+      },      
+    ]
+  },
+  {
+    title: "其他问题",
+    content: [
+      {
+        Q:"遇到bug如何处理",
+        A:"请附上详细截图和问题描述，发送至bug-tracker@mail.aoicube.dpdns.org，这将帮助我们更好地复现和解决问题。",
+      },
+      {
+        Q:"检查更新失败",
+        A:"请检查网络连接，如果正常请访问我们官方的分发渠道获取最新版。",
+      },
+    ],
   },
 ];
 
 const HelpScreen = () => {
+  const [expandedSections, setExpandedSections] = useState({});
+
+  const toggleSection = (index) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  // 发送邮件函数
+  const handleSendEmail = () => {
+    const email = 'consult@mail.aoicube.dpdns.org';
+    const subject = '咨询与帮助';
+    const body = '您好，我需要帮助：\n\n';
+    
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    Linking.openURL(mailtoUrl).catch(err => {
+      console.error('无法打开邮件客户端:', err);
+      alert('无法打开邮件客户端，请确保已安装邮件应用');
+    });
+  };
+
   return (
-    <SafeAreaView className='flex-1 pt-5 bg-white dark:bg-gray-900'>
-      <BackIcon />
-      <ScrollView className='w-full px-7 mt-5'>
-        {data.map((data, index) => (
-          <View key={index} className='my-5'>
-            <Text className='font-bold text-xl mb-2 dark:text-gray-300'>{index+1}  {data.Q}</Text>
-            <Text className='dark:text-gray-300'>{data.A}</Text>
+    <SafeAreaView className='flex-1 bg-white dark:bg-gray-900'>
+        <BackIcon />
+
+      
+      <ScrollView className='w-full px-5 mt-2' showsVerticalScrollIndicator={false}>
+        <Text className='text-2xl font-bold text-gray-900 dark:text-white text-left mb-4 mt-2'>帮助与支持</Text>
+        {data.map((section, sectionIndex) => (
+          <View key={sectionIndex} className='mb-2'>
+            <TouchableOpacity 
+              className='flex-row justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700'
+              onPress={() => toggleSection(sectionIndex)}
+              activeOpacity={0.7}
+            >
+              <Text className='text-lg font-semibold text-gray-900 dark:text-white'>{section.title}</Text>
+              {expandedSections[sectionIndex] ? (
+                <Icon name="expand-less" size={22} color="#6b7280" />
+              ) : (
+                <Icon name="expand-more" size={22} color="#6b7280" />
+              )}
+            </TouchableOpacity>
+            
+            {expandedSections[sectionIndex] && (
+              <View className='mt-3 pl-2'>
+                {section.content.map((item, itemIndex) => (
+                  <View key={itemIndex} className='mb-3'>
+                    <Text className='text-base font-medium text-gray-900 dark:text-white mb-1' selectable={true}>{item.Q}</Text>
+                    <Text className='text-sm text-gray-700 dark:text-gray-300' selectable={true}>{item.A}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         ))}
+        
+        <View className='my-6 p-5 bg-gray-100 dark:bg-gray-800 rounded-lg'>
+          <Text className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>需要更多帮助？</Text>
+          <Text className='text-sm text-gray-700 dark:text-gray-300 mb-3'>如果以上内容未能解决您的问题，请联系我们的客服团队。</Text>
+          <View className='flex-row'>
+            {/* <TouchableOpacity className='bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded mr-3'>
+              <Text className='text-white text-sm'>在线客服</Text>
+            </TouchableOpacity> */}
+            <TouchableOpacity 
+              className='bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded mr-3'
+              onPress={handleSendEmail}
+            >
+              <Text className='text-white text-sm'>发送邮件</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>  
     </SafeAreaView>
   );
