@@ -126,7 +126,7 @@ android {
         }
         release {
             signingConfig null
-            minifyEnabled enableProguardInReleaseBuild
+            minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
