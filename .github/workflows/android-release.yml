@@ -50,9 +50,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # -------------------------------
-      # 🎯 以下为原有构建步骤（无需修改）
-      # -------------------------------
       - name: Extract version and update build.gradle
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
@@ -97,6 +94,8 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Upload Signed APK as artifact
         uses: actions/upload-artifact@v4
