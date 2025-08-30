@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -19,23 +21,11 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
-      - name: Install yarn
-        run: npm install -g yarn
-
-      - name: Cache Yarn & Node Modules
-        uses: actions/cache@v3
-        id: cache-node-modules
-        with:
-          path: |
-            ~/.cache/yarn
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install dependencies using yarn
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Generate React Native autolinking & codegen
+        run: npx react-native config
 
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -52,26 +42,23 @@ jobs:
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           echo "Tag name: $TAG_NAME"
-
           VERSION_NAME="${TAG_NAME#v}"
           echo "Version name: $VERSION_NAME"
-
           VERSION_CODE=${{ github.run_number }}
           echo "Version code: $VERSION_CODE"
 
           cd android || exit 1
-
-          # 备份原始文件
           cp app/build.gradle app/build.gradle.backup
 
-          # 更新版本信息
           sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
 
-          echo "更新 build.gradle 成功: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
+          echo "Updated build.gradle: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
 
       - name: Generate JS Bundle for Android
         run: |
+          # 确保 assets 目录存在
+          mkdir -p android/app/src/main/assets
           npx react-native bundle \
             --platform android \
             --dev false \
@@ -119,8 +106,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
-            Android Release ${{ github.ref_name }}
-            
+            📱 Android Release ${{ github.ref_name }}
+
             Built from tag: ${{ github.ref_name }}
             Run number: ${{ github.run_number }}
           files: android/app/build/outputs/apk/release/*-signed.apk
