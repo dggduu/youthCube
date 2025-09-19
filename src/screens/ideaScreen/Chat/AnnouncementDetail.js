@@ -181,19 +181,31 @@ const AnnouncementDetail = () => {
   const renderItem = ({ item }) => (
     <View className="mb-4 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <View className="flex-row justify-between items-start mb-3">
-        <View className="flex-1">
-          <View className="flex-row items-center space-x-2 justify-between">
-            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-100">{item.title}</Text>
-            {item.is_pinned && (
-              <View className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full flex-row items-center">
-                <Icon name="push-pin" size={14} color={colorScheme === 'dark' ? '#93C5FD' : '#3B82F6'} />
-                <Text className="text-xs text-blue-600 dark:text-blue-300 ml-1">置顶</Text>
-              </View>
-            )}
+        <View className="flex-1 flex-row items-start">
+          {/* 左侧：标题和作者信息 */}
+          <View className="flex-1">
+            <View className="flex-row flex-wrap items-center min-h-[24px]">
+              {/* 标题：允许换行，占据主空间 */}
+              <Text className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex-1 leading-tight">
+                {item.title}
+              </Text>
+
+              {/* 置顶标签：放在同一行，但允许换行到下一行左侧 */}
+              {item.is_pinned && (
+                <View className="mt-1 self-start"> {/* 关键：用 mt-1 让它换行时出现在左下，避免中间空隙 */}
+                  <View className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full flex-row items-center">
+                    <Icon name="push-pin" size={14} color={colorScheme === 'dark' ? '#93C5FD' : '#3B82F6'} />
+                    <Text className="text-xs text-blue-600 dark:text-blue-300 ml-1">置顶</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* 作者信息单独一行 */}
+            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {item.author?.username} • {item.created_at}
+            </Text>
           </View>
-          <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {item.author?.username} • {item.created_at}
-          </Text>
         </View>
       </View>
       

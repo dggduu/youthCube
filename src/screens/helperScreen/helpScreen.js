@@ -76,7 +76,7 @@ const data = [
     content:[
       {
         Q: "联系方式",
-        A: "co-consult@mail.aoicube.dpdns.org，我们诚挚欢迎各类合作机会。",
+        A: "consult@mail.aoicube.dpdns.org，我们诚挚欢迎各类合作机会。",
       },      
     ]
   },
@@ -85,7 +85,7 @@ const data = [
     content: [
       {
         Q:"遇到bug如何处理",
-        A:"请附上详细截图和问题描述，发送至bug-tracker@mail.aoicube.dpdns.org，这将帮助我们更好地复现和解决问题。",
+        A:"请附上详细截图和问题描述，发送至consult@mail.aoicube.dpdns.org，这将帮助我们更好地复现和解决问题。",
       },
       {
         Q:"检查更新失败",

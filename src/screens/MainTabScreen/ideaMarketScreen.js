@@ -202,7 +202,7 @@ export default function IeaMarketScreen() {
       </View>
 
       {/* 轮播图 */}
-      <View className="flex-row justify-around mb-5">
+      {/* <View className="flex-row justify-around mb-5">
           <CarouselStart
             onItemPress={(url) =>
               navigate('RootIdea', { screen: 'webview', params: { url } })
@@ -216,7 +216,7 @@ export default function IeaMarketScreen() {
               })
             }
           />
-      </View>
+      </View> */}
 
       {/* 团队标题 */}
       <Text className="font-semibold text-xl text-gray-700 dark:text-gray-200">
