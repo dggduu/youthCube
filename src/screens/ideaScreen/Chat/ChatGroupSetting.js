@@ -749,7 +749,7 @@ const ChatGroupSetting = () => {
         ))}
       </View>
 
-      {/* 子团队部分 - 仅显示给父团队 */}
+      {/* 子团队部分，仅显示给父团队 */}
       {isParentTeam && teamData.subTeams && (
         <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-sm">
           <View className='flex-row mb-3 justify-between items-center'>
@@ -1021,7 +1021,6 @@ const ChatGroupSetting = () => {
               </TouchableOpacity>
             )}
             
-            {/* Add this new option for parent teams */}
             {isParentTeam && teamData.subTeams && teamData.subTeams.length > 0 && (
               <TouchableOpacity 
                 className="p-4 border-b border-gray-200 dark:border-gray-700"

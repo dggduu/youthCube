@@ -45,8 +45,6 @@ const MainChat = () => {
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [currentImageUri, setCurrentImageUri] = useState('');
   const { showToast } = useToast();
-
-  // State for image source selection modal
   const [isImagePickerModalVisible, setIsImagePickerModalVisible] = useState(false);
 
   const loadTopics = async () => {
@@ -139,7 +137,7 @@ const MainChat = () => {
           try {
             const filePath = Platform.OS == 'ios' ? selectedFile.url.replace('file://', '') : selectedFile.url;
             const base64Image = await RNFS.readFile(filePath, 'base64');
-            setSelectedFile(null); // 未开发
+            setSelectedFile(null); // 待定功能
           } catch {
             console.log("[onSend]函数: 无法加载document，请重重试！");
             setSelectedFile(null);

@@ -45,8 +45,6 @@ const HelpChat = () => {
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [currentImageUri, setCurrentImageUri] = useState('');
   const { showToast } = useToast();
-
-  // State for image source selection modal
   const [isImagePickerModalVisible, setIsImagePickerModalVisible] = useState(false);
 
   const loadTopics = async () => {

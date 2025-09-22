@@ -165,7 +165,7 @@ const InviteFriend = () => {
 
   return (
     <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      {/* 顶部卡片 - 小组信息 */}
+      {/* 顶部卡片*/}
       <View className="mx-4 mt-4 p-4 bg-white rounded-lg shadow-sm">
         <View className="flex-row items-center mb-2">
           <Text className="text-lg font-semibold text-gray-800">队伍信息</Text>

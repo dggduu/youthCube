@@ -12,7 +12,7 @@ const api = axios.create();
 setupAuthInterceptors(api);
 
 const ChatSection = () => {
-    const [teams, setTeams] = useState([]); // Will contain parent team + sub-teams
+    const [teams, setTeams] = useState([]);
     const [privateChats, setPrivateChats] = useState([]);
     const [allPrivateChats, setAllPrivateChats] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -348,7 +348,6 @@ const ChatSection = () => {
                 </View>
             )}
 
-            {/* Private Chats Section */}
             <View className="flex-1 px-4">
                 <View className="flex-row justify-between items-center mb-3">
                     <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">私聊列表</Text>

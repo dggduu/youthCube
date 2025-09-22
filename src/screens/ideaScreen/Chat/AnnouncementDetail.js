@@ -182,17 +182,17 @@ const AnnouncementDetail = () => {
     <View className="mb-4 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 flex-row items-start">
-          {/* 左侧：标题和作者信息 */}
+          {/* 左侧 */}
           <View className="flex-1">
             <View className="flex-row flex-wrap items-center min-h-[24px]">
-              {/* 标题：允许换行，占据主空间 */}
+              {/* 标题*/}
               <Text className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex-1 leading-tight">
                 {item.title}
               </Text>
 
-              {/* 置顶标签：放在同一行，但允许换行到下一行左侧 */}
+              {/* 置顶标签 */}
               {item.is_pinned && (
-                <View className="mt-1 self-start"> {/* 关键：用 mt-1 让它换行时出现在左下，避免中间空隙 */}
+                <View className="mt-1 self-start">
                   <View className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full flex-row items-center">
                     <Icon name="push-pin" size={14} color={colorScheme === 'dark' ? '#93C5FD' : '#3B82F6'} />
                     <Text className="text-xs text-blue-600 dark:text-blue-300 ml-1">置顶</Text>
@@ -268,7 +268,6 @@ const AnnouncementDetail = () => {
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-      {/* Content */}
       <FlatList
         className="px-4 pt-4"
         data={announcements}
@@ -290,7 +289,6 @@ const AnnouncementDetail = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      {/* Create Button */}
       {isAdmin && (
         <TouchableOpacity
           className="absolute bottom-6 right-6 w-14 h-14 bg-[#409eff] dark:bg-blue-600 rounded-full shadow-lg items-center justify-center"
@@ -300,7 +298,6 @@ const AnnouncementDetail = () => {
         </TouchableOpacity>
       )}
 
-      {/* Edit Modal */}
       <Modal
         visible={isEditing}
         animationType="slide"
@@ -350,7 +347,6 @@ const AnnouncementDetail = () => {
         </View>
       </Modal>
 
-      {/* Create Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"

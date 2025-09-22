@@ -236,7 +236,7 @@ const PersonChat = ( {chatId} ) => {
     }
   }, [user, accessToken, chatId]);
 
-  // 自定义气泡样式(敏感词警告)
+  // 自定义气泡样式
   const renderBubble = (props) => {
     const isSensitive = props.currentMessage.hasSensitiveWords;
 
