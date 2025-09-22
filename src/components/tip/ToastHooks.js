@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useRef } from 'react';
 import Toast from './Toast';
-import { Portal } from 'react-native-portalize';
+import { Portal } from 'react-native-portalize'; // 这个 potral 不知道为什么用不了，但是别删，不知道哪里会出问题
 const ToastContext = createContext(null);
 
 export const ToastProvider = ({ children }) => {

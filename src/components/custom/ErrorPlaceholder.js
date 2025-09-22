@@ -13,7 +13,7 @@ const ErrorPlaceholder = ({
   const isDark = colorScheme === 'dark';
 
   // 默认图标颜色
-  const defaultIconColor = iconColor || (isDark ? '#f87171' : '#ef4444'); // red-400
+  const defaultIconColor = iconColor || (isDark ? '#f87171' : '#ef4444');
 
   return (
     <View className="flex-1 justify-center items-center px-4 py-8">

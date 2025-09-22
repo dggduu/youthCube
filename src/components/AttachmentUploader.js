@@ -27,7 +27,7 @@ const AttachmentUploader = ({ AccessToken, fileUrl, setFileUrl }) => {
     bucketName: 'posts',
   };
 
-  const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150MB
+  const MAX_FILE_SIZE = 150 * 1024 * 1024; // 限制上传 150MB 以内的文件
 
   const handleFileUpload = async () => {
     try {

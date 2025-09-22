@@ -29,7 +29,6 @@ export const sanitizeFileName = (name, ext = 'pdf') => {
   // 只保留中英文+数字
   const cleanBaseName = rawBaseName.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
 
-  // 限制最长为40字符，太长可能会出错（MinIO路径限制）
   const truncatedName = cleanBaseName.slice(0, 10) || 'file';
 
   return `${truncatedName}.${extension}`;

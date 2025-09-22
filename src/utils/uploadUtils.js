@@ -10,17 +10,7 @@ setupAuthInterceptors(api);
 // 配置项
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024; // 默认5MB
 const DEFAULT_MAX_RETRIES = 3; // 默认重试3次
-/**
- * 分片上传主函数
- * @param {string} filePath - 文件路径
- * @param {object} config - 配置对象
- * @param {string} config.baseUrl - 基础URL
- * @param {string} config.authToken - 认证token
- * @param {string} config.bucketName - 存储桶名称
- * @param {number} [config.chunkSize] - 分片大小，默认5MB
- * @param {number} [config.maxRetries] - 最大重试次数，默认3
- * @returns {Promise<object>} - 返回上传结果
- */
+
 export const uploadFile = async (filePath, config) => {
   try {
     const {
@@ -108,7 +98,6 @@ const multipartUpload = async (filePath, fileName, fileSize, config) => {
       uploadedParts: [],
     };
 
-    // 2. Upload chunks
     const chunkCount = Math.ceil(fileSize / chunkSize);
     const chunkPromises = [];
 
@@ -313,7 +302,6 @@ const retryableRequest = async (request, maxRetries) => {
       lastError = error;
       console.warn(`Request attempt ${attempt + 1} failed:`, error.message);
       if (attempt < maxRetries - 1) {
-        // Exponential backoff
         await new Promise((resolve) =>
           setTimeout(resolve, 1000 * Math.pow(2, attempt))
         );

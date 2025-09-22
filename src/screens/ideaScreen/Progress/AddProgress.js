@@ -18,7 +18,6 @@ import axios from "axios";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 import MarkdownInput from "../../../components/MarkdownInput";
 import AttachmentUploader from "../../../components/AttachmentUploader";
-// 移除了 DateTimePicker 的导入
 
 const api = axios.create();
 setupAuthInterceptors(api);
@@ -30,24 +29,17 @@ const AddProgress = () => {
   const [teamId, setTeamId] = useState(0);
   const [authToken, setAuthToken] = useState(null);
   const [error, setError] = useState(null);
-
-  // Form state
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   // 初始化为当前时间
   const [eventTime, setEventTime] = useState(new Date()); 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Media attachment state
   const [mediaAttachment, setMediaAttachment] = useState(null);
   const [mediaType, setMediaType] = useState('');
-
-  // Markdown editor state
   const [showVditorModal, setShowVditorModal] = useState(false);
   const [vditorMarkdownContent, setVditorMarkdownContent] = useState('');
   const webViewRef = useRef(null);
 
-  // Load auth token and team ID
   useEffect(() => {
     const loadAuthToken = async () => {
       try {
@@ -114,8 +106,6 @@ const AddProgress = () => {
     setTitle('');
     setMediaAttachment(null);
     setMediaType('image');
-    // 重置时也可以选择是否重置 eventTime 为当前时间
-    // setEventTime(new Date());
   };
 
   const handleSubmissionError = (err) => {
@@ -190,7 +180,6 @@ const AddProgress = () => {
       <ScrollView className="flex-1 p-5">
         <Text className="text-2xl font-bold mb-5 text-gray-900 dark:text-white">创建进度报告</Text>
 
-        {/* Title Input */}
         <TextInput
           placeholder="标题 *"
           placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
@@ -200,26 +189,18 @@ const AddProgress = () => {
           className="border border-gray-300 dark:border-gray-600 p-3 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
 
-        {/* Markdown Input */}
         <MarkdownInput
           value={description}
           onChange={setDescription}
           placeholder="请输入进度内容..."
         />
 
-        {/* Attachment Uploader */}
         <AttachmentUploader 
           AccessToken={authToken}
           fileUrl={mediaAttachment}
           setFileUrl={setMediaAttachment}
         />
 
-        {/* 可以选择性地显示当前时间，但通常不需要，因为它是后台自动记录的
-        <View className="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-          <Text className="text-gray-700 dark:text-gray-300">事件时间: {eventTime.toLocaleString()}</Text>
-        </View> */}
-
-        {/* Submit Button */}
         <TouchableOpacity
           onPress={submitProgress}
           disabled={isSubmitting || !description.trim()}
@@ -237,7 +218,6 @@ const AddProgress = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Markdown Editor Modal */}
       <Modal
         visible={showVditorModal}
         animationType="slide"

@@ -35,11 +35,6 @@ axiosClient.interceptors.response.use(
   }
 );
 
-/**
- * 登录函数，通过邮箱和密码获取访问令牌和刷新令牌
- * @param {object} userAuthInfo - 包含 email 和 pswd 的用户认证信息
- * @returns {Promise<object | null>} 成功时返回包含 accessToken, refreshToken, user 数据的对象，失败时返回 null
- */
 export const getAccessTokenByLogin = async (loginData) => {
     try {
         console.log("test:",BASE_INFO.BASE_URL + 'api');
@@ -60,11 +55,6 @@ export const getAccessTokenByLogin = async (loginData) => {
     }
 };
 
-/**
- * 刷新访问令牌函数
- * @param {string} refreshToken - 用户当前的刷新令牌
- * @returns {Promise<string | null>} 成功时返回新的 accessToken，失败时返回 null
- */
 export const refreshAccessToken = async (refreshToken) => {
     try {
         const response = await axiosClient.post('/refresh_token', { refreshToken });

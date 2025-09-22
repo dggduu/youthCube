@@ -93,7 +93,7 @@ const MainSetting = () => {
         onPress={handlePressLogout}
       />
 
-      {/* 自定义登出确认弹窗 */}
+      {/* 登出确认弹窗 */}
       <CustomAlert
         visible={alertVisible}
         title="登出"

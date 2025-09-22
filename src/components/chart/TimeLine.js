@@ -12,7 +12,7 @@ import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 const api = axios.create();
 setupAuthInterceptors(api);
 // 类型颜色
-// 根据类型返回颜色（深色/浅色模式适配）
+// 根据类型返回颜色
 const getColorByType = (type, isDark) => {
   switch (type) {
     case 'meeting':     // 会议
@@ -28,7 +28,7 @@ const getColorByType = (type, isDark) => {
   }
 };
 
-// 状态颜色（不区分深色模式）
+// 状态颜色
 const getColorByStatus = (status) => {
   switch (status) {
     case 'accept':  // 已通过
@@ -56,7 +56,7 @@ const getTypeClasses = (type) => {
   }
 };
 
-// 状态颜色（使用 tailwind 类名）
+// 状态颜色
 const getStatusColorClass = (status) => {
   switch (status) {
     case 'accept':

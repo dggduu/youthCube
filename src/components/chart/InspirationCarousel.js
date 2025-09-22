@@ -41,11 +41,10 @@ const InspirationCarousel = ({ onMenuPress }) => {
     keepPreviousData: true,
   });
 
-  // Calculate dimensions based on screen aspect ratio
   const isSquareScreen = screenWidth / screenHeight > 0.9 && screenWidth / screenHeight < 1.1;
   const containerWidth = isSquareScreen ? screenWidth * 0.45 : (screenWidth / 2) - 25;
-  const containerHeight = containerWidth; // Make it square
-  const itemHeight = (containerHeight - 60) / ITEMS_PER_PAGE; // Subtract header height and divide by items count
+  const containerHeight = containerWidth;
+  const itemHeight = (containerHeight - 60) / ITEMS_PER_PAGE;
 
   useEffect(() => {
     if (data?.items?.length > 0) {
@@ -160,7 +159,6 @@ const InspirationCarousel = ({ onMenuPress }) => {
         ))}
       </View>
 
-      {/* Moral Modal */}
       <Modal
         animationType="fade"
         transparent={true}

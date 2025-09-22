@@ -9,10 +9,6 @@ const apiClient = axios.create({
   },
 });
 
-/**
- * 发送验证码
- * @param {string} email 邮箱
- */
 export const sendVerificationCode = async (email) => {
   try {
     console.log("ewhdu");
@@ -26,21 +22,10 @@ export const sendVerificationCode = async (email) => {
   }
 };
 
-/**
- * 注册新用户
- * @param {Object} userData 用户数据
- * @param {string} userData.name 姓名
- * @param {string} userData.date 出生日期
- * @param {string} userData.learnStage 学年
- * @param {string} userData.email 邮箱
- * @param {string} userData.code 验证码
- * @param {string} userData.pswd 密码
- * @param {string} [userData.sex] 性别（男、女、不想说）
- */
 export const registerUser = async (userData) => {
   const { name, date, learnStage, email, code, pswd, sex } = userData;
 
-  // 使用默认头像
+  // 使用默认头像（没有自定义头像功能）
   const defaultGravasterUrl = ''
   const payload = {
     name,

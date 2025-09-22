@@ -6,7 +6,7 @@ import { useColorScheme } from 'nativewind';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
-import CustomAlert from '../components/custom/CustomAlert'; // ✅ 引入 CustomAlert
+import CustomAlert from '../components/custom/CustomAlert';
 
 const FileUploader = ({ AccessToken }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -14,7 +14,6 @@ const FileUploader = ({ AccessToken }) => {
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  // ✅ 新增：控制 CustomAlert 的状态
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -112,7 +111,7 @@ const FileUploader = ({ AccessToken }) => {
       },
       {
         text: '删除',
-        style: 'destructive', // 红色按钮
+        style: 'destructive',
         onPress: () => {
           setAlertVisible(false);
           setUploadedFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToDelete));

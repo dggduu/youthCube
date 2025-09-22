@@ -1,11 +1,6 @@
 // async Storage 函数封装
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/**
- * 从 AsyncStorage 获取数据
- * @param {string} key 要获取数据的键
- * @returns {Promise<any | null>} 键对应的值
- */
 export const getItemFromAsyncStorage = async (key) => {
     try {
         const jsonValue = await AsyncStorage.getItem(key);
@@ -16,12 +11,6 @@ export const getItemFromAsyncStorage = async (key) => {
     }
 };
 
-/**
- * 将数据保存到 AsyncStorage
- * @param {string} key 要保存数据的键
- * @param {any} value 要保存的值(stringfy处理)
- * @returns {Promise<void>}
- */
 export const setItemToAsyncStorage = async (key, value) => {
     try {
         const jsonValue = JSON.stringify(value);
@@ -32,11 +21,6 @@ export const setItemToAsyncStorage = async (key, value) => {
     }
 };
 
-/**
- * 从 AsyncStorage 删除数据
- * @param {string} key 要删除数据的键
- * @returns {Promise<void>}
- */
 export const removeItemFromAsyncStorage = async (key) => {
     try {
         await AsyncStorage.removeItem(key);
@@ -45,10 +29,6 @@ export const removeItemFromAsyncStorage = async (key) => {
     }
 };
 
-/**
- * 清除 AsyncStorage 中的所有数据
- * @returns {Promise<void>}
- */
 export const clearAllAsyncStorage = async () => {
     try {
         await AsyncStorage.clear();

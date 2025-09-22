@@ -201,7 +201,7 @@ export default function IeaMarketScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 轮播图 */}
+      {/* 轮播图（招不到负责这块的人，目前先不用） */}
       {/* <View className="flex-row justify-around mb-5">
           <CarouselStart
             onItemPress={(url) =>

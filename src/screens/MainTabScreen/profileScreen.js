@@ -98,7 +98,6 @@ export default function ProfileScreen() {
     <SafeAreaProvider>
       <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
         <View className="px-6 pt-4 pb-8">
-          {/* --- 用户信息卡片 --- */}
           <View
             className={`py-8 px-4 rounded-2xl mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}
             style={{
@@ -136,10 +135,8 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* --- 我的学习模块 --- */}
           {renderSection('我的学习', learningItems)}
           
-          {/* --- 设置和其他选项 --- */}
           {renderSection('其他', otherItems)}
         </View>
       </ScrollView>

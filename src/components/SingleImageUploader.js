@@ -22,7 +22,7 @@ const SingleImageUploader = ({ AccessToken, imgUrl, setImgUrl }) => {
     bucketName: 'posts',
   };
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 限制10MB的图片
 
   const handleImageUpload = async () => {
     const options = {

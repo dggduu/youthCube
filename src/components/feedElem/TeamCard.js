@@ -53,7 +53,7 @@ const TeamCard = ({ title, tags, onPress, img_url, grade }) => {
             {title}
           </Text>
 
-          {/* 标签行 - 修改后的部分 */}
+          {/* 标签行 */}
           <View className="flex-row flex-wrap items-center mb-1">
             {tags?.slice(0, 3).map((tag) => (
               <TouchableOpacity

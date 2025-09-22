@@ -83,7 +83,6 @@ const CustomPicker = ({
         </View>
       </Pressable>
 
-      {/* Modal*/}
       <Modal
         animationType="none"
         transparent

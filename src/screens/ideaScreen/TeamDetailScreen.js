@@ -218,7 +218,6 @@ const TeamDetailScreen = () => {
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      {/* Main Team Card */}
       <View className="m-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
         <View className="p-5">
           {teamData?.img_url && (
@@ -334,7 +333,6 @@ const TeamDetailScreen = () => {
         </View>
       </View>
 
-      {/* Members Card */}
       <View className="mx-4 mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
         <View className="p-5">
           <View className="flex-row items-center mb-3">
@@ -383,7 +381,6 @@ const TeamDetailScreen = () => {
         </View>
       </View>
 
-      {/* Articles Card */}
       {articlesLoading ? (
         <View className="mx-4 my-6 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 items-center">
           <ActivityIndicator size="small" color="#3b82f6" />
@@ -429,7 +426,6 @@ const TeamDetailScreen = () => {
         </View>
       )}
 
-      {/* Apply Modal */}
       <Modal
         visible={showApplyModal}
         animationType="fade"

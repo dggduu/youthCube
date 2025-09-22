@@ -289,7 +289,6 @@ const ChatSection = () => {
 
     return (
         <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-            {/* Header Buttons */}
             <View className="flex-row p-4 space-x-3">
                 <TouchableOpacity
                     className="flex-1 items-center justify-center p-3 rounded-l-lg 
@@ -317,7 +316,6 @@ const ChatSection = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* Team Chat Section */}
             {teams.length > 0 ? (
                 <View className="px-4 mb-4">
                     <Text className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">团队聊天</Text>

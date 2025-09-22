@@ -13,11 +13,10 @@ import { useColorScheme } from 'nativewind';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
-    const { colorScheme } = useColorScheme(); // 获取当前主题
+    const { colorScheme } = useColorScheme(); // 主题的通信有问题
     const [showModal, setShowModal] = useState(false);
     const webViewRef = useRef(null);
 
-    // 向 WebView 发送初始内容和主题
     const injectInitialContentAndTheme = useCallback(() => {
         const script = `
             (function() {

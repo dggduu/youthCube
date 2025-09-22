@@ -174,8 +174,6 @@ const MessageScreen = ({ navigation }) => {
         onEndReachedThreshold={0.3}
         ListHeaderComponent={
           <View className="px-4 mt-2">
-
-            {/* --- 用户名片 --- */}
               <View className={`bg-white dark:bg-gray-800 p-6 rounded-t-2xl`}>
                 <View className="flex-row items-center mb-4">
                   <Image
@@ -221,7 +219,6 @@ const MessageScreen = ({ navigation }) => {
                 </View>
               </View>
             
-            {/* --- 个人简介卡片 --- */}
             {currentUser.bio && (
                 <View className={`bg-white dark:bg-gray-800 p-6 rounded-b-2xl`}>
                   <View className="flex-row items-center">
@@ -239,7 +236,7 @@ const MessageScreen = ({ navigation }) => {
                   </Text>
                 </View>
             )}
-            {/* --- 队伍信息卡片 --- */}
+
             {currentUser.team_id && (
                 <View className={`bg-white dark:bg-gray-800 p-6 rounded-2xl mt-3 `}>
                   <View className="flex-row items-center mb-3">

@@ -374,7 +374,6 @@ const ProgressAdmin = () => {
             </TouchableOpacity>
           </View>
           <ScrollView className="flex-1">
-            {/* Title*/}
             <TextInput
               placeholder="标题 *"
               style={{height:50}}
@@ -391,15 +390,13 @@ const ProgressAdmin = () => {
               onChange={setDescription}
               placeholder="请输入进度内容..."
             />
-            
-            {/* Attachment Upload */}
+
             <AttachmentUploader 
               AccessToken={accessToken}
               fileUrl={mediaUrl}
               setFileUrl={handleFileUpload}
             />
 
-            {/* Event Time */}
             <View className="mb-5">
               <Text className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 事件时间
@@ -426,7 +423,6 @@ const ProgressAdmin = () => {
               )}
             </View>
 
-            {/* Submit Button */}
             <TouchableOpacity
               onPress={submitProgress}
               disabled={isSubmitting || !title.trim() || !description.trim()}

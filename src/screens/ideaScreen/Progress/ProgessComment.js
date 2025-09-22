@@ -376,7 +376,7 @@ const ProgressComment = () => {
         overflow: 'hidden',
         magrin: 10,
       },
-      fence: { // 特定于 fenced code blocks 的样式
+      fence: {
         backgroundColor: isDark ? '#2E2E2E' : '#F9F9F9',
         magrin: 10,
       },
