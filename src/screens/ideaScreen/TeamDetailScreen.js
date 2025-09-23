@@ -230,7 +230,7 @@ const TeamDetailScreen = () => {
             </View>
           )}
           
-          <View className="flex-row justify-between items-start mb-4">
+          <View className="flex-row justify-between items-center mb-4">
             <View className="flex-1 mr-3">
               <Text 
                 className="text-2xl font-bold text-gray-800 dark:text-white mb-2" 
@@ -239,12 +239,12 @@ const TeamDetailScreen = () => {
               >
                 {teamData.team_name}
               </Text>
-              <View className="flex-row items-center">
+              {/* <View className="flex-row items-center">
                 <MaterialIcons name="date-range" size={16} color="#6b7280" />
                 <Text className="ml-1 text-sm text-gray-500 dark:text-gray-400">
                   创建于 {new Date(teamData.create_at).toLocaleDateString()}
                 </Text>
-              </View>
+              </View> */}
             </View>
             
             <View className="flex-col">

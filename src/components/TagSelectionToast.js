@@ -51,6 +51,7 @@ const TagSelectionToast = ({
       const { items, totalPages } = response.data;
       setAvailableTags(items || []);
       setTotalPages(totalPages || 1);
+      console.log(items);
     } catch (error) {
       console.error('获取标签失败:', error);
       setAvailableTags([]);

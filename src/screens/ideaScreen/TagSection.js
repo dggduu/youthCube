@@ -75,6 +75,7 @@ const TagSection = () => {
       const url = `${BASE_INFO.BASE_URL}api/tags/${tagId}/teams?page=${pageNum}&size=20`;
       const response = await api.get(url);
       const result = response.data;
+      console.log(result);
 
       setTotalPages(result.totalPages);
 
@@ -192,9 +193,9 @@ const TagSection = () => {
         </View>
       </View>
       <View className="flex-row justify-between items-center mt-2">
-        <Text className="text-xs text-gray-500 dark:text-gray-400">
+        {/* <Text className="text-xs text-gray-500 dark:text-gray-400">
           创建于 {new Date(item.create_at).toLocaleDateString()}
-        </Text>
+        </Text> */}
         <Text className="text-xs text-gray-500 dark:text-gray-400">
           推荐加入等级：{GRADES.find(grade => grade.value ===item.grade)?.label || '未知'}
         </Text>

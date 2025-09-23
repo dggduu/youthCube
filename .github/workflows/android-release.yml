@@ -3,7 +3,7 @@ name: Build Android Release & Create GitHub Release
 on:
   push:
     tags:
-      - 'v*' # 触发条件：推送以 'v' 开头的 tag
+      - 'v*' # 例如 v1.0.0
 
 jobs:
   build-android-release:
@@ -33,7 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install dependencies using yarn
+      - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           yarn install
@@ -50,23 +50,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Extract version and update build.gradle
+      - name: Extract version from tag and update build.gradle
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
-          echo "Tag name: $TAG_NAME"
+          echo "🏷️ Tag name: $TAG_NAME"
 
           VERSION_NAME="${TAG_NAME#v}"
-          echo "Version name: $VERSION_NAME"
+          echo "🔖 Version name: $VERSION_NAME"
 
+          # 使用 GitHub Run Number 作为 versionCode
           VERSION_CODE=${{ github.run_number }}
-          echo "Version code: $VERSION_CODE"
+          echo "🔢 Version code: $VERSION_CODE"
+
+          # 写入环境变量供后续步骤使用
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
           cd android || exit 1
 
+          # 更新 versionName 和 versionCode
           sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
 
-          echo "更新 build.gradle 成功: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
+          echo "✅ Updated app/build.gradle: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
+          git diff app/build.gradle
 
       - name: Generate JS Bundle for Android
         run: |
@@ -81,11 +88,12 @@ jobs:
         run: |
           cd android && chmod +x gradlew
 
-      - name: Build Android Release (Split APKs)
+      - name: Build Android Release (Split + Universal APK)
         run: |
-          cd android && ./gradlew assembleRelease --no-daemon
+          cd android
+          ./gradlew assembleRelease --no-daemon
 
-      - name: Sign all APKs
+      - name: Sign APKs
         uses: r0adkll/sign-android-release@v1
         id: sign_apks
         with:
@@ -95,36 +103,63 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
-          BUILD_TOOLS_VERSION: "34.0.0"
+          BUILD_TOOLS_VERSION: "35.0.0"  # 必须与 build.gradle 一致
 
-      - name: Copy Signed APKs to Unified Directory
+      - name: Debug - List signed APKs
+        run: |
+          echo "📄 Signed APKs produced:"
+          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}" || echo "(none)"
+
+      - name: Copy Universal APK to release directory
         run: |
           mkdir -p release-apks
-          echo "Copying signed APKs..."
-          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}" | while read file; do
+
+          SIGNED_FILES="${{ steps.sign_apks.outputs.signedReleaseFiles }}"
+          if [ -z "$SIGNED_FILES" ]; then
+            echo "❌ Error: No signed APK files were produced."
+            exit 1
+          fi
+
+          FOUND_UNIVERSAL=false
+          echo "$SIGNED_FILES" | while IFS= read -r file; do
             if [ -n "$file" ] && [ -f "$file" ]; then
-              cp "$file" release-apks/
-              echo "Copied: $(basename "$file")"
+              if [[ "$file" == *universal* ]]; then
+                cp "$file" release-apks/
+                echo "✅ Copied universal APK: $(basename "$file")"
+                FOUND_UNIVERSAL=true
+              fi
+            else
+              echo "❌ File not found: $file"
             fi
           done
 
-      - name: Upload Signed APKs as artifact
+          if [ "$FOUND_UNIVERSAL" = "false" ]; then
+            echo "❌ No universal APK found! Available files:"
+            echo "$SIGNED_FILES"
+            exit 1
+          fi
+
+      - name: Upload Signed APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-apks
+          name: android-release-apk
           path: release-apks/
           if-no-files-found: error
 
-      - name: Create GitHub Release and Upload All APKs
+      - name: Create GitHub Release and Upload Universal APK
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
-            Release ${{ github.ref_name }}
-            This release includes:
-            - Split APKs for armeabi-v7a, arm64-v8a, and x86_64.
-            - A universal APK containing all architectures.
+            🎉 Release ${{ github.ref_name }} is live!
+
+            ✅ Built from tag: ${{ github.ref_name }}
+            📦 Includes universal APK with support for armeabi-v7a, arm64-v8a, and x86_64.
+            🔐 Signed with production keystore.
           files: release-apks/*
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}

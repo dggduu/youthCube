@@ -351,18 +351,18 @@ const PersonalProfile = () => {
                 <Text className="text-sm text-gray-500 dark:text-gray-400">用户ID</Text>
                 <Text className="text-sm text-gray-800 dark:text-gray-200 font-medium">{currentUser.id}</Text>
               </View>
-              <View className="flex-row justify-between items-center py-2">
+              {/* <View className="flex-row justify-between items-center py-2">
                 <Text className="text-sm text-gray-500 dark:text-gray-400">联系邮箱</Text>
                 <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.email || '未设置'}</Text>
-              </View>
+              </View> */}
               <View className="flex-row justify-between items-center py-2">
                 <Text className="text-sm text-gray-500 dark:text-gray-400">性别</Text>
                 <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.sex || '未设置'}</Text>
               </View>
-              <View className="flex-row justify-between items-center py-2">
+              {/* <View className="flex-row justify-between items-center py-2">
                 <Text className="text-sm text-gray-500 dark:text-gray-400">出生日期</Text>
                 <Text className="text-sm text-gray-800 dark:text-gray-200">{currentUser.birth_date || '未设置'}</Text>
-              </View>
+              </View> */}
               <View className="flex-row justify-between items-center py-2">
                 <Text className="text-sm text-gray-500 dark:text-gray-400">学习阶段</Text>
                 <Text className="text-sm text-gray-800 dark:text-gray-200">{getLearnStageLabel(currentUser.learn_stage)}</Text>
