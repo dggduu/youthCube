@@ -22,33 +22,11 @@ jobs:
       - name: Install yarn
         run: npm install -g yarn
 
-      - name: Cache Yarn & Node Modules
-        uses: actions/cache@v3
-        id: cache-node-modules
-        with:
-          path: |
-            ~/.cache/yarn
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           yarn install
           yarn add lightningcss-linux-x64-gnu
-
-      - name: Cache Gradle
-        uses: actions/cache@v3
-        id: cache-gradle
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Extract version from tag and update build.gradle
         run: |
@@ -128,7 +106,7 @@ jobs:
             🎉 Release ${{ github.ref_name }} is live!
             ✅ Built from tag: ${{ github.ref_name }}
             📦 Includes:
-            - ABI-specific APKs (armeabi-v7a, arm64-v8a, x86_64)
+            - ABI-specific APKs (armeabi-v7a, arm66-v8a, x86_64)
             - Universal APK (supports all architectures)
             🔐 Signed with production keystore.
           files: |
