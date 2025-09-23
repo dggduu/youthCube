@@ -97,16 +97,23 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      - name: List signed APKs
+      - name: Copy Signed APKs to Unified Directory
         run: |
-          echo "Signed APKs found:"
-          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}"
+          mkdir -p release-apks
+          echo "Copying signed APKs..."
+          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}" | while read file; do
+            if [ -n "$file" ] && [ -f "$file" ]; then
+              cp "$file" release-apks/
+              echo "Copied: $(basename "$file")"
+            fi
+          done
 
       - name: Upload Signed APKs as artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-release-apks
-          path: ${{ steps.sign_apks.outputs.signedReleaseFiles }}
+          path: release-apks/
+          if-no-files-found: error
 
       - name: Create GitHub Release and Upload All APKs
         uses: softprops/action-gh-release@v1
@@ -115,11 +122,9 @@ jobs:
           tag_name: ${{ github.ref_name }}
           body: |
             Release ${{ github.ref_name }}
-
             This release includes:
             - Split APKs for armeabi-v7a, arm64-v8a, and x86_64.
             - A universal APK containing all architectures.
-          files: |
-            ${{ steps.sign_apks.outputs.signedReleaseFiles }}
+          files: release-apks/*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}

@@ -219,7 +219,7 @@ export default function IeaMarketScreen() {
       </View> */}
 
       {/* 团队标题 */}
-      <Text className="font-semibold text-xl text-gray-700 dark:text-gray-200">
+      <Text className="font-semibold text-xl text-gray-700 dark:text-gray-200 mt-4">
         推荐团队
       </Text>
     </View>

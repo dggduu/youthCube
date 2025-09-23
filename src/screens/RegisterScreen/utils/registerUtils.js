@@ -12,10 +12,12 @@ const apiClient = axios.create({
 export const sendVerificationCode = async (email) => {
   try {
     console.log("ewhdu");
-    const response = await apiClient.post('/api/send-verification-code', {
-      email,
-    });
-    
+    // const response = await apiClient.post('/api/send-verification-code', {
+    //   email,
+    // });
+    const response = {
+      message: "邮件功能无法使用"
+    };
     return { success: true, message: response.data.message };
   } catch (error) {
     return { success: false, error: "服务运行不正常" };

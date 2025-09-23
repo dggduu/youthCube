@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TextInput,
   useColorScheme,
   Pressable,
 } from 'react-native';
@@ -14,7 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import InputBox from '../../components/inputBox/inputBox';
 import BackIcon from '../../components/backIcon/backIcon';
-import { registerUser, sendVerificationCode } from '../RegisterScreen/utils/registerUtils';
+import { registerUser } from '../RegisterScreen/utils/registerUtils';
 import { GRADES } from '../../constant/index';
 import { useToast } from '../../components/tip/ToastHooks';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -26,7 +25,7 @@ const isValidPassword = (password) => {
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
-  const isLongEnough = password.length >= 8; // 增加长度验证
+  const isLongEnough = password.length >= 8;
 
   return {
     valid: hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLongEnough,
@@ -87,10 +86,8 @@ export default function InputProfile({ route }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [grade, setGrade] = useState('');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [countdown, setCountdown] = useState(0);
   const [passwordMatchError, setPasswordMatchError] = useState('');
   const [formError, setFormError] = useState('');
   const colorScheme = useColorScheme();
@@ -98,7 +95,6 @@ export default function InputProfile({ route }) {
   const { showToast } = useToast();
 
   useEffect(() => {
-    // 根据需要重置状态
     setGrade('');
     setName('');
     setEmail('');
@@ -108,59 +104,18 @@ export default function InputProfile({ route }) {
     setPasswordMatchError('');
   }, [useType]);
 
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || birthday;
     setShowDatePicker(Platform.OS === 'ios');
     setBirthday(currentDate);
   };
 
-  useEffect(() => {
-    let timer;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [countdown]);
-
-  const handleSendCode = async () => {
-    if (countdown > 0) return;
-
-    if (!email.trim()) {
-      showToast('请输入邮箱', 'error');
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      showToast('邮箱格式不正确', 'error');
-      return;
-    }
-
-    try {
-      showToast('正在发送验证码...', 'info');
-      const result = await sendVerificationCode(email);
-      if (result.success) {
-        showToast('验证码已发送', 'success');
-        setCountdown(60);
-      } else {
-        showToast(result.error || '邮件发送失败', 'error');
-      }
-    } catch (error) {
-      showToast('网络错误，请稍后重试', 'error');
-    }
-  };
-
   const onSubmit = async () => {
     setFormError('');
     setPasswordMatchError('');
 
-    if (!name.trim() || !grade || !email.trim() || !code.trim() || !password.trim() || !gender.trim()) {
+    console.log(name);
+    if (!name.trim() || !grade || !email.trim() || !password.trim() || !gender.trim()) {
       showToast('请填写完整信息', 'error');
       return;
     }
@@ -182,7 +137,6 @@ export default function InputProfile({ route }) {
       date,
       learnStage: grade,
       email,
-      code,
       pswd: password,
       sex: gender === 'male' ? '男' : gender === 'female' ? '女' : '不想说',
     };
@@ -200,7 +154,7 @@ export default function InputProfile({ route }) {
       showToast('网络错误，请稍后重试', 'error');
     }
   };
-  
+
   useEffect(() => {
     if (confirmPassword && password !== confirmPassword) {
       setPasswordMatchError('两次输入的密码不一致');
@@ -254,45 +208,34 @@ export default function InputProfile({ route }) {
             <CustomPicker label="学年" options={GRADES} selectedValue={grade} onValueChange={setGrade} placeholder="请选择学年" />
           </View>
 
-          <InputBox label="邮箱" placeholder="请输入邮箱" value={email} onChangeText={setEmail} keyboardType="email-address" leftIconName="email" />
-          
-          <InputBox
-            label="验证码"
-            placeholder="请输入验证码"
-            value={code}
-            onChangeText={setCode}
-            keyboardType="numeric"
-            leftIconName="mark-email-read"
-            rightButton={
-              <Pressable
-                onPress={handleSendCode}
-                disabled={!isValidEmail(email) || countdown > 0}
-                style={{height:55}}
-                className={`px-8 rounded-lg justify-center items-center ${
-                  !isValidEmail(email) || countdown > 0
-                    ? 'bg-gray-300 dark:bg-gray-700'
-                    : 'bg-[#409eff]'
-                }`}
-              >
-                <Text
-                  className={`text-base font-medium ${
-                    !isValidEmail(email) || countdown > 0
-                      ? 'text-gray-600 dark:text-gray-400'
-                      : 'text-white'
-                  }`}
-                >
-                  {countdown > 0 ? `${countdown}s` : '获取'}
-                </Text>
-              </Pressable>
-            }
+          {/* 联系邮箱 */}
+          <InputBox 
+            label="联系邮箱" 
+            placeholder="请输入邮箱" 
+            value={email} 
+            onChangeText={setEmail} 
+            keyboardType="email-address" 
+            leftIconName="email" 
           />
+          
+          <InputBox 
+            label="密码" 
+            placeholder="请输入密码" 
+            value={password} 
+            onChangeText={setPassword} 
+            secureTextEntry 
+            leftIconName="lock" 
+          />
+          {password && <PasswordStrengthIndicator password={password} />}
 
-          <InputBox label="密码" placeholder="请输入密码" value={password} onChangeText={setPassword} secureTextEntry leftIconName="lock" />
-          {password && 
-            <PasswordStrengthIndicator password={password} />
-          }
-
-          <InputBox label="确认密码" placeholder="请再次输入密码" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry leftIconName="lock" />
+          <InputBox 
+            label="确认密码" 
+            placeholder="请再次输入密码" 
+            value={confirmPassword} 
+            onChangeText={setConfirmPassword} 
+            secureTextEntry 
+            leftIconName="lock" 
+          />
           {passwordMatchError ? (
             <Text className="text-[#f56c6c] text-xs ml-2">•{passwordMatchError}</Text>
           ) : null}
@@ -301,17 +244,21 @@ export default function InputProfile({ route }) {
             onPress={onSubmit}
             disabled={!isValidPassword(password).valid || password !== confirmPassword}
             className={`py-4 rounded-lg items-center justify-center mt-8 ${
-              isValidPassword(password).valid && password === confirmPassword ? 'bg-[#409eff]' : 'bg-gray-400 dark:bg-gray-700'
+              isValidPassword(password).valid && password === confirmPassword 
+                ? 'bg-[#409eff]' 
+                : 'bg-gray-400 dark:bg-gray-700'
             }`}
           >
             <Text className="text-white dark:text-gray-300 font-semibold text-lg">完成注册</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('helpSolvor')} className="mt-6 self-center">
-            <Text className={`font-semibold ${isDarkMode ? 'text-[#409eff]' : 'text-[#409eff]'}`}>有问题？联系工作人员</Text>
+            <Text className={`font-semibold text-[#409eff]`}>有问题？联系工作人员</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
+

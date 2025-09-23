@@ -134,14 +134,14 @@ const LoginPage = ({ navigation }) => {
               没有账号？去注册
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigation.navigate('FindPswd')}
             className="items-center mt-4"
           >
             <Text className={`${isDark ? 'text-[#409eff]' : 'text-[#409eff]'}`}>
               忘记密码？
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

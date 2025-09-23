@@ -1,10 +1,10 @@
 export const BASE_INFO={
     chat:{
-        url: 'http://10.0.2.15:1234',
+        url: 'http://10.0.2.2:1234',
         model: 'qwen2-vl-2b-instruct',
     },
-    BASE_URL: 'http://10.0.2.2:3166/v1/',
-    BASE_SOCKET_URL: 'http://10.0.2.2:3166',
+    BASE_URL: 'http://aoicube.dpdns.org:3166/v1/',
+    BASE_SOCKET_URL: 'wss://aoicube.dpdns.org:3166',
     fakeUser: {
         id: '8',
         email: 'dev@example.com',
@@ -19,3 +19,6 @@ export const BASE_INFO={
         isSkipRegisterVerify: false,
     },
 };
+
+    // BASE_URL: 'http://aoicube.dpdns.org:3166/v1/',
+    // BASE_SOCKET_URL: 'wss://aoicube.dpdns.org:3166',
