@@ -174,7 +174,7 @@ const LearningHomeScreen = () => {
   };
 
   const renderHeader = () => (
-    <View>
+    <View className='bg-white dark:bg-gray-800'>
       <Text 
         className='text-4xl mt-10 ml-4 mb-1 text-black dark:text-gray-200'
         style={{ fontFamily: "NotoSerifSC" }}
@@ -211,7 +211,7 @@ const LearningHomeScreen = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <FlatList
         ref={flatListRef}
         data={data}

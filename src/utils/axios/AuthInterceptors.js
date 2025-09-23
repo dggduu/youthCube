@@ -1,9 +1,10 @@
-import axios from "axios";
-import { refreshAccessToken } from "../LoginUtil";
+import axios from 'axios';
+import { setupCache } from 'axios-cache-interceptor';
+import { refreshAccessToken } from '../LoginUtil';
 import {
   getItemFromAsyncStorage,
   setItemToAsyncStorage,
-} from "../LocalStorage";
+} from '../LocalStorage';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -20,8 +21,14 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-export default function setupAuthInterceptors(instance) {
-  instance.interceptors.request.use(
+export default function etupAuthInterceptors(instance, cacheOptions = {}) {
+
+  const cachedInstance = setupCache(instance, {
+    ttl: 5 * 60 * 1000,
+    ...cacheOptions,
+  });
+
+  cachedInstance.interceptors.request.use(
     async (config) => {
       const token = await getItemFromAsyncStorage("accessToken");
       if (token) {
@@ -34,7 +41,7 @@ export default function setupAuthInterceptors(instance) {
     }
   );
 
-  instance.interceptors.response.use(
+  cachedInstance.interceptors.response.use(
     (response) => {
       return response;
     },
@@ -52,7 +59,7 @@ export default function setupAuthInterceptors(instance) {
           })
             .then((token) => {
               originalRequest.headers["Authorization"] = `Bearer ${token}`;
-              return instance(originalRequest);
+              return cachedInstance(originalRequest);
             })
             .catch((err) => {
               return Promise.reject(err);
@@ -71,7 +78,7 @@ export default function setupAuthInterceptors(instance) {
           originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
           originalRequest._retry = true;
 
-          const retryResponse = await instance(originalRequest);
+          const retryResponse = await cachedInstance(originalRequest);
 
           processQueue(null, accessToken);
 
@@ -88,4 +95,5 @@ export default function setupAuthInterceptors(instance) {
       return Promise.reject(error);
     }
   );
+  return cachedInstance;
 }
