@@ -3,7 +3,7 @@ name: Build Android Release & Create GitHub Release
 on:
   push:
     tags:
-      - 'v*' # e.g., v1.0.0
+      - 'v*' # 例如 v1.0.0
 
 jobs:
   build-android-release:
@@ -53,27 +53,13 @@ jobs:
       - name: Extract version from tag and update build.gradle
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
-          echo "🏷️ Tag name: $TAG_NAME"
-
           VERSION_NAME="${TAG_NAME#v}"
-          echo "🔖 Version name: $VERSION_NAME"
-
-          # Use GitHub Run Number as versionCode
           VERSION_CODE=${{ github.run_number }}
-          echo "🔢 Version code: $VERSION_CODE"
-
-          # Write environment variables for subsequent steps
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-
           cd android || exit 1
-
-          # Update versionName and versionCode
           sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
-
-          echo "✅ Updated app/build.gradle: versionName=$VERSION_NAME, versionCode=$VERSION_CODE"
-          git diff app/build.gradle
 
       - name: Generate JS Bundle for Android
         run: |
@@ -88,80 +74,68 @@ jobs:
         run: |
           cd android && chmod +x gradlew
 
-      - name: Build Android Release (Split + Universal APK)
+      - name: Build Android Release (Split APKs + Universal)
         run: |
           cd android
           ./gradlew assembleRelease --no-daemon
 
-      - name: Sign and Align APKs
-        # Replace the problematic action with a manual script
+      - name: Sign APKs
+        uses: r0adkll/sign-android-release@v1
+        id: sign_apks
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "35.0.0"
+
+      - name: Debug - List all signed APKs
         run: |
-          cd android/app/build/outputs/apk/release/
+          echo "📄 All signed APKs:"
+          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}" | tr ':' '\n'
 
-          # Loop through all unsigned APKs
-          for file in ./*-unsigned.apk; do
-            if [ -f "$file" ]; then
-              echo "🔑 Signing $file..."
-              
-              # Sign the APK
-              /usr/bin/jarsigner -verbose \
-                -sigalg SHA1withRSA -digestalg SHA1 \
-                -keystore /home/runner/keystore.jks \
-                -storepass ${{ secrets.KEY_STORE_PASSWORD }} \
-                "$file" \
-                "${{ secrets.ALIAS }}"
+      - name: Split signed APKs list
+        uses: jungwinter/split@v1
+        id: split_apks
+        with:
+          msg: ${{ steps.sign_apks.outputs.signedReleaseFiles }}
+          separator: ':'
 
-              # Generate the name for the signed APK
-              SIGNED_FILE_NAME=$(basename "$file" "-unsigned.apk")-signed.apk
-              
-              # Align the signed APK
-              echo "📐 Zipaligning $SIGNED_FILE_NAME..."
-              /usr/local/lib/android/sdk/build-tools/35.0.0/zipalign -v -p 4 \
-                "$file" "$SIGNED_FILE_NAME"
-              
-              # Clean up unsigned file
-              rm "$file"
-            fi
-          done
-
-      - name: Copy Universal APK to release directory
-        run: |
-          mkdir -p release-apks
-          
-          # Manually find the signed universal APK
-          # Use a more reliable search pattern like 'app-universal-release-signed.apk'
-          SIGNED_UNIVERSAL_APK=$(find android/app/build/outputs/apk/release/ -type f -name "*universal*signed.apk")
-
-          if [ -z "$SIGNED_UNIVERSAL_APK" ]; then
-            echo "❌ No universal APK found! Available files:"
-            ls -la android/app/build/outputs/apk/release/
-            exit 1
-          fi
-
-          cp "$SIGNED_UNIVERSAL_APK" release-apks/
-          echo "✅ Copied universal APK: $(basename "$SIGNED_UNIVERSAL_APK")"
-
-      - name: Upload Signed APK as artifact
+      - name: Upload All Signed APKs as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-apk
-          path: release-apks/
+          name: android-release-apks
+          path: |
+            ${{ steps.split_apks.outputs._0 }}
+            ${{ steps.split_apks.outputs._1 }}
+            ${{ steps.split_apks.outputs._2 }}
+            ${{ steps.split_apks.outputs._3 }}
+            ${{ steps.split_apks.outputs._4 }}
+            ${{ steps.split_apks.outputs._5 }}
           if-no-files-found: error
 
-      - name: Create GitHub Release and Upload Universal APK
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release with All APKs
+        uses: marvinpinto/action-automatic-releases@latest
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          repo_token: ${{ secrets.GH_PAT }}
+          automatic_release_tag: ${{ github.ref_name }}
+          prerelease: false
+          title: "Release ${{ github.ref_name }}"
           body: |
             🎉 Release ${{ github.ref_name }} is live!
-
             ✅ Built from tag: ${{ github.ref_name }}
-            📦 Includes universal APK with support for armeabi-v7a, arm64-v8a, and x86_64.
+            📦 Includes:
+            - ABI-specific APKs (armeabi-v7a, arm64-v8a, x86_64)
+            - Universal APK (supports all architectures)
             🔐 Signed with production keystore.
-          files: release-apks/*
+          files: |
+            ${{ steps.split_apks.outputs._0 }}
+            ${{ steps.split_apks.outputs._1 }}
+            ${{ steps.split_apks.outputs._2 }}
+            ${{ steps.split_apks.outputs._3 }}
+            ${{ steps.split_apks.outputs._4 }}
+            ${{ steps.split_apks.outputs._5 }}
           draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
