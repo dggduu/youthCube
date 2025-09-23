@@ -3,7 +3,7 @@ name: Build Android Release & Create GitHub Release
 on:
   push:
     tags:
-      - 'v*' # 例如 v1.0.0
+      - 'v*' # e.g., v1.0.0
 
 jobs:
   build-android-release:
@@ -58,17 +58,17 @@ jobs:
           VERSION_NAME="${TAG_NAME#v}"
           echo "🔖 Version name: $VERSION_NAME"
 
-          # 使用 GitHub Run Number 作为 versionCode
+          # Use GitHub Run Number as versionCode
           VERSION_CODE=${{ github.run_number }}
           echo "🔢 Version code: $VERSION_CODE"
 
-          # 写入环境变量供后续步骤使用
+          # Write environment variables for subsequent steps
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
           cd android || exit 1
 
-          # 更新 versionName 和 versionCode
+          # Update versionName and versionCode
           sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
 
@@ -93,51 +93,53 @@ jobs:
           cd android
           ./gradlew assembleRelease --no-daemon
 
-      - name: Sign APKs
-        uses: r0adkll/sign-android-release@v1
-        id: sign_apks
-        with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "35.0.0"  # 必须与 build.gradle 一致
-
-      - name: Debug - List signed APKs
+      - name: Sign and Align APKs
+        # Replace the problematic action with a manual script
         run: |
-          echo "📄 Signed APKs produced:"
-          echo "${{ steps.sign_apks.outputs.signedReleaseFiles }}" || echo "(none)"
+          cd android/app/build/outputs/apk/release/
+
+          # Loop through all unsigned APKs
+          for file in ./*-unsigned.apk; do
+            if [ -f "$file" ]; then
+              echo "🔑 Signing $file..."
+              
+              # Sign the APK
+              /usr/bin/jarsigner -verbose \
+                -sigalg SHA1withRSA -digestalg SHA1 \
+                -keystore /home/runner/keystore.jks \
+                -storepass ${{ secrets.KEY_STORE_PASSWORD }} \
+                "$file" \
+                "${{ secrets.ALIAS }}"
+
+              # Generate the name for the signed APK
+              SIGNED_FILE_NAME=$(basename "$file" "-unsigned.apk")-signed.apk
+              
+              # Align the signed APK
+              echo "📐 Zipaligning $SIGNED_FILE_NAME..."
+              /usr/local/lib/android/sdk/build-tools/35.0.0/zipalign -v -p 4 \
+                "$file" "$SIGNED_FILE_NAME"
+              
+              # Clean up unsigned file
+              rm "$file"
+            fi
+          done
 
       - name: Copy Universal APK to release directory
         run: |
           mkdir -p release-apks
+          
+          # Manually find the signed universal APK
+          # Use a more reliable search pattern like 'app-universal-release-signed.apk'
+          SIGNED_UNIVERSAL_APK=$(find android/app/build/outputs/apk/release/ -type f -name "*universal*signed.apk")
 
-          SIGNED_FILES="${{ steps.sign_apks.outputs.signedReleaseFiles }}"
-          if [ -z "$SIGNED_FILES" ]; then
-            echo "❌ Error: No signed APK files were produced."
-            exit 1
-          fi
-
-          FOUND_UNIVERSAL=false
-          echo "$SIGNED_FILES" | while IFS= read -r file; do
-            if [ -n "$file" ] && [ -f "$file" ]; then
-              if [[ "$file" == *universal* ]]; then
-                cp "$file" release-apks/
-                echo "✅ Copied universal APK: $(basename "$file")"
-                FOUND_UNIVERSAL=true
-              fi
-            else
-              echo "❌ File not found: $file"
-            fi
-          done
-
-          if [ "$FOUND_UNIVERSAL" = "false" ]; then
+          if [ -z "$SIGNED_UNIVERSAL_APK" ]; then
             echo "❌ No universal APK found! Available files:"
-            echo "$SIGNED_FILES"
+            ls -la android/app/build/outputs/apk/release/
             exit 1
           fi
+
+          cp "$SIGNED_UNIVERSAL_APK" release-apks/
+          echo "✅ Copied universal APK: $(basename "$SIGNED_UNIVERSAL_APK")"
 
       - name: Upload Signed APK as artifact
         uses: actions/upload-artifact@v4
