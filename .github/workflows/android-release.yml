@@ -34,7 +34,9 @@ jobs:
 
       - name: Install Node.js Dependencies
         working-directory: .
-        run: npm install
+        run:
+          npm install yarn -g 
+          yarn install
 
       - name: Build Release APKs
         working-directory: android
