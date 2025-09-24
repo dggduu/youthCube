@@ -3,7 +3,7 @@ name: Android Release
 on:
   push:
     tags:
-      - "v*" # 监听以 v 开头的 tag，如 v1.0.0
+      - "v*"
 
 jobs:
   release:
@@ -18,16 +18,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22.19.0"
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          distribution: "temurin"
-          java-version: "17"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v1
+        uses: android-actions/setup-android@v3
 
       - name: Grant permissions to gradlew
         run: chmod +x android/gradlew
