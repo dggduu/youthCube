@@ -13,21 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '22.19.0'
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install yarn
         run: npm install -g yarn
-
 
       - name: Install dependencies
         run: |
           yarn install
           yarn add lightningcss-linux-x64-gnu
 
-          
       - name: Extract version from tag and update build.gradle
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
@@ -38,6 +37,7 @@ jobs:
           cd android || exit 1
           sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
+
       - name: Generate JS Bundle for Android
         run: |
           npx react-native bundle \
@@ -46,83 +46,45 @@ jobs:
             --entry-file index.js \
             --bundle-output android/app/src/main/assets/index.android.bundle \
             --assets-dest android/app/src/main/res/
+
       - name: Make gradlew executable
         run: |
           cd android && chmod +x gradlew
+
       - name: Build Android Release (Split APKs + Universal)
         run: |
           cd android
           ./gradlew assembleRelease --no-daemon
+
       - name: Sign APKs
-        uses: r0adkll/sign-android-release@v1
-        id: sign_apks
+        uses: ilharp/sign-android-release@v2
+        id: sign_app
         with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
+          releaseDir: android/app/build/outputs/apk/release
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "35.0.0"
+          buildToolsVersion: "36.0.0"
 
       - name: Split Signed APKs List
         uses: jungwinter/split@v1
-        id: split_apks
+        id: signed_files
         with:
-          msg: ${{ steps.sign_apks.outputs.signedReleaseFiles }}
-          seperator: ":"
-          maxsplit: "-1"
+          msg: ${{ steps.sign_app.outputs.signedFiles }}
+          separator: ':'
+          maxsplit: -1
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Automatic Release
+        uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
+          repo_token: ${{ secrets.GH_PAT }}
+          automatic_release_tag: ${{ github.ref_name }
           prerelease: false
-
-      - name: Upload Universal APK
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.split_apks.outputs._0 }}
-          asset_name: youthcube-universal-${{ github.ref_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload arm64-v8a APK
-        if: steps.split_apks.outputs._1 != ''
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.split_apks.outputs._1 }}
-          asset_name: youthcube-arm64-v8a-${{ github.ref_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload armeabi-v7a APK
-        if: steps.split_apks.outputs._2 != ''
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.split_apks.outputs._2 }}
-          asset_name: youthcube-armeabi-v7a-${{ github.ref_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload x86_64 APK
-        if: steps.split_apks.outputs._3 != ''
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.split_apks.outputs._3 }}
-          asset_name: youthcube-x86_64-${{ github.ref_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
+          title: "Release ${{ github.ref_name }}"
+          files: |
+            ${{ steps.signed_files.outputs._0 }}
+            ${{ steps.signed_files.outputs._1 }}
+            ${{ steps.signed_files.outputs._2 }}
+            ${{ steps.signed_files.outputs._3 }}
+            ${{ steps.signed_files.outputs._4 }}
