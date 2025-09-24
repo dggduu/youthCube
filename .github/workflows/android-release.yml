@@ -1,9 +1,7 @@
 name: Build Android Release & Create GitHub Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 jobs:
   build-android-release:
@@ -25,11 +23,10 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install
-          yarn add lightningcss-linux-x64-gnu
 
       - name: Extract version from tag and update build.gradle
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          TAG_NAME="v0.1.5"
           VERSION_NAME="${TAG_NAME#v}"
           VERSION_CODE=${{ github.run_number }}
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
@@ -76,11 +73,11 @@ jobs:
           maxsplit: -1
 
       - name: Create Automatic Release
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GH_PAT }}
           automatic_release_tag: ${{ github.ref_name }}
-          prerelease: false
+          prerelease: true
           title: "Release ${{ github.ref_name }}"
           files: |
             ${{ steps.signed_files.outputs._0 }}
