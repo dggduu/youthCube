@@ -34,8 +34,8 @@ jobs:
 
       - name: Install Node.js Dependencies
         working-directory: .
-        run:
-          npm install yarn -g
+        run: |
+          npm install -g yarn
           yarn install
           yarn add @react-native/gradle-plugin
 
