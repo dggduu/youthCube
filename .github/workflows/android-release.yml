@@ -1,64 +1,69 @@
-name: Android Release
+name: Build Android Release & Create GitHub Release
 
 on:
   push:
     tags:
-      - "v*" # 监听以 v 开头的 tag，如 v1.0.0
+      - "v*"
 
 jobs:
-  release:
+  build-android-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          submodules: true
+          node-version: '22.19.0'
+          cache: "yarn"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
+      - name: Install yarn
+        run: npm install -g yarn
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v1
+      - name: Install dependencies
+        run: |
+          yarn install
+          yarn add lightningcss-linux-x64-gnu
 
-      - name: Grant permissions to gradlew
-        run: chmod +x android/gradlew
-
-      - name: Install Node.js Dependencies
-        working-directory: .
-        run: npm install
-
-      - name: Build Release APKs
-        working-directory: android
-        run: ./gradlew assembleRelease
-
-      - name: Sign APKs with Release Key
+          
+      - name: Extract version from tag and update build.gradle
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION_NAME="${TAG_NAME#v}"
+          VERSION_CODE=${{ github.run_number }}
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          cd android || exit 1
+          sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
+      - name: Generate JS Bundle for Android
+        run: |
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output android/app/src/main/assets/index.android.bundle \
+            --assets-dest android/app/src/main/res/
+      - name: Make gradlew executable
+        run: |
+          cd android && chmod +x gradlew
+      - name: Build Android Release (Split APKs + Universal)
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon
+      - name: Sign APKs
         uses: r0adkll/sign-android-release@v1
         id: sign_apks
         with:
           releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY_BASE64 }}
-          alias: ${{ secrets.KEYSTORE_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "35.0.0"
-
-      - name: Debug - Check Signed Files Output
-        run: |
-          echo "🔍 Found signed APKs: '${{ steps.sign_apks.outputs.signedReleaseFiles }}'"
-          if [ -z "${{ steps.sign_apks.outputs.signedReleaseFiles }}" ]; then
-            echo "❌ No signed APKs were generated!"
-            exit 1
-          fi
 
       - name: Split Signed APKs List
         uses: jungwinter/split@v1
