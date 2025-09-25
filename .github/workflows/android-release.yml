@@ -1,7 +1,9 @@
 name: Build Android Release & Create GitHub Release
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-android-release:
@@ -10,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag_name }}
 
       - name: Setup Node and Yarn
         uses: actions/setup-node@v4
@@ -23,8 +27,9 @@ jobs:
 
       - name: Extract version and update build.gradle
         run: |
-          TAG_NAME="v0.1.5"
-          VERSION_NAME="${TAG_NAME#v}"
+          # 使用输入的 tag_name
+          TAG_NAME="${{ github.event.inputs.tag_name }}"
+          VERSION_NAME="${TAG_NAME#v}"  # 去掉 'v' 前缀
           VERSION_CODE=${{ github.run_number }}
           
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
@@ -68,12 +73,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "Release ${{ github.ref_name }}"
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: "Release ${{ github.event.inputs.tag_name }}"
           prerelease: true
           draft: false
-    # ✅ 显式使用你的自定义 PAT
-          repo_token: ${{ secrets.GH_PAT }}
-    # ✅ 上传所有签名后的 APK
+          token: ${{ secrets.GH_PAT }}
           files: |
-             android/app/build/outputs/apk/release/*-release-signed.apk
+            android/app/build/outputs/apk/release/*-release-signed.apk
