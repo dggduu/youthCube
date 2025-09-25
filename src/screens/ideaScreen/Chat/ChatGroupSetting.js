@@ -637,13 +637,6 @@ const ChatGroupSetting = () => {
           </View>
         </View>
         
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-base text-gray-600 dark:text-gray-300">创建时间:</Text>
-          <Text className="text-base text-gray-900 dark:text-gray-100">
-            {new Date(teamData.create_at).toLocaleDateString()}
-          </Text>
-        </View>
-        
         {isParentTeam && (
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-base text-gray-600 dark:text-gray-300">可见性:</Text>

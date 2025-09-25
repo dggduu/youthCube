@@ -28,7 +28,7 @@ jobs:
       - name: Extract version and update build.gradle
         run: |
           # 使用输入的 tag_name
-          TAG_NAME="${{ github.event.inputs.tag_name }}"
+          TAG_NAME="${{ github.ref_name }}"
           VERSION_NAME="${TAG_NAME#v}"  # 去掉 'v' 前缀
           VERSION_CODE=${{ github.run_number }}
           
