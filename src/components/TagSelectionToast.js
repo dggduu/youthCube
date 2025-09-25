@@ -112,7 +112,6 @@ const TagSelectionToast = ({
       setShowAddTagModal(false);
       showToast('标签创建成功', "success");
       
-      setSelectedTags(prev => [...prev, newTag.tag_id]);
       setCurrentPage(0);
       fetchTags(0);
       
