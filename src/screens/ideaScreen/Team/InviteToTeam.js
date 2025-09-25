@@ -7,7 +7,6 @@ import { BASE_INFO } from '../../../constant/base';
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from "@react-native-vector-icons/material-icons";
-
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 const api = axios.create();
 setupAuthInterceptors(api);

@@ -13,7 +13,7 @@ import TagSelectionToast from "../../../components/TagSelectionToast";
 import setupAuthInterceptors from "../../../utils/axios/AuthInterceptors";
 import Custompicker from "../../../components/custom/Custompicker";
 import SingleImageUploader from "../../../components/SingleImageUploader";
-
+import { refreshAndStoreUserInfo } from "../../../utils/utils";
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -40,14 +40,30 @@ const CreateTeam = () => {
 
   useEffect(() => {
     const checkUserTeam = async () => {
-      const userData = await getItemFromAsyncStorage("user");
-      const token = await getItemFromAsyncStorage("accessToken");
-      if (userData?.team_id) {
-        showToast("您已加入一个队伍，无法创建新队伍", "warning");
-        navigation.goBack();
+      try {
+        const token = await getItemFromAsyncStorage("accessToken");
+        let storedUser = await getItemFromAsyncStorage("user");
+
+        if (!token || !storedUser || !storedUser.id) {
+          showToast("请先登录", "error");
+          navigation.goBack();
+          return;
+        }
+        const latestUser = await refreshAndStoreUserInfo(storedUser.id);
+        
+        setUser(latestUser);
+        setAccessToken(token);
+
+        if (latestUser.team_id) {
+          showToast("您已加入一个队伍，无法创建新队伍", "warning");
+          navigation.goBack(); 
+          return;
+        }
+        
+      } catch (error) {
+        console.error('队伍创建初始化检查失败:', error);
+        showToast("初始化检查失败，请检查网络", "error");
       }
-      setUser(userData);
-      setAccessToken(token);
     };
     checkUserTeam();
   }, []);

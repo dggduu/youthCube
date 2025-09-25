@@ -1,4 +1,7 @@
 import { GRADES,PartyGrade, ProgressType } from "../constant/user";
+import { BASE_INFO } from "../constant/base";
+import { setItemToAsyncStorage } from "../utils/LocalStorage";
+
 
 export function formatTimeToChinese(isoString) {
   const date = new Date(isoString);
@@ -46,4 +49,36 @@ export const isValidEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   return emailRegex.test(email.trim());
+};
+
+
+export const refreshAndStoreUserInfo = async (userId) => {
+    if (!userId) {
+        throw new Error('用户ID不能为空');
+    }
+
+    try {
+        const response = await fetch(`${BASE_INFO.BASE_URL}api/users/${userId}`);
+        
+        if (!response.ok) {
+            let errorDetails = {};
+            try {
+                errorDetails = await response.json();
+            } catch (e) {
+
+            }
+            throw new Error(errorDetails.message || `获取用户信息失败，状态码：${response.status}`);
+        }
+        
+        const updatedUserData = await response.json();
+        
+        await setItemToAsyncStorage('user', updatedUserData);
+
+        console.log("本地存储用户数据刷新成功:", updatedUserData);
+        
+        return updatedUserData;
+    } catch (error) {
+        console.error("刷新并存储用户信息失败:", error);
+        throw error;
+    }
 };
