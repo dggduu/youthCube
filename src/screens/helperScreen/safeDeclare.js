@@ -174,7 +174,7 @@ const SafeDeclare = () => {
             如您需要咨询或求助，请通过以下方式联系我们：
           </Text>
           <Text className="text-gray-700 dark:text-gray-300 mb-2">
-            电子邮箱：service@mail.aoicube.dpdns.com
+            电子邮箱：aobaradgg@126.com
           </Text>
           <Text className="text-gray-700 dark:text-gray-300 mb-2">
             官方地址：湖南师范大学桃花坪校区3栋学生公寓

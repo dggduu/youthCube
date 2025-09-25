@@ -100,8 +100,8 @@ export const PrivatePolicy = `
 十、联系我们
 如您对本隐私政策有任何疑问、建议或投诉，可通过以下方式联系我们：
 
-电子邮件：consult@mail.aoicube.dpdns.org
-地址：HUNNU 桃花坪校区
+电子邮件：aobaradgg@126.com
+地址：湖南师范大学桃花坪校区
 
 感谢您对青智立方的信任与支持！我们将持续努力，为您提供更安全、更透明的隐私保护服务。
 `;
@@ -226,8 +226,8 @@ export const UserPolicy = `
 十、联系我们
 如有任何疑问或建议，欢迎通过以下方式联系我们：
 
-官方邮箱：consult@mail.aoicube.dpdns.org
-地址：HUNNU 桃花坪校区
+官方邮箱：aobaradgg@126.com
+地址：湖南师范大学桃花坪校区
 `
 
 export const CommunityPolicy = `
@@ -348,8 +348,8 @@ export const CommunityPolicy = `
 3. 修改后的规范将在平台公告或通过站内信等方式通知用户
 4. 用户继续使用平台社区功能即视为接受修改后的规范
 
-官方邮箱：consult@mail.aoicube.dpdns.org
-地址：HUNNU 桃花坪校区
+官方邮箱：aobaradgg@126.com
+地址：湖南师范大学桃花坪校区
 
 感谢您对青智立方社区的支持，愿我们共同营造一个健康、积极、有爱的成长空间！
 `;
@@ -450,8 +450,8 @@ export const TeenPolicy = `
 3. 修改后的政策将在平台公告或通过站内信等方式通知用户
 4. 用户继续使用平台服务即视为接受修改后的政策
 
-官方邮箱：consult@mail.aoicube.dpdns.org
-地址：HUNNU 桃花坪校区
+官方邮箱：aobaradgg@126.com
+地址：湖南师范大学桃花坪校区
 
 感谢您对青智立方社区的支持，愿我们共同营造一个健康、积极、有爱的成长空间！
 `;

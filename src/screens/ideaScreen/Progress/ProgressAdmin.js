@@ -20,6 +20,17 @@ import axios from 'axios';
 import MarkdownInput from '../../../components/MarkdownInput';
 import setupAuthInterceptors from '../../../utils/axios/AuthInterceptors';
 import AttachmentUploader from "../../../components/AttachmentUploader";
+// Import the constant
+// import { ProgressType } from "../../../constant/user";
+
+// Temporary definition of ProgressType based on your request
+const ProgressType = [
+  {type:'deadline', name: "截止日期"},
+  {type:'competition', name: "比赛"},
+  {type:'meeting', name: "会议"},
+  {type:'progress_report', name: "进度报告"},
+];
+
 
 const api = axios.create();
 setupAuthInterceptors(api);
@@ -39,6 +50,7 @@ const ProgressAdmin = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  // State for the selected progress type
   const [timelineType, setTimelineType] = useState('progress_report');
   const [eventTime, setEventTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -193,7 +205,7 @@ const ProgressAdmin = () => {
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setTimelineType('progress_report');
+    setTimelineType('progress_report'); // Reset to default
     setEventTime(new Date());
     setMediaUrl('');
     setMediaType('');
@@ -385,6 +397,35 @@ const ProgressAdmin = () => {
               className="mb-4 h-12 rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
             
+            <View className="mb-5">
+              <Text className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                进度类型 *
+              </Text>
+              <View className="flex-row flex-wrap">
+                {ProgressType.map((typeOption) => (
+                  <TouchableOpacity
+                    key={typeOption.type}
+                    onPress={() => setTimelineType(typeOption.type)}
+                    className={`h-9 items-center justify-center rounded px-3 py-1 mr-2 mb-2 ${
+                      timelineType === typeOption.type
+                        ? 'bg-[#409eff] '
+                        : 'bg-gray-100  dark:bg-gray-700 '
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        timelineType === typeOption.type
+                          ? 'text-white'
+                          : 'text-gray-700 dark:text-gray-300' 
+                      }`}
+                    >
+                      {typeOption.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             <MarkdownInput
               value={description}
               onChange={setDescription}

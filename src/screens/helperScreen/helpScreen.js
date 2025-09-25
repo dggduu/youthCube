@@ -2,6 +2,7 @@ import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 
 import React, { useState } from 'react';
 import BackIcon from "../../components/backIcon/backIcon";
 import Icon from "@react-native-vector-icons/material-icons";
+import { Link } from '@react-navigation/native';
 
 const data = [
   {
@@ -20,20 +21,12 @@ const data = [
         A: "可以。请进入个人中心，点击修改用户信息，按照提示更改用户名。",
       },
       {
-        Q: "如何换绑邮箱",
-        A: "请进入个人中心，点击修改用户信息，按照提示更换绑定邮箱。",
-      },
-      {
         Q: "邮箱已被注册如何解决",
         A: "请联系客服并提供相关有效证明进行处理。",
       },
       {
         Q: "如何注销账号",
         A: "目前暂不支持账号注销功能。",
-      },
-      {
-        Q: "未接收到邮件",
-        A: "请先检查网络环境是否正常。如果正常，可能是我们尚未支持该邮箱类型，建议尝试使用其他邮箱注册。",
       },
     ]
   },
@@ -55,6 +48,10 @@ const data = [
       {
         Q:"提示429错误",
         A:"可能是授权信息未自动更新，请尝试退出后重新进入软件。如果问题仍然存在，请尝试重新登录。"
+      },
+      {
+        Q:"为什么有时无法更新团队信息",
+        A:"可能是有人碰巧也在进行操作，可以等一下再进行操作。"
       }
     ],
   },
@@ -76,7 +73,7 @@ const data = [
     content:[
       {
         Q: "联系方式",
-        A: "consult@mail.aoicube.dpdns.org，我们诚挚欢迎各类合作机会。",
+        A: "aobaradgg@126.com，我们诚挚欢迎各类合作机会。",
       },      
     ]
   },
@@ -85,7 +82,7 @@ const data = [
     content: [
       {
         Q:"遇到bug如何处理",
-        A:"请附上详细截图和问题描述，发送至consult@mail.aoicube.dpdns.org，这将帮助我们更好地复现和解决问题。",
+        A:"请附上详细截图和问题描述，发送至aobaradgg@126.com，这将帮助我们更好地复现和解决问题。",
       },
       {
         Q:"检查更新失败",
@@ -107,15 +104,26 @@ const HelpScreen = () => {
 
   // 发送邮件函数
   const handleSendEmail = () => {
-    const email = 'consult@mail.aoicube.dpdns.org';
+    const email = 'aobaradgg@126.com';
     const subject = '咨询与帮助';
-    const body = '您好，我需要帮助：\n\n';
+    const body = '您好，我需要帮助：\n（写清楚遇到什么问题：怎么遇到的，现象是什么，什么时间用的，用户名是什么）';
     
     const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
     Linking.openURL(mailtoUrl).catch(err => {
       console.error('无法打开邮件客户端:', err);
       alert('无法打开邮件客户端，请确保已安装邮件应用');
+    });
+  };
+  const handleQQqun = () => {
+    const deepLink = 'mqqapi://card/show_pslcard?src_type=internal&version=1&card_type=group&uin=1032147823';
+    
+    const fallbackLink = 'https://qun.qq.com/universal-share/share?ac=1&authKey=lVo1jTp3lafCMpXao5%2FpQGkemwWyk%2F8gkCbZsYGeDhyXNsHB5jGpXPCkzDu8U0aY&busi_data=eyJncm91cENvZGUiOiIxMDMyMTQ3ODIzIiwidG9rZW4iOiJCNENWaXQ2eVE1WVZGb08xdEVsV1V4MFpjdTd5NTVZRGhiUVhYNTFEcHVIeTBGdEt2VXdYV0RZNTl0K0lNdlpBIiwidWluIjoiMjY1ODg5NTg2NiJ9&data=_VVwJpCSGHkMUykOHnYe7n1d8nlCsL_vZlWdOFOioIzrk0NuQ4Ig5P0lmtl1nZT94BIuWftl06b8gP1JV9Xfew&svctype=4&tempid=h5_group_info';
+
+    Linking.openURL(deepLink).catch(() => {
+      Linking.openURL(fallbackLink).catch(() => {
+        alert('无法打开QQ，请手动复制群号 1032147823 加入');
+      });
     });
   };
 
@@ -166,6 +174,12 @@ const HelpScreen = () => {
               onPress={handleSendEmail}
             >
               <Text className='text-white text-sm'>发送邮件</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              className='bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded mr-3'
+              onPress={handleQQqun}
+            >
+              <Text className='text-white text-sm'>加入QQ客服群</Text>
             </TouchableOpacity>
           </View>
         </View>

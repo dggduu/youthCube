@@ -12,6 +12,7 @@ import InputBox from "../../components/inputBox/inputBox";
 import axios from 'axios';
 import setupAuthInterceptors from "../../utils/axios/AuthInterceptors";
 
+import { isValidEmail } from "../../utils/utils"
 const api = axios.create();
 setupAuthInterceptors(api);
 
@@ -95,6 +96,7 @@ const TeamDetailScreen = () => {
     const loadUserID = async()=>{
       const user = await getItemFromAsyncStorage('user');
       setUserId(user.id);
+      setApplicationData({email: user.email , description: ""});
     }
     fetchTeamDetails();
     loadUserID();
@@ -132,6 +134,10 @@ const TeamDetailScreen = () => {
     }
     if (!applicationData.description.trim()) {
       showToast('请输入申请描述', "warning");
+      return;
+    }
+    if(!isValidEmail(applicationData.email)) {
+      showToast("请输入正确的邮箱格式", 'warning');
       return;
     }
 

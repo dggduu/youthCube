@@ -257,9 +257,7 @@ const MosciaChart = ({ team_id }) => {
 
   useEffect(() => {
     if (!isLoading && scrollViewRef.current) {
-      setTimeout(() => {
-        scrollViewRef.current.scrollToEnd({ animated: false });
-      }, 100);
+        scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [isLoading]);
 

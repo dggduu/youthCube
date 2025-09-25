@@ -23,3 +23,10 @@ export const PartyGrade = [
   {grade: '管理员' ,value: 'co_owner'},
   {grade: '成员' ,value: 'member'},
 ];
+
+export const ProgressType = [
+  {type:'deadline', name: "截止日期"},
+  {type:'competition', name: "比赛"},
+  {type:'meeting', name: "会议"},
+  {type:'progress_report', name: "进度报告"},
+];
