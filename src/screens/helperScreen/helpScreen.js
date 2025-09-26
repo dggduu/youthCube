@@ -179,7 +179,7 @@ const HelpScreen = () => {
               className='bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded mr-3'
               onPress={handleQQqun}
             >
-              <Text className='text-white text-sm'>加入QQ客服群</Text>
+              <Text className='text-white text-sm'>加入客服群</Text>
             </TouchableOpacity>
           </View>
         </View>

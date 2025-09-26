@@ -113,7 +113,8 @@
         }
     </style>
 </head>
-<body class="light"> <div id="vditor"></div>
+<body class="light">
+    <div id="vditor"></div>
     <div class="submit-button-container">
         <button class="submit-button" id="submitBtn">完成编辑</button>
         <button class="clear-button" id="clearBtn">清空内容</button>
@@ -122,7 +123,9 @@
     <script src="./index.min.js"></script>
     <script>
         let vditorInstance;
-        let currentContent = ''; // 新增变量来存储当前内容
+        let currentContent = '';
+        let contentChangeTimeout = null;
+        let isUpdatingFromRN = false; // 标志位，防止循环更新
 
         // 初始化 Vditor
         function initVditor(theme = 'classic', content = '') {
@@ -150,33 +153,56 @@
                     if (window.ReactNativeWebView) {
                         window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_READY' }));
                     }
+                    // 设置初始内容
+                    if (content) {
+                        vditorInstance.setValue(content);
+                    }
+                },
+                input: (value) => {
+                    // 只有当不是从 RN 更新的内容时才发送更新消息
+                    if (!isUpdatingFromRN) {
+                        // 监听内容变化，延迟发送，避免频繁更新
+                        clearTimeout(contentChangeTimeout);
+                        contentChangeTimeout = setTimeout(() => {
+                            if (window.ReactNativeWebView) {
+                                window.ReactNativeWebView.postMessage(JSON.stringify({
+                                    type: 'VDITOR_CONTENT_CHANGED',
+                                    content: value
+                                }));
+                            }
+                        }, 300); // 300ms 延迟
+                    } else {
+                        // 重置标志位
+                        isUpdatingFromRN = false;
+                    }
                 },
                 mode: 'ir',
                 theme: theme,
-                value: content, // 在初始化时设置内容
+                value: content,
                 cache: { enable: false }
             });
         }
 
-        // 监听来自 React Native 的消息，放在顶层，保证能最早接收到
+        // 监听来自 React Native 的消息
         document.addEventListener('message', (event) => {
             try {
                 const message = JSON.parse(event.data);
                 console.log('Received message:', message);
 
                 if (message.type === 'SET_THEME') {
-                    currentContent = vditorInstance ? vditorInstance.getValue() : ''; // 在切换主题前保存内容
+                    currentContent = vditorInstance ? vditorInstance.getValue() : '';
                     const theme = message.theme === 'dark' ? 'dark' : 'classic';
                     document.body.className = message.theme;
-                    initVditor(theme, currentContent); // 切换主题时，传入之前保存的内容
+                    initVditor(theme, currentContent);
                 }
 
                 if (message.type === 'SET_INITIAL_CONTENT' && vditorInstance) {
+                    isUpdatingFromRN = true;
                     vditorInstance.setValue(message.content || '');
                 }
                 
-                // 统一处理清空消息，避免重复逻辑
                 if (message.type === 'VDITOR_CLEAR') {
+                    isUpdatingFromRN = true;
                     if (vditorInstance) {
                         vditorInstance.setValue('');
                     }
@@ -204,12 +230,12 @@
 
         // 清空按钮
         document.getElementById('clearBtn').addEventListener('click', () => {
-            if (window.ReactNativeWebView) {
-                // 通过 postMessage 发送清空指令，统一处理
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_CLEAR' }));
-            } else {
-                if (vditorInstance) {
-                    vditorInstance.setValue('');
+            if (vditorInstance) {
+                isUpdatingFromRN = true;
+                vditorInstance.setValue('');
+                // 发送清除消息到 RN
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_CLEARED' }));
                 }
             }
         });

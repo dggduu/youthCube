@@ -1,5 +1,5 @@
 // components/MarkdownInput.jsx
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -13,34 +13,14 @@ import { useColorScheme } from 'nativewind';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
-    const { colorScheme } = useColorScheme(); // 主题的通信有问题
+    const { colorScheme } = useColorScheme();
     const [showModal, setShowModal] = useState(false);
     const webViewRef = useRef(null);
-
-    const injectInitialContentAndTheme = useCallback(() => {
-        const script = `
-            (function() {
-                // 设置主题
-                const themeMessage = {
-                    type: 'SET_THEME',
-                    theme: '${colorScheme === 'dark' ? 'dark' : 'light'}'
-                };
-                window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(themeMessage));
-
-                // 设置内容
-                if (${value ? true : false}) {
-                    const contentMessage = {
-                        type: 'SET_INITIAL_CONTENT',
-                        content: ${JSON.stringify(value)}
-                    };
-                    window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(contentMessage));
-                }
-            })();
-        `;
-        setTimeout(() => {
-            webViewRef.current?.injectJavaScript(script);
-        }, 500);
-    }, [value, colorScheme]);
+    const [textInputValue, setTextInputValue] = useState(value || '');
+    
+    useEffect(() => {
+        setTextInputValue(value || '');
+    }, [value]);
 
     const onMessage = useCallback(
         (event) => {
@@ -49,13 +29,29 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
                 switch (data.type) {
                     case 'VDITOR_SUBMIT':
                         onChange(data.content);
+                        setTextInputValue(data.content);
                         setShowModal(false);
                         break;
                     case 'VDITOR_READY':
-                        injectInitialContentAndTheme();
+                        // Vditor 准备好后设置初始内容
+                        if (value) {
+                            const contentStr = JSON.stringify(value);
+                            const script = `
+                                if (window.vditorInstance && typeof window.vditorInstance.setValue === 'function') {
+                                    window.vditorInstance.setValue(${contentStr});
+                                }
+                            `;
+                            webViewRef.current?.injectJavaScript(script);
+                        }
                         break;
                     case 'VDITOR_CLEARED':
                         onChange('');
+                        setTextInputValue('');
+                        break;
+                    case 'VDITOR_CONTENT_CHANGED':
+                        // Vditor 内容变化时，同步到 TextInput
+                        onChange(data.content);
+                        setTextInputValue(data.content);
                         break;
                     default:
                         break;
@@ -64,15 +60,36 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
                 console.error('Failed to parse message from WebView:', e);
             }
         },
-        [onChange, injectInitialContentAndTheme]
+        [onChange, value]
     );
 
     const handleClearVditorContent = () => {
         if (webViewRef.current) {
             const script = `
                 if (window.confirm("确定要清空所有内容吗？")) {
-                    vditorInstance.setValue('');
+                    if (window.vditorInstance && typeof window.vditorInstance.setValue === 'function') {
+                        window.vditorInstance.setValue('');
+                    }
+                    // 发送清除消息到 RN
                     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VDITOR_CLEARED' }));
+                }
+            `;
+            webViewRef.current.injectJavaScript(script);
+        }
+    };
+
+    // 当 TextInput 内容变化时，同步到 Vditor
+    const handleTextInputChange = (text) => {
+        setTextInputValue(text);
+        onChange(text);
+        
+        // 同步到 Vditor（只有在模态框显示时）
+        if (webViewRef.current && showModal) {
+            const textStr = JSON.stringify(text);
+            // 直接调用 Vditor 的 setValue 方法，而不是发送消息
+            const script = `
+                if (window.vditorInstance && typeof window.vditorInstance.setValue === 'function') {
+                    window.vditorInstance.setValue(${textStr});
                 }
             `;
             webViewRef.current.injectJavaScript(script);
@@ -84,8 +101,8 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
             <TextInput
                 placeholder={placeholder}
                 placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-                value={value}
-                onChangeText={onChange}
+                value={textInputValue}
+                onChangeText={handleTextInputChange}
                 multiline
                 numberOfLines={5}
                 className="border border-gray-300 dark:border-gray-600 p-3 h-40 mb-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -129,7 +146,6 @@ const MarkdownInput = ({ value, onChange, placeholder = '进度内容 *' }) => {
                         allowFileAccess
                         scalesPageToFit={false}
                         onMessage={onMessage}
-                        onLoadEnd={injectInitialContentAndTheme}
                         startInLoadingState
                         renderLoading={() => (
                             <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-gray-900">
